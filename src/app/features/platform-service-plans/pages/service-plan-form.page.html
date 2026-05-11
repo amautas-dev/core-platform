@@ -1,0 +1,396 @@
+<div class="service-plan-form-page">
+  <header class="page-header">
+    <h1>{{ isEdit() ? ('servicePlans.editPlan' | translate) : ('servicePlans.createPlan' | translate) }}</h1>
+    <a mat-button [routerLink]="paths.catalogServicePlans()" [queryParams]="listQueryParams()">
+      <mat-icon>arrow_back</mat-icon>
+      {{ 'common.back' | translate }}
+    </a>
+  </header>
+
+  @if (error()) {
+    <p class="error-message">{{ error() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <!-- Datos -->
+    <mat-card class="form-section form-section--plan-data">
+      <mat-card-header>
+        <mat-card-title>{{ 'servicePlans.sections.planData' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="section-fields basic-fields">
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>{{ 'servicePlans.code' | translate }}</mat-label>
+            <input matInput formControlName="planCode" placeholder="pro, enterprise, ..." />
+            @if (form.get('planCode')?.hasError('required')) {
+              <mat-error>{{ 'servicePlans.errors.required' | translate }}</mat-error>
+            }
+            @if (form.get('planCode')?.hasError('minlength')) {
+              <mat-error>{{ 'servicePlans.errors.minLength2' | translate }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>{{ 'servicePlans.name' | translate }}</mat-label>
+            <input matInput formControlName="planName" placeholder="Plan Pro" />
+            @if (form.get('planName')?.hasError('required')) {
+              <mat-error>{{ 'servicePlans.errors.required' | translate }}</mat-error>
+            }
+            @if (form.get('planName')?.hasError('minlength')) {
+              <mat-error>{{ 'servicePlans.errors.minLength2' | translate }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>{{ 'servicePlans.description' | translate }}</mat-label>
+            <textarea matInput formControlName="description" rows="3" [placeholder]="'servicePlans.descriptionPlaceholder' | translate"></textarea>
+            @if (form.get('description')?.hasError('maxlength')) {
+              <mat-error>{{ 'servicePlans.errors.maxLength4000' | translate }}</mat-error>
+            }
+          </mat-form-field>
+
+        </div>
+        @if (isEdit()) {
+          <p class="regional-hint regional-hint--compact">{{ regionalBasicFieldsHintText() }}</p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Módulos -->
+    <mat-card class="form-section form-section--modules">
+      <mat-card-header>
+        <mat-card-title>{{ 'servicePlans.sections.modulesTitle' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (!isEdit()) {
+          <p class="section-hint">{{ 'servicePlans.modulesHint' | translate }}</p>
+        } @else if (modulesLoading()) {
+          <p>{{ 'servicePlans.loading' | translate }}</p>
+        } @else if (planModules().length === 0) {
+          <p class="section-hint">{{ 'servicePlans.planModulesEmpty' | translate }}</p>
+        } @else {
+          <p class="tab-hint">{{ 'servicePlans.planModulesHintShort' | translate }}</p>
+          <ul class="plan-modules-list">
+            @for (m of planModules(); track m.moduleId) {
+              <li class="plan-module-row">
+                <span class="module-label">{{ m.moduleName || m.moduleCode || 'Módulo ' + m.moduleId }}</span>
+                <mat-slide-toggle
+                  [checked]="!!m.enabled"
+                  (change)="onModuleToggle(m, $event.checked)"
+                  [disabled]="modulesSaving()"
+                  color="primary"
+                  *hasPermission="PERMISSIONS.PLANS_UPDATE"
+                >
+                </mat-slide-toggle>
+              </li>
+            }
+          </ul>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Pricing -->
+    <mat-card class="form-section form-section--pricing-primary">
+      <mat-card-header>
+        <mat-card-title>{{ 'servicePlans.sections.pricingTitle' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="section-fields billing-fields">
+          <mat-form-field appearance="outline" class="field-price">
+            <mat-label>{{ 'servicePlans.price' | translate }}</mat-label>
+            <input matInput type="number" formControlName="price" min="0" step="0.01" />
+            @if (form.get('price')?.hasError('required')) {
+              <mat-error>{{ 'servicePlans.errors.required' | translate }}</mat-error>
+            }
+            @if (form.get('price')?.hasError('min')) {
+              <mat-error>{{ 'servicePlans.errors.minZero' | translate }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field-currency">
+            <mat-label>{{ 'servicePlans.currency' | translate }}</mat-label>
+            <mat-select formControlName="currency">
+              <mat-option value="USD">USD</mat-option>
+              <mat-option value="EUR">EUR</mat-option>
+              <mat-option value="PEN">PEN</mat-option>
+              <mat-option value="ARS">ARS</mat-option>
+            </mat-select>
+            @if (form.get('currency')?.hasError('required')) {
+              <mat-error>{{ 'servicePlans.errors.required' | translate }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field-interval">
+            <mat-label>{{ 'servicePlans.billingInterval' | translate }}</mat-label>
+            <mat-select formControlName="billingInterval">
+              @for (opt of billingIntervals; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.labelKey | translate }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @if (isEdit()) {
+          <p class="tab-hint currency-market-hint">
+            {{
+              'servicePlans.currencyMarketHint'
+                | translate: { currency: pricingDisplayCurrency(), typical: typicalCurrencyForMarket(), country: priceCountry() }
+            }}
+          </p>
+        }
+
+        @if (isEdit()) {
+          <div class="pricing-country-select">
+            <mat-form-field appearance="outline" class="field-pricing-country">
+              <mat-label>{{ 'servicePlans.pricingCountryLabelShort' | translate }}</mat-label>
+              <mat-select [value]="priceCountry()" (selectionChange)="onPricingCountrySelect($event.value)">
+                @for (cc of pricingCountrySelectOptions(); track cc) {
+                  <mat-option [value]="cc">{{ cc }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div
+            class="pricing-analysis-block"
+            role="region"
+            [attr.aria-label]="'servicePlans.pricingAnalysisBlockTitle' | translate"
+          >
+            <h3 class="pricing-analysis-block__title">{{ 'servicePlans.pricingAnalysisBlockTitle' | translate }}</h3>
+            <p class="pricing-analysis-block__intro">{{ 'servicePlans.pricingPlanSumExplainerShort' | translate }}</p>
+
+            <div class="pricing-kpis">
+              <div class="pricing-kpi">
+                <span class="pricing-kpi__label">{{ 'servicePlans.pricingKpiBaseTotalShort' | translate }}</span>
+                <span class="pricing-kpi__value">{{ planBaseCostFromFeatures() | currency: pricingDisplayCurrency() : 'symbol' : '1.0-2' }}</span>
+              </div>
+              <div class="pricing-kpi">
+                <span class="pricing-kpi__label">{{ 'servicePlans.pricingKpiSuggestedShort' | translate }}</span>
+                <span class="pricing-kpi__value pricing-kpi__value--accent">{{ planSuggestedPriceWithMargin() | currency: pricingDisplayCurrency() : 'symbol' : '1.0-2' }}</span>
+              </div>
+              <div class="pricing-kpi">
+                <span class="pricing-kpi__label">{{ 'servicePlans.pricingKpiCurrentShort' | translate }}</span>
+                <span class="pricing-kpi__value">{{ form.get('price')?.value | currency: pricingDisplayCurrency() : 'symbol' : '1.0-2' }}</span>
+              </div>
+            </div>
+
+            @if (planSuggestedPriceWithMargin() > 0 && (planPricingWarnings().low || planPricingWarnings().high)) {
+              <div class="pricing-alert-badges" role="status">
+                @if (planPricingWarnings().low) {
+                  <span class="pricing-alert-badge pricing-alert-badge--low">{{ 'servicePlans.alertLowMarginShort' | translate }}</span>
+                }
+                @if (planPricingWarnings().high) {
+                  <span class="pricing-alert-badge pricing-alert-badge--high">{{ 'servicePlans.alertOverpriceShort' | translate }}</span>
+                }
+              </div>
+            }
+
+            @if (planSuggestedPriceWithMargin() > 0) {
+              <p
+                class="pricing-analysis-block__summary"
+                [class.pricing-analysis-block__summary--ok]="
+                  !planPricingWarnings().low && !planPricingWarnings().high
+                "
+                [class.pricing-analysis-block__summary--low]="planPricingWarnings().low"
+                [class.pricing-analysis-block__summary--high]="planPricingWarnings().high"
+              >
+                {{ planPricingAnalysisMessage() }}
+              </p>
+            } @else {
+              <p class="pricing-analysis-block__empty-hint">{{ planPricingAnalysisMessage() }}</p>
+            }
+
+            @if (planModuleBreakdownRows().length > 0) {
+              <div class="module-cost-section">
+                <h4 class="module-cost-section__title">{{ 'servicePlans.pricingCostByModuleSection' | translate }}</h4>
+                <ul class="module-cost-list" role="list">
+                  @for (row of planModuleBreakdownRows(); track row.moduleCode) {
+                    <li class="module-cost-row" role="listitem">
+                      <div class="module-cost-bar-track" aria-hidden="true">
+                        <div class="module-cost-bar-fill" [style.width.%]="row.percentOfTotal"></div>
+                      </div>
+                      <div class="module-cost-line">
+                        <span class="module-cost-name">{{ row.displayName }}</span>
+                        <span class="module-cost-amount">{{ row.baseCost | currency: pricingDisplayCurrency() : 'symbol' : '1.0-2' }}</span>
+                        <span class="module-cost-pct">{{ row.percentOfTotal }}%</span>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
+            @if (planSuggestedPriceWithMargin() > 0) {
+              <button mat-stroked-button color="primary" type="button" class="apply-suggested-btn" (click)="applySuggestedPriceToForm()">
+                {{ 'servicePlans.applySuggestedPrice' | translate }}
+              </button>
+            }
+
+            <p class="pricing-analysis-block__footnote">{{ 'servicePlans.pricingInsightHintShort' | translate }}</p>
+          </div>
+        }
+
+        @if (isEdit() && catalogAddonFeatures().length > 0) {
+          <div class="addons-inline-block">
+            <h4 class="addons-inline-block__title">{{ 'servicePlans.addonsAvailableTitle' | translate }}</h4>
+            <p class="addons-inline-block__hint">{{ 'servicePlans.addonsAvailableSubtitleShort' | translate }}</p>
+            <ul class="addons-plan-list">
+              @for (f of catalogAddonFeatures(); track f.featureId) {
+                <li class="addons-plan-row">
+                  <mat-checkbox
+                    [checked]="!!addonProposalInclude()[f.featureId]"
+                    (change)="onAddonProposalChange(f.featureId, $event.checked)"
+                  >
+                    <span class="addons-plan-check-label">
+                      <span class="addons-plan-name">{{ f.name || f.code || ('#' + f.featureId) }}</span>
+                      <span class="addons-plan-amount">{{
+                        effectiveFeatureMonthly(f) | currency: pricingDisplayCurrency() : 'symbol' : '1.0-2'
+                      }}</span>
+                    </span>
+                  </mat-checkbox>
+                </li>
+              }
+            </ul>
+            @if (addonsInProposalTotal() > 0) {
+              <div class="addons-proposal-totals">
+                <p class="addons-line">
+                  <span class="addons-line__label">{{ 'servicePlans.addonsInProposalSum' | translate }}</span>
+                  <strong class="addons-line__value">{{
+                    addonsInProposalTotal() | currency: pricingDisplayCurrency() : 'symbol' : '1.0-2'
+                  }}</strong>
+                </p>
+                <p class="addons-line addons-line--grand">
+                  <span class="addons-line__label">{{ 'servicePlans.proposalTotalWithAddons' | translate }}</span>
+                  <strong class="addons-line__value">{{
+                    proposalWithAddonsTotal() | currency: pricingDisplayCurrency() : 'symbol' : '1.0-2'
+                  }}</strong>
+                </p>
+              </div>
+            }
+            <p class="addons-footnote">{{ 'servicePlans.addonsProposalFootnoteShort' | translate }}</p>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Límites -->
+    <mat-card class="form-section form-section--limits">
+      <mat-card-header>
+        <mat-card-title>{{ 'servicePlans.sections.limitsTitle' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (!isEdit()) {
+          <p class="section-hint">{{ 'servicePlans.limitsHint' | translate }}</p>
+        } @else if (limitsLoading()) {
+          <p class="muted">{{ 'servicePlans.loadingLimits' | translate }}</p>
+        } @else {
+          <div class="limits-preview-block">
+            <h4 class="limits-preview-block__title">{{ 'servicePlans.limitsPreviewTitle' | translate }}</h4>
+            <ul class="commercial-limits-summary" role="list">
+              <li class="commercial-limit-line">
+                <span class="commercial-limit-line__label">{{ 'servicePlans.limitCommercialMembers' | translate }}:</span>
+                <span class="commercial-limit-line__value">
+                  @if (limitValueForCode('maxMembers') != null) {
+                    {{ 'servicePlans.limitCommercialUpTo' | translate: { max: limitValueForCode('maxMembers') } }}
+                  } @else {
+                    —
+                  }
+                </span>
+              </li>
+              <li class="commercial-limit-line">
+                <span class="commercial-limit-line__label">{{ 'servicePlans.limitCommercialUsers' | translate }}:</span>
+                <span class="commercial-limit-line__value">
+                  @if (limitValueForCode('maxUsers') != null) {
+                    {{ 'servicePlans.limitCommercialUpTo' | translate: { max: limitValueForCode('maxUsers') } }}
+                  } @else {
+                    —
+                  }
+                </span>
+              </li>
+            </ul>
+
+            @if (quotaExpansionFeatures().length > 0) {
+              <div class="quota-expansions-block">
+                <h4 class="quota-expansions-block__title">{{ 'servicePlans.expansionsAvailableTitle' | translate }}</h4>
+                <p class="quota-expansions-block__hint">{{ 'servicePlans.expansionPricingHintShort' | translate }}</p>
+                <ul class="quota-expansions-list" role="list">
+                  @for (row of quotaExpansionFeatures(); track row.feature.featureId) {
+                    <li class="quota-expansion-line">
+                      <span class="quota-expansion-line__label">{{
+                        'servicePlans.expansionMembersLine' | translate: { count: row.plusMembers }
+                      }}</span>
+                      <span class="quota-expansion-line__sep" aria-hidden="true">→</span>
+                      <span class="quota-expansion-line__price">{{
+                        effectiveFeatureMonthly(row.feature) | currency: pricingDisplayCurrency() : 'symbol' : '1.0-2'
+                      }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+
+          <p class="tab-hint limits-table-hint">{{ 'servicePlans.limitsTabHintShort' | translate }}</p>
+          <table mat-table [dataSource]="editableLimits()" class="limits-table">
+            <ng-container matColumnDef="limitCode">
+              <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.limitCode' | translate }}</th>
+              <td mat-cell *matCellDef="let row; let i = index">
+                <input
+                  matInput
+                  [value]="row.limitCode"
+                  (input)="updateEditableLimit(i, 'limitCode', $any($event.target).value)"
+                  placeholder="maxUsers"
+                />
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="limitValue">
+              <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.limitValue' | translate }}</th>
+              <td mat-cell *matCellDef="let row; let i = index">
+                <input
+                  matInput
+                  type="number"
+                  [value]="row.limitValue"
+                  (input)="updateEditableLimit(i, 'limitValue', $any($event.target).value)"
+                  placeholder="0"
+                />
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let row; let i = index">
+                <button mat-icon-button type="button" (click)="removeLimitRow(i)" [attr.aria-label]="'servicePlans.removeLimit' | translate">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="limitsTableColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: limitsTableColumns"></tr>
+          </table>
+          <div class="limits-actions">
+            <button mat-button type="button" (click)="addLimitRow()">
+              <mat-icon>add</mat-icon>
+              {{ 'servicePlans.addLimit' | translate }}
+            </button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="button"
+              (click)="saveLimits()"
+              [disabled]="limitsSaving()"
+              *hasPermission="PERMISSIONS.PLANS_UPDATE"
+            >
+              {{ limitsSaving() ? ('common.saving' | translate) : ('servicePlans.saveLimits' | translate) }}
+            </button>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <div class="form-actions">
+      <a mat-button [routerLink]="paths.catalogServicePlans()" [queryParams]="listQueryParams()">{{ 'common.cancel' | translate }}</a>
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading()">
+        {{ loading() ? ('common.loading' | translate) : (isEdit() ? ('common.save' | translate) : ('servicePlans.createPlan' | translate)) }}
+      </button>
+    </div>
+  </form>
+</div>

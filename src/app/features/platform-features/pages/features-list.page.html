@@ -1,0 +1,132 @@
+<div class="features-list-page">
+  <header class="page-header">
+    <div class="header-text">
+      <h1>{{ 'features.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'features.subtitle' | translate }}</p>
+    </div>
+    <a
+      mat-raised-button
+      color="primary"
+      [routerLink]="paths.catalogFeaturesCreate()"
+      [queryParams]="{ country: viewCountry() }"
+      *hasPermission="PERMISSIONS.FEATURES_CREATE"
+    >
+      {{ 'features.createFeature' | translate }}
+    </a>
+  </header>
+
+  <div class="view-market-bar">
+    <mat-form-field appearance="outline" class="field-view-market" subscriptSizing="dynamic">
+      <mat-label>{{ 'features.viewMarketLabel' | translate }}</mat-label>
+      <mat-select [value]="viewCountry()" (selectionChange)="onViewCountryChange($event.value)">
+        @for (c of countriesForSelect(); track c.countryCode) {
+          <mat-option [value]="c.countryCode">{{ c.name }} ({{ c.countryCode }})</mat-option>
+        }
+      </mat-select>
+      <mat-hint>{{ 'features.viewMarketHint' | translate }}</mat-hint>
+    </mat-form-field>
+  </div>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>{{ 'features.loading' | translate }}</p>
+    </div>
+  } @else {
+    <div class="table-with-paginator">
+    <table mat-table [dataSource]="dataSource" class="features-table">
+      <ng-container matColumnDef="sortOrder">
+        <th mat-header-cell *matHeaderCellDef>{{ 'features.sortOrder' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.sortOrder ?? 0 }}</td>
+      </ng-container>
+      <ng-container matColumnDef="code">
+        <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.code' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.code ?? '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>{{ 'tenants.name' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.name ?? '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="priceBase">
+        <th mat-header-cell *matHeaderCellDef>{{ 'features.priceBaseColumn' | translate }}</th>
+        <td mat-cell *matCellDef="let row" class="cell-numeric">
+          {{ formatBaseMonthly(row) }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="priceMarket">
+        <th mat-header-cell *matHeaderCellDef>
+          {{ 'features.priceMarketColumn' | translate: { country: viewCountry() } }}
+        </th>
+        <td mat-cell *matCellDef="let row" class="cell-numeric cell-price-market">
+          <div class="price-market-inner">
+            <span class="price-amount">{{ formatMarketMonthly(row) }}</span>
+            @if (monthlySource(row) === 'base' && formatMarketMonthly(row) !== '—') {
+              <span class="price-suffix muted">{{ 'features.pricingBaseSuffix' | translate }}</span>
+            }
+            <mat-chip-set class="pricing-chip-set" aria-label="">
+              @if (monthlySource(row) === 'override') {
+                <mat-chip class="chip-override">{{ 'features.pricingBadgeOverride' | translate }}</mat-chip>
+              } @else {
+                <mat-chip class="chip-base">{{ 'features.pricingBadgeBase' | translate }}</mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="featureType">
+        <th mat-header-cell *matHeaderCellDef>{{ 'features.taxonomy.label' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ featureTypeLabel(row) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="moduleCode">
+        <th mat-header-cell *matHeaderCellDef>{{ 'features.moduleCode' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.moduleCode ?? '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="showInSidebar">
+        <th mat-header-cell *matHeaderCellDef>{{ 'features.showInSidebar' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.showInSidebar !== false ? ('common.yes' | translate) : ('common.no' | translate) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>{{ 'common.actions' | translate }}</th>
+        <td mat-cell *matCellDef="let row">
+          <a
+            mat-icon-button
+            [routerLink]="paths.catalogFeatureEdit(row.featureId)"
+            [queryParams]="{ country: viewCountry() }"
+            [attr.aria-label]="'common.edit' | translate"
+            *hasPermission="PERMISSIONS.FEATURES_UPDATE"
+          >
+            <mat-icon>edit</mat-icon>
+          </a>
+          <button
+            mat-icon-button
+            color="warn"
+            type="button"
+            (click)="deleteFeature(row)"
+            [attr.aria-label]="'features.delete' | translate"
+            *hasPermission="PERMISSIONS.FEATURES_DELETE"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          {{ 'features.noFeatures' | translate }}
+        </td>
+      </tr>
+    </table>
+    <mat-paginator
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      showFirstLastButtons
+      aria-label="Paginación"
+    />
+    </div>
+  }
+</div>

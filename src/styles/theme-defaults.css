@@ -1,0 +1,47 @@
+/**
+ * Defaults estáticos alineados con theme-defaults.ts / generateTheme(#1f6feb, #4dd2f0).
+ * En runtime, applyDocumentTheme() sobrescribe con la paleta generada desde la API.
+ */
+:root {
+  --color-primary-50: #dce4f0;
+  --color-primary-100: #bdcee6;
+  --color-primary-200: #99b6e1;
+  --color-primary-300: #719ee0;
+  --color-primary-400: #4a88e4;
+  --color-primary-500: #1f6feb;
+  --color-primary-600: #1e66d3;
+  --color-primary-700: #1b5bbd;
+  --color-primary-800: #174ea2;
+  --color-primary-900: #14448b;
+
+  --color-accent-50: #f4f9fa;
+  --color-accent-100: #e2f1f4;
+  --color-accent-200: #c1e5ed;
+  --color-accent-300: #9bdbea;
+  --color-accent-400: #76d6eb;
+  --color-accent-500: #4dd2f0;
+  --color-accent-600: #3fc6e5;
+  --color-accent-700: #28c0e2;
+  --color-accent-800: #1cafcf;
+  --color-accent-900: #199cb9;
+
+  --color-neutral-50: #f9fafa;
+  --color-neutral-100: #f4f5f6;
+  --color-neutral-200: #e6e8ea;
+  --color-neutral-300: #cdd0d6;
+  --color-neutral-400: #abb1ba;
+  --color-neutral-500: #89929f;
+  --color-neutral-600: #6e7887;
+  --color-neutral-700: #575f6b;
+  --color-neutral-800: #3c4149;
+  --color-neutral-900: #202327;
+
+  --color-success: #2e7d32;
+  --color-warning: #f9a825;
+  --color-error: #d32f2f;
+  --color-info: #1565c0;
+
+  --color-on-primary: #ffffff;
+  --color-primary-hover: #1e66d3;
+  --color-accent-hover: #3fc6e5;
+}

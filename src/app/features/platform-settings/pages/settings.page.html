@@ -1,0 +1,679 @@
+<div class="settings-page">
+  <h1>{{ 'settings.title' | translate }}</h1>
+  <p class="page-subtitle">{{ 'settings.subtitle' | translate }}</p>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>{{ 'common.loading' | translate }}</span>
+    </div>
+  }
+
+  @if (loadError()) {
+    <p class="error-message" role="alert">{{ loadError() }}</p>
+  }
+
+  @if (!loading() && !loadError()) {
+    <mat-tab-group class="settings-tabs" animationDuration="0ms">
+      <!-- Branding -->
+      <mat-tab>
+        <ng-template mat-tab-label>{{ 'settings.tabs.branding' | translate }}</ng-template>
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <form [formGroup]="brandingForm" (ngSubmit)="saveBranding()">
+                <h2 class="section-title section-title--identity">{{ 'settings.branding.visualIdentityTitle' | translate }}</h2>
+                <p class="section-help section-help--identity">{{ 'settings.branding.visualIdentityHelp' | translate }}</p>
+
+                <h3 class="section-subtitle">{{ 'settings.branding.logosSection' | translate }}</h3>
+                <div class="identity-grid identity-grid--logos">
+                  <app-branding-asset-upload
+                    [label]="'settings.branding.logoMainLight' | translate"
+                    [previewUrl]="previewUrlForFileId(brandingForm.get('logoFileId')?.value)"
+                    [uploadHandler]="platformAssetUpload('logo')"
+                    [showRemove]="!!brandingForm.get('logoFileId')?.value"
+                    (uploaded)="onPlatformAssetFileId('logoFileId', $event)"
+                    (cleared)="clearPlatformAsset('logoFileId')"
+                  />
+                  <app-branding-asset-upload
+                    [label]="'settings.branding.logoMainDark' | translate"
+                    [previewUrl]="previewUrlForFileId(brandingForm.get('logoDarkFileId')?.value)"
+                    [uploadHandler]="platformAssetUpload('logo_dark')"
+                    [showRemove]="!!brandingForm.get('logoDarkFileId')?.value"
+                    (uploaded)="onPlatformAssetFileId('logoDarkFileId', $event)"
+                    (cleared)="clearPlatformAsset('logoDarkFileId')"
+                  />
+                  <app-branding-asset-upload
+                    [label]="'settings.branding.logoCompactLight' | translate"
+                    [previewUrl]="previewUrlForFileId(brandingForm.get('logoCompactFileId')?.value)"
+                    [uploadHandler]="platformAssetUpload('logo_compact')"
+                    [compactPreview]="true"
+                    [fallbackSrc]="'assets/brand/amautas-logo-reduc.png'"
+                    [showRemove]="!!brandingForm.get('logoCompactFileId')?.value"
+                    (uploaded)="onPlatformAssetFileId('logoCompactFileId', $event)"
+                    (cleared)="clearPlatformAsset('logoCompactFileId')"
+                  />
+                  <app-branding-asset-upload
+                    [label]="'settings.branding.logoCompactDark' | translate"
+                    [previewUrl]="previewUrlForFileId(brandingForm.get('logoCompactDarkFileId')?.value)"
+                    [uploadHandler]="platformAssetUpload('logo_compact_dark')"
+                    [compactPreview]="true"
+                    [fallbackSrc]="'assets/brand/amautas-logo-alt-reduc.png'"
+                    [showRemove]="!!brandingForm.get('logoCompactDarkFileId')?.value"
+                    (uploaded)="onPlatformAssetFileId('logoCompactDarkFileId', $event)"
+                    (cleared)="clearPlatformAsset('logoCompactDarkFileId')"
+                  />
+                </div>
+
+                <h3 class="section-subtitle">{{ 'settings.branding.faviconSection' | translate }}</h3>
+                <div class="identity-grid identity-grid--narrow">
+                  <app-branding-asset-upload
+                    [label]="'settings.branding.favicon' | translate"
+                    [previewUrl]="previewUrlForFileId(brandingForm.get('faviconFileId')?.value)"
+                    [uploadHandler]="platformAssetUpload('favicon')"
+                    [faviconPreview]="true"
+                    [fallbackSrc]="'assets/brand/amautas-logo.png'"
+                    [showRemove]="!!brandingForm.get('faviconFileId')?.value"
+                    (uploaded)="onPlatformAssetFileId('faviconFileId', $event)"
+                    (cleared)="clearPlatformAsset('faviconFileId')"
+                  />
+                </div>
+
+                <h3 class="section-subtitle">{{ 'settings.branding.loginBackgroundsSection' | translate }}</h3>
+                <div class="identity-grid">
+                  <app-branding-asset-upload
+                    [label]="'settings.branding.loginBgLight' | translate"
+                    [previewUrl]="previewUrlForFileId(brandingForm.get('loginBackgroundLightFileId')?.value)"
+                    [fallbackSrc]="null"
+                    [uploadHandler]="platformAssetUpload('login_background_light')"
+                    [showRemove]="!!brandingForm.get('loginBackgroundLightFileId')?.value"
+                    (uploaded)="onPlatformAssetFileId('loginBackgroundLightFileId', $event)"
+                    (cleared)="clearPlatformAsset('loginBackgroundLightFileId')"
+                  />
+                  <app-branding-asset-upload
+                    [label]="'settings.branding.loginBgDark' | translate"
+                    [previewUrl]="previewUrlForFileId(brandingForm.get('loginBackgroundDarkFileId')?.value)"
+                    [fallbackSrc]="null"
+                    [uploadHandler]="platformAssetUpload('login_background_dark')"
+                    [showRemove]="!!brandingForm.get('loginBackgroundDarkFileId')?.value"
+                    (uploaded)="onPlatformAssetFileId('loginBackgroundDarkFileId', $event)"
+                    (cleared)="clearPlatformAsset('loginBackgroundDarkFileId')"
+                  />
+                </div>
+
+                <div class="login-mock" [attr.data-preview]="brandPreviewMode()">
+                  <div class="login-mock__toolbar">
+                    <span class="login-mock__toolbar-label">{{ 'settings.branding.loginMockLabel' | translate }}</span>
+                    <mat-button-toggle-group [value]="brandPreviewMode()" (change)="brandPreviewMode.set($any($event).value)">
+                      <mat-button-toggle value="light">{{ 'settings.branding.previewLight' | translate }}</mat-button-toggle>
+                      <mat-button-toggle value="dark">{{ 'settings.branding.previewDark' | translate }}</mat-button-toggle>
+                    </mat-button-toggle-group>
+                  </div>
+                  <div class="login-mock__stage" [style.background-image]="loginPreviewBackground()">
+                    @if (loginPatternOverlay(); as pat) {
+                      <div class="login-mock__pattern" [style.background-image]="pat"></div>
+                    }
+                    <div class="login-mock__card">
+                      <div class="login-mock__logo" [style.background-image]="loginMockLogoBg()"></div>
+                      <div class="login-mock__fake-fields">
+                        <span></span><span></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h3 class="section-subtitle">{{ 'settings.branding.patternSection' | translate }}</h3>
+                <div class="identity-grid identity-grid--narrow">
+                  <app-branding-asset-upload
+                    [label]="'settings.branding.appPattern' | translate"
+                    [previewUrl]="previewUrlForFileId(brandingForm.get('appBackgroundPatternFileId')?.value)"
+                    [fallbackSrc]="null"
+                    [uploadHandler]="platformAssetUpload('app_background_pattern')"
+                    [showRemove]="!!brandingForm.get('appBackgroundPatternFileId')?.value"
+                    (uploaded)="onPlatformAssetFileId('appBackgroundPatternFileId', $event)"
+                    (cleared)="clearPlatformAsset('appBackgroundPatternFileId')"
+                  />
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width theme-mode-field">
+                  <mat-label>{{ 'settings.branding.themeModeDefault' | translate }}</mat-label>
+                  <mat-select formControlName="themeModeDefault">
+                    <mat-option value="light">{{ 'settings.branding.themeModeLight' | translate }}</mat-option>
+                    <mat-option value="dark">{{ 'settings.branding.themeModeDark' | translate }}</mat-option>
+                    <mat-option value="system">{{ 'settings.branding.themeModeSystem' | translate }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width login-bg-url-legacy">
+                  <mat-label>{{ 'settings.branding.loginBackground' | translate }}</mat-label>
+                  <input matInput formControlName="loginBackgroundUrl" placeholder="https://..." />
+                  <mat-hint>{{ 'settings.branding.loginBackgroundUrlHint' | translate }}</mat-hint>
+                </mat-form-field>
+
+                <h3 class="section-subtitle">{{ 'settings.branding.livePreviewChrome' | translate }}</h3>
+                <div class="chrome-preview" [attr.data-theme]="brandPreviewMode() === 'dark' ? 'dark' : null">
+                  @if (semanticTheme(); as sem) {
+                    <div class="chrome-preview__shell" [style.background]="sem.background">
+                      <aside class="chrome-preview__sidebar" [style.background]="sem.sidebar">
+                        <div class="chrome-preview__sidebar-logo" [style.background-image]="chromeSidebarLogoBg()"></div>
+                      </aside>
+                      <div class="chrome-preview__main">
+                        <header class="chrome-preview__header" [style.background]="sem.header"></header>
+                        <div class="chrome-preview__body">
+                          <div
+                            class="chrome-preview__card"
+                            [style.background]="sem.surface"
+                            [style.border-color]="sem.border"
+                            [style.color]="sem.textPrimary"
+                          >
+                            {{ 'settings.branding.previewCard' | translate }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <div class="colors-section-header">
+                  <h3 class="section-title section-title--inline">{{ 'settings.branding.colorsSection' | translate }}</h3>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    class="colors-section-info-btn"
+                    [matMenuTriggerFor]="colorRolesInfo"
+                    [attr.aria-label]="'settings.branding.colorsSectionInfoAria' | translate"
+                  >
+                    <mat-icon>info_outline</mat-icon>
+                  </button>
+                  <span class="colors-section-header__spacer"></span>
+                  <button type="button" mat-stroked-button (click)="togglePaletteTools()">
+                    {{
+                      showPaletteTools()
+                        ? ('settings.branding.hidePaletteTools' | translate)
+                        : ('settings.branding.showPaletteTools' | translate)
+                    }}
+                  </button>
+                </div>
+
+                <mat-menu #colorRolesInfo="matMenu" panelClass="settings-color-roles-menu">
+                  <div class="color-roles-info-body" (click)="$event.stopPropagation()">
+                    <div class="color-roles-info-head">
+                      <span class="color-roles-info-title">{{ 'settings.branding.colorsSectionHelpTitle' | translate }}</span>
+                    </div>
+                    <ul class="color-roles-info-list">
+                      <li class="color-roles-info-item">
+                        <span class="color-roles-info-label">{{ 'settings.branding.colorRoleBrand' | translate }}</span>
+                        <span class="color-roles-info-desc">{{ 'settings.branding.colorRoleBrandDesc' | translate }}</span>
+                      </li>
+                      <li class="color-roles-info-item">
+                        <span class="color-roles-info-label">{{ 'settings.branding.colorRoleAccent' | translate }}</span>
+                        <span class="color-roles-info-desc">{{ 'settings.branding.colorRoleAccentDesc' | translate }}</span>
+                      </li>
+                      <li class="color-roles-info-item">
+                        <span class="color-roles-info-label">{{ 'settings.branding.colorRoleChrome' | translate }}</span>
+                        <span class="color-roles-info-desc">{{ 'settings.branding.colorRoleChromeDesc' | translate }}</span>
+                      </li>
+                      <li class="color-roles-info-item">
+                        <span class="color-roles-info-label">{{ 'settings.branding.colorRoleBtnCancel' | translate }}</span>
+                        <span class="color-roles-info-desc">{{ 'settings.branding.colorRoleBtnCancelDesc' | translate }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </mat-menu>
+
+                @if (!showPaletteTools()) {
+                  <p class="palette-tools-hint palette-tools-hint--under-colors-header">
+                    {{ 'settings.branding.paletteToolsHint' | translate }}
+                  </p>
+                }
+
+                @if (showPaletteTools()) {
+                  <h3 class="section-title">{{ 'settings.branding.paletteAssistantTitle' | translate }}</h3>
+                  <p class="section-help">{{ 'settings.branding.paletteAssistantHelp' | translate }}</p>
+                  <div class="advisor-grid">
+                    <mat-form-field appearance="outline" class="color-field">
+                      <mat-label>{{ 'settings.branding.advisorColor1' | translate }}</mat-label>
+                      <input matInput [ngModel]="advisorColor1()" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setAdvisorColor(1, $event)" placeholder="#0FA2CC" />
+                      <input
+                        type="color"
+                        class="color-picker"
+                        [value]="advisorColor1() || '#0FA2CC'"
+                        (input)="setAdvisorColor(1, $any($event.target).value)"
+                      />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="color-field">
+                      <mat-label>{{ 'settings.branding.advisorColor2' | translate }}</mat-label>
+                      <input matInput [ngModel]="advisorColor2()" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setAdvisorColor(2, $event)" placeholder="#17CCA1" />
+                      <input
+                        type="color"
+                        class="color-picker"
+                        [value]="advisorColor2() || '#17CCA1'"
+                        (input)="setAdvisorColor(2, $any($event.target).value)"
+                      />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="color-field">
+                      <mat-label>{{ 'settings.branding.advisorColor3' | translate }}</mat-label>
+                      <input matInput [ngModel]="advisorColor3()" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setAdvisorColor(3, $event)" placeholder="#17CCA1" />
+                      <input
+                        type="color"
+                        class="color-picker"
+                        [value]="advisorColor3() || '#17CCA1'"
+                        (input)="setAdvisorColor(3, $any($event.target).value)"
+                      />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="palette-list advisor-list">
+                    @for (palette of paletteRecommendations(); track palette.id + palette.name) {
+                      <button
+                        type="button"
+                        class="palette-btn"
+                        [class.active]="selectedPaletteId() === palette.id"
+                        (click)="applyRecommendedPalette(palette)"
+                      >
+                        <span class="palette-name">{{ palette.name }}</span>
+                        <span class="palette-swatches">
+                          <span class="swatch" [style.background]="palette.primaryColor"></span>
+                          <span class="swatch" [style.background]="palette.accentColor"></span>
+                        </span>
+                      </button>
+                    }
+                  </div>
+
+                  <h3 class="section-title">{{ 'settings.branding.suggestedPalettesTitle' | translate }}</h3>
+                  <div class="palette-list">
+                    @for (palette of themePalettes; track palette.id) {
+                      <button
+                        type="button"
+                        class="palette-btn"
+                        [class.active]="selectedPaletteId() === palette.id"
+                        (click)="applyPalette(palette)"
+                      >
+                        <span class="palette-name">{{ palette.name }}</span>
+                        <span class="palette-swatches">
+                          <span class="swatch" [style.background]="palette.primaryColor"></span>
+                          <span class="swatch" [style.background]="palette.accentColor"></span>
+                        </span>
+                      </button>
+                    }
+                  </div>
+                }
+
+                <div class="color-grid">
+                  <mat-form-field appearance="outline" class="color-field">
+                    <mat-label>{{ 'settings.branding.primaryColor' | translate }}</mat-label>
+                    <input matInput formControlName="primaryColor" type="text" placeholder="#1f6feb" />
+                    <input
+                      type="color"
+                      class="color-picker"
+                      [value]="brandingForm.get('primaryColor')?.value || '#1f6feb'"
+                      (input)="brandingForm.get('primaryColor')?.setValue($any($event.target).value)"
+                    />
+                    @if (brandingForm.get('primaryColor')?.hasError('pattern')) {
+                      <mat-error>{{ 'settings.branding.invalidHex' | translate }}</mat-error>
+                    }
+                    @if (brandingColorWarnings().primaryTooDark) {
+                      <mat-hint class="branding-warn">{{ 'settings.branding.warnPrimaryTooDark' | translate }}</mat-hint>
+                    }
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="color-field">
+                    <mat-label>{{ 'settings.branding.accentColor' | translate }}</mat-label>
+                    <input matInput formControlName="accentColor" type="text" placeholder="#4dd2f0" />
+                    <input
+                      type="color"
+                      class="color-picker"
+                      [value]="brandingForm.get('accentColor')?.value || '#4dd2f0'"
+                      (input)="brandingForm.get('accentColor')?.setValue($any($event.target).value)"
+                    />
+                    @if (brandingForm.get('accentColor')?.hasError('pattern')) {
+                      <mat-error>{{ 'settings.branding.invalidHex' | translate }}</mat-error>
+                    }
+                    @if (brandingColorWarnings().accentTooLight) {
+                      <mat-hint class="branding-warn">{{ 'settings.branding.warnAccentTooLight' | translate }}</mat-hint>
+                    }
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="color-field">
+                    <mat-label>{{ 'settings.branding.buttonCancelColor' | translate }}</mat-label>
+                    <input matInput formControlName="buttonCancelColor" type="text" />
+                    <input
+                      type="color"
+                      class="color-picker"
+                      [value]="brandingForm.get('buttonCancelColor')?.value || '#5f6b7a'"
+                      (input)="brandingForm.get('buttonCancelColor')?.setValue($any($event.target).value)"
+                    />
+                  </mat-form-field>
+                </div>
+
+                @if (generatedThemeTokens(); as gen) {
+                  <div class="palette-fine-tuning-wrap" aria-label="palette fine tuning">
+                    <h4 class="section-title">{{ 'settings.branding.paletteFineTuningTitle' | translate }}</h4>
+                    <p class="section-help palette-fine-tuning-wrap__help">
+                      {{ 'settings.branding.paletteFineTuningHelp' | translate }}
+                    </p>
+
+                    <div class="palette-edit-toolbar">
+                      <span class="palette-edit-toolbar__label">{{ 'settings.branding.paletteEditModeLabel' | translate }}</span>
+                      <mat-button-toggle-group
+                        class="palette-edit-toolbar__toggles"
+                        [value]="themeEditMode()"
+                        (change)="setThemeEditMode($any($event).value)"
+                        [attr.aria-label]="'settings.branding.paletteEditModeLabel' | translate"
+                      >
+                        <mat-button-toggle value="auto">{{ 'settings.branding.paletteEditModeAuto' | translate }}</mat-button-toggle>
+                        <mat-button-toggle value="manual">{{ 'settings.branding.paletteEditModeManual' | translate }}</mat-button-toggle>
+                      </mat-button-toggle-group>
+                    </div>
+
+                    @if (resolvedThemeTokens(); as res) {
+                      <div class="palette-summary">
+                        <div class="palette-summary__bases">
+                          <span class="palette-summary__label">{{ 'settings.branding.paletteSummaryBases' | translate }}</span>
+                          <span class="palette-summary__swatches">
+                            <span
+                              class="palette-summary__swatch"
+                              [style.background]="brandingForm.get('primaryColor')?.value"
+                              [attr.title]="'primary'"
+                            ></span>
+                            <span
+                              class="palette-summary__swatch"
+                              [style.background]="brandingForm.get('accentColor')?.value"
+                              [attr.title]="'accent'"
+                            ></span>
+                          </span>
+                        </div>
+                        @if (semanticTheme(); as sem) {
+                          <div class="palette-summary__semantic-hint">
+                            {{ 'settings.branding.paletteSummaryChromeHint' | translate }}
+                            <span class="palette-summary__semantic-swatches">
+                              <span class="palette-summary__mini" [style.background]="sem.sidebar" [attr.title]="'sidebar'"></span>
+                              <span class="palette-summary__mini" [style.background]="sem.header" [attr.title]="'header'"></span>
+                              <span class="palette-summary__mini" [style.background]="sem.background" [attr.title]="'bg'"></span>
+                            </span>
+                          </div>
+                        }
+                        <div class="palette-summary__resolved">
+                          <span class="palette-summary__label">{{ 'settings.branding.paletteSummaryResolved' | translate }}</span>
+                          <div class="palette-summary__scale-strip">
+                            @for (stop of colorScaleStops; track stop) {
+                              <span
+                                class="palette-summary__mini"
+                                [style.background]="res.primary[stop]"
+                                [attr.title]="'primary-' + stop"
+                              ></span>
+                            }
+                          </div>
+                          <div class="palette-summary__scale-strip">
+                            @for (stop of colorScaleStops; track stop) {
+                              <span
+                                class="palette-summary__mini"
+                                [style.background]="res.accent[stop]"
+                                [attr.title]="'accent-' + stop"
+                              ></span>
+                            }
+                          </div>
+                          <div class="palette-summary__scale-strip">
+                            @for (stop of colorScaleStops; track stop) {
+                              <span
+                                class="palette-summary__mini"
+                                [style.background]="res.neutral[stop]"
+                                [attr.title]="'neutral-' + stop"
+                              ></span>
+                            }
+                          </div>
+                        </div>
+                        <div class="palette-summary__chips">
+                          @if (manualOverrideCount() > 0) {
+                            <span class="palette-summary__chip">{{
+                              'settings.branding.paletteSummaryManualCount' | translate: { count: manualOverrideCount() }
+                            }}</span>
+                          } @else {
+                            <span class="palette-summary__chip palette-summary__chip--muted">{{
+                              'settings.branding.paletteSummaryNoManual' | translate
+                            }}</span>
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    @if (semanticTheme(); as semUi) {
+                      <div class="ui-behavior-preview" aria-label="ui behavior preview">
+                        <h4 class="section-title">{{ 'settings.branding.uiBehaviorTitle' | translate }}</h4>
+                        <p class="section-help">{{ 'settings.branding.uiBehaviorHelp' | translate }}</p>
+                        <div class="ui-behavior-preview__mock" [style.background]="semUi.background">
+                          <div class="ui-behavior-preview__shell">
+                            <aside
+                              class="ui-behavior-preview__sidebar"
+                              [style.background]="semUi.sidebar"
+                              [attr.aria-label]="'settings.branding.previewSidebar' | translate"
+                            ></aside>
+                            <div class="ui-behavior-preview__main">
+                              <header
+                                class="ui-behavior-preview__header"
+                                [style.background]="semUi.header"
+                                [attr.aria-label]="'settings.branding.previewHeader' | translate"
+                              ></header>
+                              <div class="ui-behavior-preview__content">
+                                <div
+                                  class="ui-behavior-preview__card"
+                                  [style.background]="semUi.surface"
+                                  [style.borderColor]="semUi.border"
+                                  [style.color]="semUi.textPrimary"
+                                >
+                                  <span class="ui-behavior-preview__card-title">{{ 'settings.branding.previewCard' | translate }}</span>
+                                  <span class="ui-behavior-preview__card-muted" [style.color]="semUi.textSecondary">{{
+                                    'settings.branding.previewCardHint' | translate
+                                  }}</span>
+                                </div>
+                                <div class="ui-behavior-preview__actions">
+                                  <span class="ui-behavior-preview__label">{{ 'settings.branding.previewButtons' | translate }}</span>
+                                  <button
+                                    type="button"
+                                    class="ui-behavior-preview__btn ui-behavior-preview__btn--primary"
+                                    [style.background]="semUi.actionPrimary"
+                                    [style.color]="semUi.textInverse"
+                                  >
+                                    {{ 'settings.branding.previewBtnPrimary' | translate }}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    class="ui-behavior-preview__btn ui-behavior-preview__btn--secondary"
+                                    [style.borderColor]="semUi.actionSecondary.border"
+                                    [style.color]="semUi.actionSecondary.text"
+                                    [style.--preview-secondary-hover-bg]="semUi.actionSecondary.hoverBg"
+                                  >
+                                    {{ 'settings.branding.previewBtnSecondary' | translate }}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+
+                    <app-theme-palette-fine-tuning
+                      [generated]="gen"
+                      [overrides]="themeTokenOverrides()"
+                      [editMode]="themeEditMode()"
+                      (overridesChange)="onPaletteOverridesChange($event)"
+                      (resetScale)="onPaletteResetScale($event)"
+                      (resetAll)="onPaletteResetAll()"
+                    />
+                  </div>
+                }
+
+                <div class="font-section">
+                  <div class="font-section-toolbar">
+                    <button
+                      type="button"
+                      mat-icon-button
+                      class="font-help-info-btn"
+                      [matMenuTriggerFor]="fontHelpMenu"
+                      [attr.aria-label]="'settings.branding.fontHelpAria' | translate"
+                    >
+                      <mat-icon>info_outline</mat-icon>
+                    </button>
+                  </div>
+                  <mat-menu
+                    #fontHelpMenu="matMenu"
+                    panelClass="settings-font-help-menu"
+                    xPosition="before"
+                    yPosition="above"
+                  >
+                    <div class="font-help-body" (click)="$event.stopPropagation()">
+                      <div class="font-help-head">
+                        <span class="font-help-title">{{ 'settings.branding.fontHelpTitle' | translate }}</span>
+                      </div>
+                      <div class="font-help-block">
+                        <span class="font-help-label">{{ 'settings.branding.fontPreset' | translate }}</span>
+                        <p class="font-help-text">{{ 'settings.branding.fontPresetHint' | translate }}</p>
+                      </div>
+                      <div class="font-help-block">
+                        <span class="font-help-label">{{ 'settings.branding.fontFamily' | translate }}</span>
+                        <p class="font-help-text">{{ 'settings.branding.fontFamilyHint' | translate }}</p>
+                      </div>
+                    </div>
+                  </mat-menu>
+                  <div class="font-fields-row">
+                    <mat-form-field appearance="outline" class="font-field">
+                      <mat-label>{{ 'settings.branding.fontPreset' | translate }}</mat-label>
+                      <mat-select [value]="selectedFontPresetId()" (selectionChange)="onFontPresetChange($event.value)">
+                        <mat-option value="custom">{{ 'settings.branding.fontPresetCustom' | translate }}</mat-option>
+                        @for (p of fontPresets; track p.id) {
+                          <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="font-field">
+                      <mat-label>{{ 'settings.branding.fontFamily' | translate }}</mat-label>
+                      <input matInput formControlName="fontFamily" placeholder="Inter, system-ui, sans-serif" />
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="form-actions form-actions--split">
+                  <button mat-button type="button" (click)="cancelBranding()" [disabled]="saving()">
+                    {{ 'common.cancel' | translate }}
+                  </button>
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    type="submit"
+                    [disabled]="brandingForm.invalid || saving()"
+                  >
+                    {{ saving() ? ('settings.saving' | translate) : ('common.save' | translate) }}
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Localization -->
+      <mat-tab>
+        <ng-template mat-tab-label>{{ 'settings.tabs.localization' | translate }}</ng-template>
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <form [formGroup]="localizationForm" (ngSubmit)="saveLocalization()">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>{{ 'settings.localization.defaultLanguage' | translate }}</mat-label>
+                  <mat-select formControlName="defaultLanguageCode">
+                    @for (lang of languages(); track lang.code) {
+                      <mat-option [value]="lang.code">{{ lang.nativeName || lang.name }}</mat-option>
+                    }
+                    @if (languages().length === 0) {
+                      <mat-option value="es">{{ 'settings.localization.languageEs' | translate }}</mat-option>
+                      <mat-option value="en">{{ 'settings.localization.languageEn' | translate }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <div class="available-languages">
+                  <span class="section-label">{{ 'settings.localization.availableLanguages' | translate }}</span>
+                  <div class="checkbox-group">
+                    @for (lang of languages(); track lang.code) {
+                      <label class="checkbox-item">
+                        <mat-checkbox
+                          [checked]="isLanguageAvailable(lang.code)"
+                          (change)="toggleLanguage(lang.code)"
+                        />
+                        <span>{{ lang.nativeName || lang.name }} ({{ lang.code }})</span>
+                      </label>
+                    }
+                    @if (languages().length === 0) {
+                      <label class="checkbox-item">
+                        <mat-checkbox [checked]="isLanguageAvailable('es')" (change)="toggleLanguage('es')" />
+                        <span>{{ 'settings.localization.languageEs' | translate }}</span>
+                      </label>
+                      <label class="checkbox-item">
+                        <mat-checkbox [checked]="isLanguageAvailable('en')" (change)="toggleLanguage('en')" />
+                        <span>{{ 'settings.localization.languageEn' | translate }}</span>
+                      </label>
+                    }
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    type="submit"
+                    [disabled]="localizationForm.invalid || saving()"
+                  >
+                    {{ saving() ? ('settings.saving' | translate) : ('common.save' | translate) }}
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- System -->
+      <mat-tab>
+        <ng-template mat-tab-label>{{ 'settings.tabs.system' | translate }}</ng-template>
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <form [formGroup]="systemForm" (ngSubmit)="saveSystem()">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>{{ 'settings.system.dateFormat' | translate }}</mat-label>
+                  <mat-select formControlName="dateFormat">
+                    @for (opt of dateFormatOptions; track opt.value) {
+                      <mat-option [value]="opt.value">{{ opt.labelKey | translate }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>{{ 'settings.system.currency' | translate }}</mat-label>
+                  <mat-select formControlName="currency">
+                    @for (opt of currencyOptions; track opt.value) {
+                      <mat-option [value]="opt.value">{{ opt.labelKey | translate }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>{{ 'settings.system.timezone' | translate }}</mat-label>
+                  <mat-select formControlName="timezone">
+                    @for (opt of timezoneOptions; track opt.value) {
+                      <mat-option [value]="opt.value">{{ opt.labelKey | translate }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <div class="form-actions">
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    type="submit"
+                    [disabled]="systemForm.invalid || saving()"
+                  >
+                    {{ saving() ? ('settings.saving' | translate) : ('common.save' | translate) }}
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

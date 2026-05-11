@@ -1,0 +1,92 @@
+/**
+ * Brand Helpers - Funciones y mixins para trabajar con colores de brand.css
+ * 
+ * Uso:
+ *   background-color: brand-rgba('primary', 0.1);
+ *   @include brand-button('primary');
+ */
+
+@use "sass:map";
+@use "sass:list";
+
+/* ======= MAPA DE COLORES RGB ======= */
+$brand-colors-rgb: (
+  'primary': (10, 154, 198),
+  'primary-hover': (10, 126, 151),
+  'secondary': (15, 127, 143),
+  'secondary-hover': (11, 103, 115),
+  'tertiary': (0, 91, 150),
+  'tertiary-hover': (0, 68, 112),
+  'success': (46, 125, 50),
+  'warning': (249, 168, 37),
+  'error': (211, 47, 47),
+);
+
+/* ======= FUNCIÓN PARA RGBA CON BRAND COLORS ======= */
+@function brand-rgba($color-name, $opacity: 1) {
+  $rgb: map.get($brand-colors-rgb, $color-name);
+  
+  @if not $rgb {
+    @warn "Color '#{$color-name}' no encontrado en brand-colors-rgb. Usando negro.";
+    @return rgba(0, 0, 0, $opacity);
+  }
+  
+  @return rgba(list.nth($rgb, 1), list.nth($rgb, 2), list.nth($rgb, 3), $opacity);
+}
+
+/* ======= MIXIN PARA BOTONES BRAND ======= */
+@mixin brand-button($variant: 'primary', $type: 'raised') {
+  $bg-var: '--color-action-primary';
+  $fg-var: '--color-text-inverse';
+  $hover-var: '--color-action-primary-hover';
+  
+  @if $variant == 'secondary' {
+    $bg-var: '--color-accent-500';
+    $fg-var: '--color-text-inverse';
+    $hover-var: '--color-accent-hover';
+  } @else if $variant == 'tertiary' {
+    $bg-var: '--color-accent-700';
+    $fg-var: '--color-text-inverse';
+    $hover-var: '--color-accent-800';
+  }
+  
+  @if $type == 'raised' or $type == 'flat' {
+    background-color: var(#{$bg-var});
+    color: var(#{$fg-var});
+    
+    &:hover:not(:disabled) {
+      background-color: var(#{$hover-var});
+    }
+  } @else if $type == 'stroked' {
+    border-color: var(#{$bg-var});
+    color: var(#{$bg-var});
+    background-color: transparent;
+    
+    &:hover:not(:disabled) {
+      background-color: brand-rgba($variant, 0.05);
+      border-color: var(#{$hover-var});
+      color: var(#{$hover-var});
+    }
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* ======= MIXIN PARA BACKGROUNDS CON OPACIDAD ======= */
+@mixin brand-bg($color-name, $opacity: 0.1) {
+  background-color: brand-rgba($color-name, $opacity);
+}
+
+/* ======= MIXIN PARA BORDERS ======= */
+@mixin brand-border($color-name, $width: 1px, $style: solid) {
+  border: $width $style var(--color-#{$color-name});
+}
+
+/* ======= MIXIN PARA TEXT COLORS ======= */
+@mixin brand-text($color-name) {
+  color: var(--color-#{$color-name});
+}
+

@@ -1,0 +1,66 @@
+<div
+  class="toggle-button"
+  [class.collapsed]="collapsed"
+  [class.mobile-open]="isMobile && !collapsed"
+  (click)="toggle.emit()"
+>
+  <mat-icon>{{ toggleIcon }}</mat-icon>
+</div>
+<div
+  class="sidebar"
+  [class.collapsed]="!isMobile && collapsed"
+  [class.open]="isMobile && !collapsed"
+  [class.mobile-hidden]="isMobile && collapsed"
+>
+  <div class="logo">
+    <img
+      [src]="sidebarLogoSrc()"
+      alt="Logo"
+      loading="eager"
+      (error)="onSidebarLogoImgError($event)"
+    />
+  </div>
+
+  <nav class="menu">
+    @for (item of filteredMenuItems(); track item.id) {
+      @if (!item.children?.length) {
+        <a
+          class="menu-item sidebar-item"
+          [routerLink]="item.path"
+          [class.active]="isMenuLinkActive(item)"
+          (click)="isMobile && toggle.emit()"
+        >
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span class="label">{{ (item.translationKey | translate) || item.label }}</span>
+        </a>
+      } @else {
+        <div class="submenu">
+          <div class="menu-item parent sidebar-item">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            <span class="label">{{ (item.translationKey | translate) || item.label }}</span>
+          </div>
+          <div class="submenu-items">
+            @for (child of item.children; track child.id) {
+              <a
+                class="menu-item child sidebar-item"
+                [routerLink]="child.path"
+                [class.active]="isMenuLinkActive(child)"
+                (click)="isMobile && toggle.emit()"
+              >
+                <mat-icon>{{ child.icon }}</mat-icon>
+                <span class="label">{{ (child.translationKey | translate) || child.label }}</span>
+              </a>
+            }
+          </div>
+        </div>
+      }
+    }
+  </nav>
+
+  <div class="logout">
+    <button mat-flat-button color="primary" (click)="logout.emit()">
+      <mat-icon>logout</mat-icon>
+      <span>{{ 'common.logout' | translate }}</span>
+    </button>
+  </div>
+</div>

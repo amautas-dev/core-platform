@@ -1,0 +1,265 @@
+<div class="guided-notif">
+  @if (loading() && !messageTypes().length) {
+    <p class="guided-loading">{{ 'common.loading' | translate }}</p>
+  } @else {
+    @if (typeEnabled(selectedMessageType()) && notificationUiWarningKeys().length) {
+      <mat-card class="guided-card guided-card--warn">
+        <mat-card-header>
+          <mat-card-title>{{ 'tenants.guidedNotifValidationTitle' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <ul class="guided-warn-list">
+            @for (k of notificationUiWarningKeys(); track k) {
+              <li>{{ k | translate }}</li>
+            }
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <mat-card class="guided-card guided-card--hero">
+      <mat-card-header>
+        <mat-card-title>{{ 'tenants.guidedNotifStep0Title' | translate }}</mat-card-title>
+        <mat-card-subtitle>{{ 'tenants.guidedNotifStep0Hint' | translate }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="type-toggles">
+          @for (t of messageTypes(); track t.messageTypeCode) {
+            <div class="type-toggle-row">
+              <span class="type-label">{{ messageTypeLabel(t.messageTypeCode) }}</span>
+              <mat-slide-toggle
+                [checked]="t.enabled"
+                [disabled]="readonlyMode() || saving()"
+                (change)="toggleType(t.messageTypeCode, $event.checked)"
+                *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+              ></mat-slide-toggle>
+            </div>
+          }
+        </div>
+        <p class="guided-field-hint">{{ 'tenants.guidedNotifTypeSelect' | translate }}</p>
+        <mat-button-toggle-group
+          class="guided-type-toggle-group"
+          [value]="selectedMessageType()"
+          (change)="onMessageTypeSelect($event.value)"
+          [disabled]="readonlyMode() || !messageTypes().length"
+        >
+          @for (t of messageTypes(); track t.messageTypeCode) {
+            <mat-button-toggle [value]="t.messageTypeCode" [disabled]="!t.enabled">
+              {{ messageTypeLabel(t.messageTypeCode) }}
+            </mat-button-toggle>
+          }
+        </mat-button-toggle-group>
+        @if (!typeEnabled(selectedMessageType())) {
+          <p class="guided-warn">{{ 'tenants.guidedNotifTypeDisabledHint' | translate }}</p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="guided-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'tenants.guidedNotifStep1Title' | translate }}</mat-card-title>
+        <mat-card-subtitle>{{ 'tenants.guidedNotifStep1Hint' | translate }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="guided-actions">
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadSampleCsv()"
+            [disabled]="schemaRows().length === 0 || readonlyMode() || !typeEnabled(selectedMessageType())"
+            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+          >
+            {{ 'tenants.importSchemaDownloadSample' | translate }}
+          </button>
+        </div>
+        <table class="guided-table guided-schema-table">
+          <thead>
+            <tr>
+              <th class="guided-col-order">{{ 'tenants.guidedNotifOrderColumn' | translate }}</th>
+              <th class="guided-col-drag" aria-hidden="true"></th>
+              <th>{{ 'tenants.guidedNotifColLabel' | translate }}</th>
+              <th>{{ 'tenants.importSchemaFieldType' | translate }}</th>
+              <th>{{ 'tenants.importSchemaRequired' | translate }}</th>
+              <th>{{ 'common.actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody
+            cdkDropList
+            [cdkDropListData]="schemaRows()"
+            [cdkDropListDisabled]="
+              readonlyMode() || !typeEnabled(selectedMessageType()) || schemaReorderSaving()
+            "
+            (cdkDropListDropped)="onSchemaDrop($event)"
+          >
+            @for (r of schemaRows(); track r.id; let i = $index) {
+              <tr cdkDrag [cdkDragDisabled]="readonlyMode() || !typeEnabled(selectedMessageType()) || schemaReorderSaving()">
+                <td class="guided-col-order guided-order-index">{{ (r.order ?? i + 1) }}</td>
+                <td class="guided-col-drag">
+                  <span class="guided-drag-handle" [attr.aria-label]="'tenants.guidedNotifOrderDragHint' | translate">
+                    <mat-icon class="guided-drag-icon" cdkDragHandle aria-hidden="true">drag_indicator</mat-icon>
+                  </span>
+                </td>
+                <td>{{ r.fieldLabel }}</td>
+                <td>{{ schemaFieldTypeLabel(r.fieldType) }}</td>
+                <td>{{ r.isRequired ? ('common.yes' | translate) : ('common.no' | translate) }}</td>
+                <td>
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="deleteSchemaRow(r)"
+                    [disabled]="readonlyMode()"
+                    *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                  >
+                    {{ 'common.delete' | translate }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <form [formGroup]="newFieldForm" (ngSubmit)="addSchemaField()" class="guided-add-field">
+          <h4 class="guided-subtitle">{{ 'tenants.guidedNotifAddField' | translate }}</h4>
+          <div class="guided-field-row">
+            <mat-form-field appearance="outline" class="guided-grow">
+              <mat-label>{{ 'tenants.guidedNotifColLabel' | translate }}</mat-label>
+              <input matInput formControlName="fieldLabel" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'tenants.importSchemaFieldType' | translate }}</mat-label>
+              <mat-select formControlName="fieldType">
+                <mat-option value="string">string</mat-option>
+                <mat-option value="number">number</mat-option>
+                <mat-option value="date">date</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-checkbox formControlName="isRequired">{{ 'tenants.importSchemaRequired' | translate }}</mat-checkbox>
+          </div>
+          <mat-expansion-panel class="guided-advanced">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ 'tenants.guidedNotifAdvanced' | translate }}</mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-form-field appearance="outline" class="guided-full">
+              <mat-label>{{ 'tenants.guidedNotifAliasesHint' | translate }}</mat-label>
+              <input matInput formControlName="aliasesText" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="guided-full">
+              <mat-label>{{ 'tenants.guidedNotifFieldKeyOverride' | translate }}</mat-label>
+              <input matInput formControlName="fieldKeyOverride" />
+            </mat-form-field>
+          </mat-expansion-panel>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="newFieldForm.invalid || readonlyMode() || saving() || !typeEnabled(selectedMessageType())"
+            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+          >
+            {{ 'tenants.guidedNotifAddFieldBtn' | translate }}
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="guided-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'tenants.guidedNotifStep2Title' | translate }}</mat-card-title>
+        <mat-card-subtitle>{{ 'tenants.guidedNotifStep2Hint' | translate }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-chip-set class="guided-chips">
+          @for (chip of variableChips(); track chip) {
+            <mat-chip (click)="insertVariable(chip)" [class.mat-mdc-chip-selected]="false">{{ chip }}</mat-chip>
+          }
+        </mat-chip-set>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="guided-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'tenants.guidedNotifStep3Title' | translate }}</mat-card-title>
+        <mat-card-subtitle>{{ 'tenants.guidedNotifStep3BuilderHint' | translate }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content [formGroup]="outputForm">
+        <h4 class="guided-section-label">{{ 'tenants.guidedNotifEmailBlock' | translate }}</h4>
+        <p class="guided-field-hint muted">{{ 'tenants.guidedNotifEmailBodyHtmlHint' | translate }}</p>
+        <mat-form-field appearance="outline" class="guided-full">
+          <mat-label>{{ 'tenants.notificationSubject' | translate }}</mat-label>
+          <input
+            matInput
+            formControlName="emailSubject"
+            (focus)="setInsertTarget('emailSubject')"
+          />
+        </mat-form-field>
+        <div class="guided-rich-email">
+          <span class="guided-rich-email-label">{{ 'tenants.guidedNotifEmailBodyLabel' | translate }} *</span>
+          <quill-editor
+            class="guided-quill-editor-host"
+            formControlName="emailBody"
+            format="html"
+            theme="snow"
+            [modules]="emailQuillModules"
+            [styles]="emailQuillStyles"
+            [readOnly]="readonlyMode()"
+            [sanitize]="true"
+            (onEditorCreated)="onEmailQuillCreated($event)"
+            (onFocus)="setInsertTarget('emailBody')"
+          />
+        </div>
+        <div class="guided-preview">
+          <span class="preview-label">{{ 'tenants.guidedNotifPreview' | translate }}</span>
+          <div class="preview-box preview-box--html" [innerHTML]="emailPreviewHtml()"></div>
+        </div>
+
+        <h4 class="guided-section-label">{{ 'tenants.guidedNotifWhatsappBlock' | translate }}</h4>
+        <p class="guided-field-hint muted guided-wa-section-note">{{ 'tenants.guidedNotifWhatsappEditorNote' | translate }}</p>
+        <p class="guided-field-hint muted">{{ 'tenants.guidedNotifWhatsappPlainHint' | translate }}</p>
+        <div class="wa-cards">
+          @for (ctrl of waArray.controls; track $index; let i = $index) {
+            <mat-card class="wa-card">
+              <mat-card-header>
+                <mat-card-title>{{ 'tenants.guidedNotifVariant' | translate }} {{ i + 1 }}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-form-field appearance="outline" class="guided-full guided-wa-variant-field">
+                  <mat-label>{{ 'tenants.guidedNotifWhatsappVariantBodyLabel' | translate }}</mat-label>
+                  <textarea
+                    matInput
+                    rows="12"
+                    class="guided-wa-textarea"
+                    [placeholder]="'tenants.guidedNotifWhatsappBodyPlaceholder' | translate"
+                    [formControl]="$any(ctrl)"
+                    (focus)="setWaInsertTarget(i)"
+                  ></textarea>
+                </mat-form-field>
+                <div class="guided-preview">
+                  <span class="preview-label">{{ 'tenants.guidedNotifPreview' | translate }}</span>
+                  <div class="preview-box preview-box--wa">{{ waPreviews()[i] }}</div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="guided-save-wrap">
+      <button
+        mat-flat-button
+        color="primary"
+        class="guided-save-btn"
+        type="button"
+        (click)="saveTemplates()"
+        [disabled]="
+          outputForm.invalid ||
+          saving() ||
+          readonlyMode() ||
+          !typeEnabled(selectedMessageType()) ||
+          schemaRows().length < 1
+        "
+        *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+      >
+        {{ 'tenants.guidedNotifSaveBtn' | translate }}
+      </button>
+    </div>
+  }
+</div>

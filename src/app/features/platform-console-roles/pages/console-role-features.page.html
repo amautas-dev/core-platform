@@ -1,0 +1,237 @@
+<div class="console-role-features-page">
+  <header class="page-header">
+    <button mat-button type="button" class="back-link" (click)="back()">
+      <span aria-hidden="true">←</span> {{ 'consoleRolesPage.backToList' | translate }}
+    </button>
+    <h1>{{ 'consoleRolesPage.roleFeaturesPageTitle' | translate }}</h1>
+    @if (roleTitle(); as rt) {
+      <p class="subtitle">
+        <strong>{{ rt.name }}</strong>
+        <code class="role-code">{{ rt.code }}</code>
+        — {{ 'consoleRolesPage.productLine' | translate }}:
+        <code class="role-code">{{ productCode() }}</code>
+      </p>
+    }
+  </header>
+
+  <mat-card class="content-card">
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading">
+          <mat-spinner diameter="36" />
+        </div>
+      } @else if (loadError()) {
+        <p class="err" role="alert">{{ 'consoleRolesPage.roleFeaturesLoadError' | translate }}</p>
+      } @else {
+        <aside class="legend-callout" role="note">
+          <p class="legend-title">{{ 'consoleRolesPage.legendTitle' | translate }}</p>
+          <ul class="legend-list">
+            <li>{{ 'consoleRolesPage.legendPermissionsColumn' | translate }}</li>
+            <li>{{ 'consoleRolesPage.legendMenuColumn' | translate }}</li>
+          </ul>
+        </aside>
+
+        @if (saveError()) {
+          <p class="err soft" role="alert">{{ 'consoleRolesPage.roleFeaturesSaveError' | translate }}</p>
+        }
+        @if (validationError()) {
+          <p class="err soft" role="alert">{{ 'consoleRolesPage.groupTitleRequired' | translate }}</p>
+        }
+
+        <div class="two-panels">
+          <section class="panel panel--permissions" aria-labelledby="perm-heading">
+            <h2 id="perm-heading" class="panel-title">{{ 'consoleRolesPage.sectionPermissions' | translate }}</h2>
+            <p class="panel-hint">{{ 'consoleRolesPage.sectionPermissionsHint' | translate }}</p>
+            <div class="perm-scroll perm-scroll--modules">
+              @for (mod of catalogByModule(); track mod[0]) {
+                <mat-expansion-panel class="module-expansion" [expanded]="true">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      @if (mod[0] === '—') {
+                        {{ 'consoleRolesPage.moduleGroupUnassigned' | translate }}
+                      } @else {
+                        {{ mod[0] }}
+                      }
+                    </mat-panel-title>
+                    <mat-panel-description>
+                      {{ 'consoleRolesPage.moduleFeatureCount' | translate: { count: mod[1].length } }}
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+                  <ul class="perm-list">
+                    @for (row of mod[1]; track row.featureId) {
+                      <li class="perm-row">
+                        <label class="perm-label">
+                          <mat-checkbox
+                            [checked]="isChecked(row.featureId)"
+                            [disabled]="!canSave()"
+                            (change)="togglePermission(row.featureId, $event.checked)"
+                          />
+                          <span class="perm-text">
+                            <span class="pname">{{ row.name }}</span>
+                            <span class="pcode">{{ row.code }}</span>
+                            @if (row.route) {
+                              <span class="proute">{{ row.route }}</span>
+                            }
+                          </span>
+                        </label>
+                      </li>
+                    }
+                  </ul>
+                </mat-expansion-panel>
+              }
+            </div>
+          </section>
+
+          <section class="panel panel--menu" aria-labelledby="menu-heading">
+            <h2 id="menu-heading" class="panel-title">{{ 'consoleRolesPage.sectionMenuBuilder' | translate }}</h2>
+            <p class="panel-hint">{{ 'consoleRolesPage.sectionMenuBuilderHint' | translate }}</p>
+
+            <button
+              mat-stroked-button
+              type="button"
+              class="add-group-btn"
+              (click)="addGroup()"
+              [disabled]="!canSave()"
+            >
+              <mat-icon aria-hidden="true">create_new_folder</mat-icon>
+              {{ 'consoleRolesPage.addGroup' | translate }}
+            </button>
+
+            <div cdkDropListGroup class="menu-groups-wrap">
+              @for (g of menuGroups(); track g.clientId) {
+                <div class="group-card">
+                  <div class="group-card-head">
+                    <div class="group-reorder">
+                      <button
+                        mat-icon-button
+                        type="button"
+                        (click)="moveGroupUp(g.clientId)"
+                        [disabled]="!canSave()"
+                        [attr.aria-label]="'consoleRolesPage.moveGroupUp' | translate"
+                      >
+                        <mat-icon>arrow_upward</mat-icon>
+                      </button>
+                      <button
+                        mat-icon-button
+                        type="button"
+                        (click)="moveGroupDown(g.clientId)"
+                        [disabled]="!canSave()"
+                        [attr.aria-label]="'consoleRolesPage.moveGroupDown' | translate"
+                      >
+                        <mat-icon>arrow_downward</mat-icon>
+                      </button>
+                    </div>
+                    <mat-form-field appearance="outline" class="group-title-field" subscriptSizing="dynamic">
+                      <mat-label>{{ 'consoleRolesPage.groupTitle' | translate }}</mat-label>
+                      <input
+                        matInput
+                        [disabled]="!canSave()"
+                        [value]="g.title"
+                        (input)="updateGroupTitle(g.clientId, $any($event.target).value)"
+                      />
+                    </mat-form-field>
+                    <button
+                      mat-icon-button
+                      type="button"
+                      (click)="removeGroup(g.clientId)"
+                      [disabled]="!canSave()"
+                      [attr.aria-label]="'consoleRolesPage.removeGroup' | translate"
+                    >
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </div>
+
+                  <div
+                    cdkDropList
+                    [cdkDropListData]="g.items"
+                    (cdkDropListDropped)="dropItem($event)"
+                    [cdkDropListDisabled]="!canSave()"
+                    class="items-drop-list"
+                  >
+                    @for (it of g.items; track it.clientId) {
+                      <div cdkDrag class="menu-item-card" [cdkDragDisabled]="!canSave()">
+                        <mat-icon class="item-drag" cdkDragHandle aria-hidden="true">drag_indicator</mat-icon>
+                        <div class="item-main">
+                          <span class="item-default-title">{{ labelForFeature(it.featureId) }}</span>
+                          <span class="item-code">{{ catalogById().get(it.featureId)?.code }}</span>
+                          <mat-form-field appearance="outline" class="item-title-override" subscriptSizing="dynamic">
+                            <mat-label>{{ 'consoleRolesPage.menuTitleOverride' | translate }}</mat-label>
+                            <input
+                              matInput
+                              [placeholder]="labelForFeature(it.featureId)"
+                              [disabled]="!canSave()"
+                              [value]="it.titleOverride"
+                              (input)="updateItemTitle(g.clientId, it.clientId, $any($event.target).value)"
+                            />
+                          </mat-form-field>
+                          <mat-form-field appearance="outline" class="item-sidebar" subscriptSizing="dynamic">
+                            <mat-label>{{ 'consoleRolesPage.sidebarVisibility' | translate }}</mat-label>
+                            <mat-select
+                              [disabled]="!canSave()"
+                              [value]="it.show"
+                              (valueChange)="updateItemShow(g.clientId, it.clientId, $event)"
+                            >
+                              <mat-option value="inherit">{{ 'consoleRolesPage.featureInherit' | translate }}</mat-option>
+                              <mat-option value="yes">{{ 'consoleRolesPage.featureShowYes' | translate }}</mat-option>
+                              <mat-option value="no">{{ 'consoleRolesPage.featureShowNo' | translate }}</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                        <button
+                          mat-icon-button
+                          type="button"
+                          (click)="removeItem(g.clientId, it.clientId)"
+                          [disabled]="!canSave()"
+                        >
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="add-item-row">
+                    <mat-form-field appearance="outline" class="add-item-select" subscriptSizing="dynamic">
+                      <mat-label>{{ 'consoleRolesPage.addMenuItem' | translate }}</mat-label>
+                      <mat-select
+                        [disabled]="!canSave() || availableToAddToMenu().length === 0"
+                        [placeholder]="'consoleRolesPage.pickFeature' | translate"
+                        (selectionChange)="addItemToGroup(g.clientId, $event.value)"
+                      >
+                        @for (opt of availableToAddToMenu(); track opt.featureId) {
+                          <mat-option [value]="opt.featureId">{{ opt.name }} ({{ opt.code }})</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (menuGroups().length === 0) {
+              <p class="empty-menu">{{ 'consoleRolesPage.emptyMenuGroups' | translate }}</p>
+            }
+          </section>
+        </div>
+
+        <div class="actions">
+          <button mat-button type="button" (click)="back()" [disabled]="saving()">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="save()"
+            [disabled]="loading() || saving() || !canSave()"
+          >
+            @if (saving()) {
+              <mat-spinner diameter="20" />
+            } @else {
+              {{ 'common.save' | translate }}
+            }
+          </button>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

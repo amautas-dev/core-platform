@@ -1,0 +1,1694 @@
+<div class="tenant-detail-page" [class.tenant-detail--readonly]="readonlyMode()">
+  <header class="page-header">
+    <h1>{{ (readonlyMode() ? 'tenants.detailTitle' : 'tenants.editTenant') | translate }}</h1>
+    <div class="header-actions">
+      @if (tenantId() != null) {
+        <a
+          mat-stroked-button
+          [routerLink]="paths.tenantBilling(tenantId()!)"
+          *hasPermission="PERMISSIONS.TENANTS_READ"
+        >
+          {{ 'tenants.billingPageLink' | translate }}
+        </a>
+      }
+      <a mat-button [routerLink]="paths.tenants()">{{ 'common.back' | translate }}</a>
+      @if (!readonlyMode() && tenantId() != null) {
+        <a mat-stroked-button color="primary" [routerLink]="paths.tenantDetail(tenantId()!)">
+          {{ 'tenants.backToViewMode' | translate }}
+        </a>
+      }
+      @if (readonlyMode() && tenantId() != null) {
+        <a
+          mat-raised-button
+          color="primary"
+          [routerLink]="paths.tenantEdit(tenantId()!)"
+          *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+        >
+          {{ 'common.edit' | translate }}
+        </a>
+      }
+      @if (tenant(); as t) {
+        @if (t.isActive) {
+          <button
+            mat-button
+            color="warn"
+            (click)="suspendTenant()"
+            [disabled]="readonlyMode() || actionPending()"
+            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+          >
+            {{ actionPending() ? ('tenants.suspendInProgress' | translate) : ('tenants.suspendTenant' | translate) }}
+          </button>
+        } @else {
+          <button
+            mat-button
+            color="primary"
+            (click)="activateTenant()"
+            [disabled]="readonlyMode() || actionPending()"
+            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+          >
+            {{ actionPending() ? ('tenants.activating' | translate) : ('tenants.activateTenant' | translate) }}
+          </button>
+        }
+      }
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>{{ 'tenants.loadingTenant' | translate }}</p>
+    </div>
+  } @else if (tenant(); as t) {
+    <mat-tab-group class="tenant-tabs" animationDuration="0ms">
+      <mat-tab [label]="'tenants.mainDataTab' | translate">
+        <div class="tab-content tenant-main-data-inner-wrap">
+          <mat-tab-group class="tenant-main-inner-tabs" animationDuration="0ms">
+            <mat-tab [label]="'tenants.mainDataGeneralSubtab' | translate">
+          <mat-card class="detail-card overview-card">
+            <mat-card-header>
+              <mat-card-title>{{ 'tenants.summary' | translate }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="tenantSummaryForm" (ngSubmit)="saveTenantSummary()" class="tenant-summary-form">
+              <div class="tenant-summary-layout">
+                <div class="summary-fields-grid" [class.summary-fields-grid--readonly]="readonlyMode()">
+                  <div class="summary-field">
+                    @if (readonlyMode()) {
+                      <span class="summary-field__label">{{ 'tenants.code' | translate }}</span>
+                      <span class="summary-field__value">{{ t.tenantCode }}</span>
+                    } @else {
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="summary-edit-field">
+                        <mat-label>{{ 'tenants.code' | translate }}</mat-label>
+                        <input matInput formControlName="tenantCode" autocomplete="off" />
+                        @if (tenantSummaryForm.controls.tenantCode.hasError('required')) {
+                          <mat-error>{{ 'common.required' | translate }}</mat-error>
+                        }
+                      </mat-form-field>
+                    }
+                  </div>
+                  <div class="summary-field">
+                    @if (readonlyMode()) {
+                      <span class="summary-field__label">{{ 'tenants.name' | translate }}</span>
+                      <span class="summary-field__value">{{ t.tenantName }}</span>
+                    } @else {
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="summary-edit-field">
+                        <mat-label>{{ 'tenants.name' | translate }}</mat-label>
+                        <input matInput formControlName="tenantName" autocomplete="organization" />
+                        @if (tenantSummaryForm.controls.tenantName.hasError('required')) {
+                          <mat-error>{{ 'common.required' | translate }}</mat-error>
+                        }
+                      </mat-form-field>
+                    }
+                  </div>
+                  <div class="summary-field">
+                    @if (readonlyMode()) {
+                      <span class="summary-field__label">{{ 'tenants.country' | translate }}</span>
+                      <span class="summary-field__value">{{ t.countryCode ?? '—' }}</span>
+                    } @else {
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="country-field">
+                        <mat-label>{{ 'tenants.country' | translate }}</mat-label>
+                        <mat-select
+                          [value]="t.countryCode ?? 'AR'"
+                          (selectionChange)="onTenantCountryChange($event.value)"
+                          [disabled]="actionPending()"
+                        >
+                          @for (c of countries(); track c.countryCode) {
+                            <mat-option [value]="c.countryCode">{{ c.name }} ({{ c.countryCode }})</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    }
+                  </div>
+                  <div class="summary-field">
+                    @if (readonlyMode()) {
+                      <span class="summary-field__label">{{ 'tenants.hostingDeployment' | translate }}</span>
+                      <span class="summary-field__value">{{ hostingDeploymentLabel(t.hostingDeployment) }}</span>
+                    } @else {
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="country-field">
+                        <mat-label>{{ 'tenants.hostingDeployment' | translate }}</mat-label>
+                        <mat-select
+                          [value]="t.hostingDeployment ?? 'amautas'"
+                          (selectionChange)="onHostingDeploymentChange($event.value)"
+                          [disabled]="actionPending()"
+                        >
+                          <mat-option value="amautas">{{ 'tenants.hostingAmautas' | translate }}</mat-option>
+                          <mat-option value="external">{{ 'tenants.hostingExternal' | translate }}</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    }
+                  </div>
+                </div>
+
+                <section class="summary-plan-section" aria-labelledby="summary-plan-heading">
+                  <h3 id="summary-plan-heading" class="summary-subsection-title">{{ 'tenants.plan' | translate }}</h3>
+                  <p class="summary-plan-hint muted">{{ 'tenants.planMultiProductHint' | translate }}</p>
+                  @if (!readonlyMode()) {
+                    <div class="show-inactive-plans-row" *hasPermission="PERMISSIONS.TENANTS_UPDATE">
+                      <mat-slide-toggle
+                        [checked]="showInactivePlans()"
+                        (change)="onShowInactivePlansChange($event.checked)"
+                        [disabled]="plansLoading()"
+                        color="primary"
+                      >
+                        {{ 'tenants.showInactivePlansToggle' | translate }}
+                      </mat-slide-toggle>
+                      <span class="muted show-inactive-plans-hint">{{ 'tenants.showInactivePlansHint' | translate }}</span>
+                    </div>
+                  }
+                  <div class="plan-dd">
+                    @if (t.serviceSubscriptions?.length) {
+                      <div class="product-subscriptions">
+                        @for (line of t.serviceSubscriptions; track line.subscriptionId) {
+                          <div class="product-line">
+                            <div class="product-line-head">
+                              <strong>{{ line.productName || line.productCode || ('#' + line.productId) }}</strong>
+                              <span class="muted">{{ line.planName || '—' }}</span>
+                            </div>
+                            @if (line.productId != null && !readonlyMode()) {
+                              <div class="product-line-actions" *hasPermission="PERMISSIONS.TENANTS_UPDATE">
+                                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="plan-select-field">
+                                  <mat-label>{{ 'tenants.servicePlan' | translate }}</mat-label>
+                                  <mat-select
+                                    [value]="selectedPlanForLine(line)"
+                                    (selectionChange)="onProductPlanSelect(line.productId, $event.value)"
+                                    [disabled]="planUpdating()"
+                                  >
+                                    @for (p of plansForProduct(line.productId); track p.servicePlanId) {
+                                      <mat-option [value]="p.servicePlanId">{{ planOptionLabel(p) }}</mat-option>
+                                    }
+                                  </mat-select>
+                                </mat-form-field>
+                                <div class="product-line-actions__buttons">
+                                  <button
+                                    mat-stroked-button
+                                    color="primary"
+                                    type="button"
+                                    (click)="applyPlanChangeForProduct(line.productId)"
+                                    [disabled]="planUpdating()"
+                                  >
+                                    {{ planUpdating() ? ('common.saving' | translate) : ('tenants.changePlanButton' | translate) }}
+                                  </button>
+                                  <button
+                                    mat-stroked-button
+                                    color="warn"
+                                    type="button"
+                                    (click)="confirmUnsubscribeProductLine(line)"
+                                    [disabled]="planUpdating()"
+                                  >
+                                    {{ 'tenants.unsubscribeProductButton' | translate }}
+                                  </button>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <p class="summary-plan-fallback">{{ planDisplayName() || getServicePlanName(t.servicePlanId) || '—' }}</p>
+                    }
+
+                    @if (!readonlyMode()) {
+                      <div class="add-product-subscription" *hasPermission="PERMISSIONS.TENANTS_UPDATE">
+                        <h4 class="add-product-subscription__title">{{ 'tenants.addProductSectionTitle' | translate }}</h4>
+                        <p class="add-product-subscription__hint muted">{{ 'tenants.addProductSectionHint' | translate }}</p>
+                        @if (catalogProductsLoading() || plansLoading()) {
+                          <div class="add-product-subscription__loading">
+                            <mat-spinner diameter="24" />
+                            <span>{{ 'common.loading' | translate }}</span>
+                          </div>
+                        } @else if (productsAvailableToSubscribe().length === 0) {
+                          <p class="add-product-subscription__empty muted">{{ 'tenants.addProductNoneAvailable' | translate }}</p>
+                        } @else {
+                          <div class="add-product-steps">
+                            <div class="add-product-step">
+                              <span class="add-product-step__label muted">{{ 'tenants.addProductStep1Label' | translate }}</span>
+                              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="plan-select-field add-product-step__field">
+                                <mat-label>{{ 'tenants.addProductProductLabel' | translate }}</mat-label>
+                                <mat-select
+                                  [value]="addSubscriptionProductId()"
+                                  (selectionChange)="onAddSubscriptionProductChange($event.value)"
+                                  [disabled]="planUpdating()"
+                                >
+                                  <mat-option [value]="null">{{ 'tenants.addProductPickProduct' | translate }}</mat-option>
+                                  @for (p of productsAvailableToSubscribe(); track p.productId) {
+                                    <mat-option [value]="p.productId">{{ productCatalogLabel(p) }}</mat-option>
+                                  }
+                                </mat-select>
+                              </mat-form-field>
+                            </div>
+                            @if (addSubscriptionProductId() != null) {
+                              <div class="add-product-step add-product-step--2">
+                                <span class="add-product-step__label muted">{{ 'tenants.addProductStep2Label' | translate }}</span>
+                                @if (addSubscriptionPlanOptions().length === 0) {
+                                  <p class="add-product-step__empty muted">{{ 'tenants.addProductNoPlansForProduct' | translate }}</p>
+                                } @else {
+                                  <div class="add-product-subscription__row">
+                                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="plan-select-field">
+                                      <mat-label>{{ 'tenants.addProductPickPlan' | translate }}</mat-label>
+                                      <mat-select
+                                        [value]="addSubscriptionPlanId()"
+                                        (selectionChange)="onAddSubscriptionPlanChange($event.value)"
+                                        [disabled]="planUpdating()"
+                                      >
+                                        <mat-option [value]="null">{{ 'tenants.addProductPickPlanPlaceholder' | translate }}</mat-option>
+                                        @for (p of addSubscriptionPlanOptions(); track p.servicePlanId) {
+                                          <mat-option [value]="p.servicePlanId">{{ planOptionLabel(p) }}</mat-option>
+                                        }
+                                      </mat-select>
+                                    </mat-form-field>
+                                    <button
+                                      mat-stroked-button
+                                      color="primary"
+                                      type="button"
+                                      (click)="applyAddProductSubscription()"
+                                      [disabled]="planUpdating() || addSubscriptionPlanId() == null"
+                                    >
+                                      {{
+                                        planUpdating()
+                                          ? ('common.saving' | translate)
+                                          : ('tenants.addProductSubscribeButton' | translate)
+                                      }}
+                                    </button>
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </section>
+
+                <section class="summary-meta" [attr.aria-label]="'tenants.summaryMetaAria' | translate">
+                  <div class="summary-meta-grid">
+                    <div class="summary-meta-item">
+                      <span class="summary-field__label">{{ 'common.status' | translate }}</span>
+                      <div class="summary-meta-value">
+                        <mat-chip [class.active]="t.isActive" [class.inactive]="!t.isActive">
+                          {{ t.isActive ? ('common.active' | translate) : ('common.suspended' | translate) }}
+                        </mat-chip>
+                      </div>
+                    </div>
+                    <div class="summary-meta-item">
+                      <span class="summary-field__label">{{ 'tenants.createdAtLabel' | translate }}</span>
+                      <span class="summary-field__value">{{ t.createdAt | date:'medium' }}</span>
+                    </div>
+                    <div class="summary-meta-item">
+                      <span class="summary-field__label">{{ 'tenants.users' | translate }}</span>
+                      <span class="summary-field__value">{{ t.usersCount ?? 0 }}</span>
+                    </div>
+                    <div class="summary-meta-item">
+                      <span class="summary-field__label">{{ 'tenants.modulesEnabled' | translate }}</span>
+                      <span class="summary-field__value">{{ t.modulesEnabledCount ?? 0 }}</span>
+                    </div>
+                  </div>
+                </section>
+              </div>
+              @if (!readonlyMode()) {
+                <div class="summary-save-actions">
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    type="submit"
+                    [disabled]="summarySaving() || actionPending() || tenantSummaryForm.invalid"
+                    *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                  >
+                    {{ summarySaving() ? ('common.saving' | translate) : ('common.save' | translate) }}
+                  </button>
+                </div>
+              }
+              </form>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="detail-card recent-activity-card">
+            <mat-card-header>
+              <mat-card-title>{{ 'tenants.recentActivity' | translate }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              @if (activityLoading()) {
+                <div class="activity-loading">
+                  <mat-spinner diameter="28"></mat-spinner>
+                  <span>{{ 'common.loading' | translate }}</span>
+                </div>
+              } @else if (activity().length === 0) {
+                <p class="activity-empty">{{ 'tenants.noRecentActivity' | translate }}</p>
+              } @else {
+                <ul class="activity-list">
+                  @for (a of activity(); track a.createdAt + a.action + (a.entityId ?? '')) {
+                    <li class="activity-item">
+                      <mat-icon class="activity-icon">{{ getActivityIcon(a.action) }}</mat-icon>
+                      <span class="activity-time">{{ formatRelativeTime(a.createdAt) }}</span>
+                      <span class="activity-action">{{ formatActionLabel(a.action) }}</span>
+                      @if (a.userEmail) {
+                        <span class="activity-user">– {{ a.userEmail }}</span>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </mat-card-content>
+          </mat-card>
+            </mat-tab>
+            <mat-tab [label]="'tenants.mainDataBrandingSubtab' | translate">
+            <mat-card class="detail-card">
+              <mat-card-header>
+                <mat-card-title>{{ 'tenants.brandingTitle' | translate }}</mat-card-title>
+                <mat-card-subtitle>{{ 'tenants.brandingSubtitle' | translate }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                @if (themeLoading()) {
+                  <p class="tab-loading">{{ 'tenants.loadingTheme' | translate }}</p>
+                } @else if (tenantTheme()) {
+                  <form [formGroup]="tenantBrandingForm" (ngSubmit)="saveTenantTheme()" class="tenant-branding tenant-branding-identity">
+                    @if (tenantId()) {
+                      <h2 class="section-title section-title--identity">{{ 'settings.branding.visualIdentityTitle' | translate }}</h2>
+                      <p class="section-help section-help--identity">{{ 'settings.branding.visualIdentityHelp' | translate }}</p>
+
+                      <h3 class="section-subtitle">{{ 'settings.branding.logosSection' | translate }}</h3>
+                      <div class="identity-grid identity-grid--logos">
+                        <app-branding-asset-upload
+                          [label]="'settings.branding.logoMainLight' | translate"
+                          [previewUrl]="tenantPreviewUrlForField('logoFileId')"
+                          [uploadHandler]="tenantAssetUpload('logo')"
+                          [inherited]="tenantInheritedForField('logoFileId')"
+                          [showRemove]="!!tenantBrandingForm.get('logoFileId')?.value"
+                          [disabled]="readonlyMode()"
+                          (uploaded)="onTenantAssetFileId('logoFileId', $event)"
+                          (cleared)="clearTenantAsset('logoFileId')"
+                        />
+                        <app-branding-asset-upload
+                          [label]="'settings.branding.logoMainDark' | translate"
+                          [previewUrl]="tenantPreviewUrlForField('logoDarkFileId')"
+                          [uploadHandler]="tenantAssetUpload('logo_dark')"
+                          [inherited]="tenantInheritedForField('logoDarkFileId')"
+                          [showRemove]="!!tenantBrandingForm.get('logoDarkFileId')?.value"
+                          [disabled]="readonlyMode()"
+                          (uploaded)="onTenantAssetFileId('logoDarkFileId', $event)"
+                          (cleared)="clearTenantAsset('logoDarkFileId')"
+                        />
+                        <app-branding-asset-upload
+                          [label]="'settings.branding.logoCompactLight' | translate"
+                          [previewUrl]="tenantPreviewUrlForField('logoCompactFileId')"
+                          [uploadHandler]="tenantAssetUpload('logo_compact')"
+                          [compactPreview]="true"
+                          [fallbackSrc]="'assets/brand/amautas-logo-reduc.png'"
+                          [inherited]="tenantInheritedForField('logoCompactFileId')"
+                          [showRemove]="!!tenantBrandingForm.get('logoCompactFileId')?.value"
+                          [disabled]="readonlyMode()"
+                          (uploaded)="onTenantAssetFileId('logoCompactFileId', $event)"
+                          (cleared)="clearTenantAsset('logoCompactFileId')"
+                        />
+                        <app-branding-asset-upload
+                          [label]="'settings.branding.logoCompactDark' | translate"
+                          [previewUrl]="tenantPreviewUrlForField('logoCompactDarkFileId')"
+                          [uploadHandler]="tenantAssetUpload('logo_compact_dark')"
+                          [compactPreview]="true"
+                          [fallbackSrc]="'assets/brand/amautas-logo-alt-reduc.png'"
+                          [inherited]="tenantInheritedForField('logoCompactDarkFileId')"
+                          [showRemove]="!!tenantBrandingForm.get('logoCompactDarkFileId')?.value"
+                          [disabled]="readonlyMode()"
+                          (uploaded)="onTenantAssetFileId('logoCompactDarkFileId', $event)"
+                          (cleared)="clearTenantAsset('logoCompactDarkFileId')"
+                        />
+                      </div>
+
+                      <h3 class="section-subtitle">{{ 'settings.branding.faviconSection' | translate }}</h3>
+                      <div class="identity-grid identity-grid--narrow">
+                        <app-branding-asset-upload
+                          [label]="'settings.branding.favicon' | translate"
+                          [previewUrl]="tenantPreviewUrlForField('faviconFileId')"
+                          [uploadHandler]="tenantAssetUpload('favicon')"
+                          [faviconPreview]="true"
+                          [fallbackSrc]="'assets/brand/amautas-logo.png'"
+                          [inherited]="tenantInheritedForField('faviconFileId')"
+                          [showRemove]="!!tenantBrandingForm.get('faviconFileId')?.value"
+                          [disabled]="readonlyMode()"
+                          (uploaded)="onTenantAssetFileId('faviconFileId', $event)"
+                          (cleared)="clearTenantAsset('faviconFileId')"
+                        />
+                      </div>
+
+                      <h3 class="section-subtitle">{{ 'settings.branding.loginBackgroundsSection' | translate }}</h3>
+                      <div class="identity-grid">
+                        <app-branding-asset-upload
+                          [label]="'settings.branding.loginBgLight' | translate"
+                          [previewUrl]="tenantPreviewUrlForField('loginBackgroundLightFileId')"
+                          [fallbackSrc]="null"
+                          [uploadHandler]="tenantAssetUpload('login_background_light')"
+                          [inherited]="tenantInheritedForField('loginBackgroundLightFileId')"
+                          [showRemove]="!!tenantBrandingForm.get('loginBackgroundLightFileId')?.value"
+                          [disabled]="readonlyMode()"
+                          (uploaded)="onTenantAssetFileId('loginBackgroundLightFileId', $event)"
+                          (cleared)="clearTenantAsset('loginBackgroundLightFileId')"
+                        />
+                        <app-branding-asset-upload
+                          [label]="'settings.branding.loginBgDark' | translate"
+                          [previewUrl]="tenantPreviewUrlForField('loginBackgroundDarkFileId')"
+                          [fallbackSrc]="null"
+                          [uploadHandler]="tenantAssetUpload('login_background_dark')"
+                          [inherited]="tenantInheritedForField('loginBackgroundDarkFileId')"
+                          [showRemove]="!!tenantBrandingForm.get('loginBackgroundDarkFileId')?.value"
+                          [disabled]="readonlyMode()"
+                          (uploaded)="onTenantAssetFileId('loginBackgroundDarkFileId', $event)"
+                          (cleared)="clearTenantAsset('loginBackgroundDarkFileId')"
+                        />
+                      </div>
+
+                      <div class="login-mock" [attr.data-preview]="brandPreviewMode()">
+                        <div class="login-mock__toolbar">
+                          <span class="login-mock__toolbar-label">{{ 'settings.branding.loginMockLabel' | translate }}</span>
+                          <mat-button-toggle-group [value]="brandPreviewMode()" (change)="brandPreviewMode.set($any($event).value)">
+                            <mat-button-toggle value="light">{{ 'settings.branding.previewLight' | translate }}</mat-button-toggle>
+                            <mat-button-toggle value="dark">{{ 'settings.branding.previewDark' | translate }}</mat-button-toggle>
+                          </mat-button-toggle-group>
+                        </div>
+                        <div class="login-mock__stage" [style.background-image]="loginPreviewBackground()">
+                          @if (loginPatternOverlay(); as pat) {
+                            <div class="login-mock__pattern" [style.background-image]="pat"></div>
+                          }
+                          <div class="login-mock__card">
+                            <div class="login-mock__logo" [style.background-image]="loginMockLogoBg()"></div>
+                            <div class="login-mock__fake-fields">
+                              <span></span><span></span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <h3 class="section-subtitle">{{ 'settings.branding.patternSection' | translate }}</h3>
+                      <div class="identity-grid identity-grid--narrow">
+                        <app-branding-asset-upload
+                          [label]="'settings.branding.appPattern' | translate"
+                          [previewUrl]="tenantPreviewUrlForField('appBackgroundPatternFileId')"
+                          [fallbackSrc]="null"
+                          [uploadHandler]="tenantAssetUpload('app_background_pattern')"
+                          [inherited]="tenantInheritedForField('appBackgroundPatternFileId')"
+                          [showRemove]="!!tenantBrandingForm.get('appBackgroundPatternFileId')?.value"
+                          [disabled]="readonlyMode()"
+                          (uploaded)="onTenantAssetFileId('appBackgroundPatternFileId', $event)"
+                          (cleared)="clearTenantAsset('appBackgroundPatternFileId')"
+                        />
+                      </div>
+
+                      <mat-form-field appearance="outline" class="full-width theme-mode-field">
+                        <mat-label>{{ 'settings.branding.themeModeDefault' | translate }}</mat-label>
+                        <mat-select formControlName="themeModeDefault">
+                          <mat-option value="light">{{ 'settings.branding.themeModeLight' | translate }}</mat-option>
+                          <mat-option value="dark">{{ 'settings.branding.themeModeDark' | translate }}</mat-option>
+                          <mat-option value="system">{{ 'settings.branding.themeModeSystem' | translate }}</mat-option>
+                          <mat-option value="auto">{{ 'tenants.themeModeAuto' | translate }}</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline" class="full-width login-bg-url-legacy">
+                        <mat-label>{{ 'settings.branding.loginBackground' | translate }}</mat-label>
+                        <input matInput formControlName="loginBackgroundUrl" placeholder="https://..." />
+                        <mat-hint>{{ 'settings.branding.loginBackgroundUrlHint' | translate }}</mat-hint>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>{{ 'tenants.companyDisplayName' | translate }}</mat-label>
+                        <input matInput formControlName="companyDisplayName" />
+                      </mat-form-field>
+                    }
+
+                    <div class="colors-section-header">
+                      <h3 class="section-title section-title--inline">{{ 'settings.branding.colorsSection' | translate }}</h3>
+                      <button
+                        type="button"
+                        mat-icon-button
+                        class="colors-section-info-btn"
+                        [matMenuTriggerFor]="tenantColorRolesInfo"
+                        [attr.aria-label]="'settings.branding.colorsSectionInfoAria' | translate"
+                      >
+                        <mat-icon>info_outline</mat-icon>
+                      </button>
+                      <span class="colors-section-header__spacer"></span>
+                      <button type="button" mat-stroked-button (click)="togglePaletteTools()">
+                        {{
+                          showPaletteTools()
+                            ? ('settings.branding.hidePaletteTools' | translate)
+                            : ('settings.branding.showPaletteTools' | translate)
+                        }}
+                      </button>
+                    </div>
+
+                    <mat-menu #tenantColorRolesInfo="matMenu" panelClass="settings-color-roles-menu">
+                      <div class="color-roles-info-body" (click)="$event.stopPropagation()">
+                        <div class="color-roles-info-head">
+                          <span class="color-roles-info-title">{{ 'settings.branding.colorsSectionHelpTitle' | translate }}</span>
+                        </div>
+                        <ul class="color-roles-info-list">
+                          <li class="color-roles-info-item">
+                            <span class="color-roles-info-label">{{ 'settings.branding.colorRoleBrand' | translate }}</span>
+                            <span class="color-roles-info-desc">{{ 'settings.branding.colorRoleBrandDesc' | translate }}</span>
+                          </li>
+                          <li class="color-roles-info-item">
+                            <span class="color-roles-info-label">{{ 'settings.branding.colorRoleSidebar' | translate }}</span>
+                            <span class="color-roles-info-desc">{{ 'settings.branding.colorRoleSidebarDesc' | translate }}</span>
+                          </li>
+                          <li class="color-roles-info-item">
+                            <span class="color-roles-info-label">{{ 'settings.branding.colorRoleHeader' | translate }}</span>
+                            <span class="color-roles-info-desc">{{ 'settings.branding.colorRoleHeaderDesc' | translate }}</span>
+                          </li>
+                          <li class="color-roles-info-item">
+                            <span class="color-roles-info-label">{{ 'settings.branding.colorRolePage' | translate }}</span>
+                            <span class="color-roles-info-desc">{{ 'settings.branding.colorRolePageDesc' | translate }}</span>
+                          </li>
+                          <li class="color-roles-info-item">
+                            <span class="color-roles-info-label">{{ 'settings.branding.colorRoleBtnPrimary' | translate }}</span>
+                            <span class="color-roles-info-desc">{{ 'settings.branding.colorRoleBtnPrimaryDesc' | translate }}</span>
+                          </li>
+                          <li class="color-roles-info-item">
+                            <span class="color-roles-info-label">{{ 'settings.branding.colorRoleBtnSecondary' | translate }}</span>
+                            <span class="color-roles-info-desc">{{ 'settings.branding.colorRoleBtnSecondaryDesc' | translate }}</span>
+                          </li>
+                          <li class="color-roles-info-item">
+                            <span class="color-roles-info-label">{{ 'settings.branding.colorRoleBtnCancel' | translate }}</span>
+                            <span class="color-roles-info-desc">{{ 'settings.branding.colorRoleBtnCancelDesc' | translate }}</span>
+                          </li>
+                          <li class="color-roles-info-item">
+                            <span class="color-roles-info-label">{{ 'settings.branding.colorRoleText' | translate }}</span>
+                            <span class="color-roles-info-desc">{{ 'settings.branding.colorRoleTextDesc' | translate }}</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </mat-menu>
+
+                    @if (!showPaletteTools()) {
+                      <p class="palette-tools-hint palette-tools-hint--under-colors-header">
+                        {{ 'settings.branding.paletteToolsHint' | translate }}
+                      </p>
+                    }
+
+                    @if (showPaletteTools()) {
+                      <h3 class="section-title">{{ 'settings.branding.paletteAssistantTitle' | translate }}</h3>
+                      <p class="section-help">
+                        {{ 'settings.branding.paletteAssistantHelp' | translate }}
+                      </p>
+                      <div class="advisor-grid">
+                        <mat-form-field appearance="outline" class="color-field">
+                          <mat-label>{{ 'settings.branding.advisorColor1' | translate }}</mat-label>
+                          <input matInput [ngModel]="advisorColor1()" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setAdvisorColor(1, $event)" placeholder="#0FA2CC" />
+                          <input
+                            type="color"
+                            class="color-picker"
+                            [value]="advisorColor1() || '#0FA2CC'"
+                            (input)="setAdvisorColor(1, $any($event.target).value)"
+                          />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="color-field">
+                          <mat-label>{{ 'settings.branding.advisorColor2' | translate }}</mat-label>
+                          <input matInput [ngModel]="advisorColor2()" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setAdvisorColor(2, $event)" placeholder="#17CCA1" />
+                          <input
+                            type="color"
+                            class="color-picker"
+                            [value]="advisorColor2() || '#17CCA1'"
+                            (input)="setAdvisorColor(2, $any($event.target).value)"
+                          />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="color-field">
+                          <mat-label>{{ 'settings.branding.advisorColor3' | translate }}</mat-label>
+                          <input matInput [ngModel]="advisorColor3()" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setAdvisorColor(3, $event)" placeholder="#F4ECE4" />
+                          <input
+                            type="color"
+                            class="color-picker"
+                            [value]="advisorColor3() || '#F4ECE4'"
+                            (input)="setAdvisorColor(3, $any($event.target).value)"
+                          />
+                        </mat-form-field>
+                      </div>
+
+                      <div class="palette-list advisor-list">
+                        @for (palette of paletteRecommendations(); track palette.id + palette.name) {
+                          <button
+                            type="button"
+                            class="palette-btn"
+                            [class.active]="selectedTenantPaletteId() === palette.id"
+                            (click)="applyRecommendedPalette(palette)"
+                          >
+                            <span class="palette-name">{{ palette.name }}</span>
+                            <span class="palette-swatches">
+                          <span class="swatch" [style.background]="palette.primaryColor"></span>
+                          <span class="swatch" [style.background]="palette.accentColor"></span>
+                            </span>
+                          </button>
+                        }
+                      </div>
+
+                      <h3 class="section-title">{{ 'settings.branding.suggestedPalettesTitle' | translate }}</h3>
+                      <div class="palette-list">
+                        @for (palette of themePalettes; track palette.id) {
+                          <button
+                            type="button"
+                            class="palette-btn"
+                            [class.active]="selectedTenantPaletteId() === palette.id"
+                            (click)="applyPalette(palette)"
+                          >
+                            <span class="palette-name">{{ palette.name }}</span>
+                            <span class="palette-swatches">
+                          <span class="swatch" [style.background]="palette.primaryColor"></span>
+                          <span class="swatch" [style.background]="palette.accentColor"></span>
+                            </span>
+                          </button>
+                        }
+                      </div>
+                    }
+
+                    <div class="color-grid">
+                      <mat-form-field appearance="outline" class="color-field">
+                        <mat-label>{{ 'settings.branding.primaryColor' | translate }}</mat-label>
+                        <input matInput formControlName="primaryColor" type="text" placeholder="#1f6feb" />
+                        <input
+                          type="color"
+                          class="color-picker"
+                          [value]="tenantBrandingForm.get('primaryColor')?.value || '#1f6feb'"
+                          (input)="tenantBrandingForm.get('primaryColor')?.setValue($any($event.target).value)"
+                        />
+                        @if (tenantBrandingForm.get('primaryColor')?.hasError('pattern')) {
+                          <mat-error>{{ 'settings.branding.invalidHex' | translate }}</mat-error>
+                        }
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="color-field">
+                        <mat-label>{{ 'settings.branding.accentColor' | translate }}</mat-label>
+                        <input matInput formControlName="accentColor" type="text" placeholder="#4dd2f0" />
+                        <input
+                          type="color"
+                          class="color-picker"
+                          [value]="tenantBrandingForm.get('accentColor')?.value || '#4dd2f0'"
+                          (input)="tenantBrandingForm.get('accentColor')?.setValue($any($event.target).value)"
+                        />
+                        @if (tenantBrandingForm.get('accentColor')?.hasError('pattern')) {
+                          <mat-error>{{ 'settings.branding.invalidHex' | translate }}</mat-error>
+                        }
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="color-field">
+                        <mat-label>{{ 'settings.branding.buttonCancelColor' | translate }}</mat-label>
+                        <input matInput formControlName="buttonCancelColor" type="text" />
+                        <input
+                          type="color"
+                          class="color-picker"
+                          [value]="tenantBrandingForm.get('buttonCancelColor')?.value || '#5f6b7a'"
+                          (input)="tenantBrandingForm.get('buttonCancelColor')?.setValue($any($event.target).value)"
+                        />
+                      </mat-form-field>
+                    </div>
+
+                    <div class="font-section">
+                      <div class="font-section-toolbar">
+                        <button
+                          type="button"
+                          mat-icon-button
+                          class="font-help-info-btn"
+                          [matMenuTriggerFor]="tenantFontHelpMenu"
+                          [attr.aria-label]="'settings.branding.fontHelpAria' | translate"
+                        >
+                          <mat-icon>info_outline</mat-icon>
+                        </button>
+                      </div>
+                      <mat-menu
+                        #tenantFontHelpMenu="matMenu"
+                        panelClass="settings-font-help-menu"
+                        xPosition="before"
+                        yPosition="above"
+                      >
+                        <div class="font-help-body" (click)="$event.stopPropagation()">
+                          <div class="font-help-head">
+                            <span class="font-help-title">{{ 'settings.branding.fontHelpTitle' | translate }}</span>
+                          </div>
+                          <div class="font-help-block">
+                            <span class="font-help-label">{{ 'settings.branding.fontPreset' | translate }}</span>
+                            <p class="font-help-text">{{ 'settings.branding.fontPresetHint' | translate }}</p>
+                          </div>
+                          <div class="font-help-block">
+                            <span class="font-help-label">{{ 'settings.branding.fontFamily' | translate }}</span>
+                            <p class="font-help-text">{{ 'settings.branding.fontFamilyHint' | translate }}</p>
+                          </div>
+                        </div>
+                      </mat-menu>
+                      <div class="font-fields-row">
+                        <mat-form-field appearance="outline" class="font-field">
+                          <mat-label>{{ 'settings.branding.fontPreset' | translate }}</mat-label>
+                          <mat-select [value]="selectedFontPresetId()" (selectionChange)="onFontPresetChange($event.value)">
+                            <mat-option value="custom">{{ 'settings.branding.fontPresetCustom' | translate }}</mat-option>
+                            @for (p of fontPresets; track p.id) {
+                              <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="font-field">
+                          <mat-label>{{ 'settings.branding.fontFamily' | translate }}</mat-label>
+                          <input matInput formControlName="fontFamily" placeholder="Inter, system-ui, sans-serif" />
+                        </mat-form-field>
+                      </div>
+                    </div>
+                    <div class="font-fields-row">
+                      <mat-form-field appearance="outline" class="font-field">
+                        <mat-label>{{ 'tenants.headingFontFamily' | translate }}</mat-label>
+                        <input matInput formControlName="headingFontFamily" placeholder="Inter, system-ui, sans-serif" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="font-field">
+                        <mat-label>{{ 'tenants.baseFontSize' | translate }}</mat-label>
+                        <input matInput type="number" formControlName="baseFontSize" min="10" max="24" />
+                      </mat-form-field>
+                    </div>
+
+                    <div class="form-actions">
+                      <button
+                        mat-raised-button
+                        color="primary"
+                        type="submit"
+                        [disabled]="tenantBrandingForm.invalid || themeSaving()"
+                        *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                      >
+                        {{ themeSaving() ? ('settings.saving' | translate) : ('common.save' | translate) }}
+                      </button>
+                    </div>
+                  </form>
+                }
+              </mat-card-content>
+            </mat-card>
+            </mat-tab>
+          </mat-tab-group>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'tenants.contractPlanTab' | translate">
+        <div class="tab-content">
+          <p class="tab-hint">{{ 'tenants.contractPlanTabHint' | translate }}</p>
+          <mat-card class="detail-card contract-limits-card">
+            <mat-card-header>
+              <mat-card-title>{{ 'tenants.contractLimitsCardTitle' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ 'tenants.contractLimitsCardSubtitle' | translate }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              @if (usageLoading()) {
+                <p class="tab-loading">{{ 'tenants.loadingUsage' | translate }}</p>
+              } @else if (tenantUsage(); as usage) {
+                <p class="contract-usage-summary">{{ contractUsageSummaryText() }}</p>
+                @if (usage.limits?.length) {
+                  <table class="contract-limits-table">
+                    <thead>
+                      <tr>
+                        <th>{{ 'tenants.contractLimitMetric' | translate }}</th>
+                        <th>{{ 'tenants.contractLimitValue' | translate }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (lim of usage.limits; track lim.limitCode) {
+                        <tr>
+                          <td>{{ usageMetricLabel(lim.limitCode) }}</td>
+                          <td>{{ lim.limitValue }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                } @else {
+                  <p class="tab-hint">{{ 'tenants.contractLimitsEmpty' | translate }}</p>
+                }
+                <p class="contract-limits-upsell tab-hint">{{ 'tenants.planLimitsUpsellHint' | translate }}</p>
+              } @else {
+                <p class="tab-hint">{{ 'tenants.contractLimitsUnavailable' | translate }}</p>
+              }
+            </mat-card-content>
+          </mat-card>
+          @if (modulesLoading()) {
+            <p class="tab-loading">{{ 'tenants.loadingModules' | translate }}</p>
+          } @else {
+            <mat-card class="detail-card features-modules-card">
+              <mat-card-header>
+                <mat-card-title>{{ 'tenants.featuresModulesSectionTitle' | translate }}</mat-card-title>
+                <mat-card-subtitle>{{ 'tenants.featuresModulesSectionSubtitle' | translate }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                @if (modules().length === 0) {
+                  <p>{{ 'tenants.noModules' | translate }}</p>
+                } @else {
+                  <table mat-table [dataSource]="modules()" class="modules-table">
+                    <ng-container matColumnDef="name">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.moduleColumn' | translate }}</th>
+                      <td mat-cell *matCellDef="let m">{{ m.moduleName || m.moduleCode || 'Módulo ' + m.moduleId }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="description">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'roles.description' | translate }}</th>
+                      <td mat-cell *matCellDef="let m">{{ m.description || '—' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="platformEnabled">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.platformColumn' | translate }}</th>
+                      <td mat-cell *matCellDef="let m">
+                        @if (m.platformEnabled) {
+                          <span class="status-badge status-ok">{{ 'common.active' | translate }}</span>
+                        } @else {
+                          <span class="status-badge status-disabled">{{ 'tenants.disabled' | translate }}</span>
+                        }
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="planEnabled">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.inPlan' | translate }}</th>
+                      <td mat-cell *matCellDef="let m">
+                        @if (m.planEnabled) {
+                          <span class="status-badge status-ok">{{ 'tenants.included' | translate }}</span>
+                        } @else {
+                          <span class="status-badge status-warn">{{ 'tenants.notIncluded' | translate }}</span>
+                        }
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="fromAddon">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.fromAddonCol' | translate }}</th>
+                      <td mat-cell *matCellDef="let m">
+                        @if (m.fromAddon) {
+                          <span class="status-badge status-ok">{{ 'common.yes' | translate }}</span>
+                        } @else {
+                          <span>—</span>
+                        }
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="effectiveEnabled">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.effectiveEnabledCol' | translate }}</th>
+                      <td mat-cell *matCellDef="let m">
+                        @if (m.effectiveEnabled) {
+                          <span class="status-badge status-ok">{{ 'common.active' | translate }}</span>
+                        } @else {
+                          <span class="status-badge status-disabled">{{ 'tenants.disabled' | translate }}</span>
+                        }
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="desktopLicense">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.desktopLicenseColumn' | translate }}</th>
+                      <td mat-cell *matCellDef="let m">
+                        @if (notificacionesLicenseEntitled(m)) {
+                          <button
+                            mat-stroked-button
+                            type="button"
+                            color="primary"
+                            [matTooltip]="'tenants.desktopLicenseHint' | translate"
+                            (click)="downloadProvisioningPackage('notificaciones')"
+                            [disabled]="provisioningLoading()"
+                            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                          >
+                            @if (provisioningLoading()) {
+                              <mat-spinner diameter="18" class="btn-inline-spinner" />
+                            }
+                            {{
+                              provisioningLoading()
+                                ? ('tenants.provisioningGenerating' | translate)
+                                : ('tenants.provisioningGenerateButton' | translate)
+                            }}
+                          </button>
+                        } @else {
+                          <span>—</span>
+                        }
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="addonAction">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.addonActionCol' | translate }}</th>
+                      <td mat-cell *matCellDef="let m">
+                        @if (readonlyMode()) {
+                          <span>—</span>
+                        } @else if (canAddonAction(m)) {
+                          @if (!m.fromAddon) {
+                            <button
+                              mat-stroked-button
+                              type="button"
+                              color="primary"
+                              (click)="onAddonToggle(m, true)"
+                              [disabled]="addonTogglingId() === m.moduleId"
+                              *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                            >
+                              {{ addonTogglingId() === m.moduleId ? ('common.saving' | translate) : ('tenants.addonActivate' | translate) }}
+                            </button>
+                          } @else {
+                            <button
+                              mat-button
+                              type="button"
+                              color="warn"
+                              (click)="onAddonToggle(m, false)"
+                              [disabled]="addonTogglingId() === m.moduleId"
+                              *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                            >
+                              {{ addonTogglingId() === m.moduleId ? ('common.saving' | translate) : ('tenants.addonRemove' | translate) }}
+                            </button>
+                          }
+                        } @else if (m.editable) {
+                          <mat-slide-toggle
+                            [checked]="m.tenantEnabled"
+                            (change)="onModuleToggle(m, $event.checked)"
+                            [disabled]="!canToggleModule(m)"
+                            [attr.aria-busy]="moduleTogglingId() === m.moduleId"
+                            color="primary"
+                            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                          >
+                            {{ m.tenantEnabled ? ('common.yes' | translate) : ('common.no' | translate) }}
+                          </mat-slide-toggle>
+                          @if (moduleTogglingId() === m.moduleId) {
+                            <span class="module-saving">{{ 'common.saving' | translate }}</span>
+                          }
+                        } @else {
+                          <span>—</span>
+                        }
+                      </td>
+                    </ng-container>
+                    <tr
+                      mat-header-row
+                      *matHeaderRowDef="[
+                        'name',
+                        'description',
+                        'platformEnabled',
+                        'planEnabled',
+                        'fromAddon',
+                        'effectiveEnabled',
+                        'desktopLicense',
+                        'addonAction',
+                      ]"
+                    ></tr>
+                    <tr
+                      mat-row
+                      *matRowDef="
+                        let row;
+                        columns: [
+                          'name',
+                          'description',
+                          'platformEnabled',
+                          'planEnabled',
+                          'fromAddon',
+                          'effectiveEnabled',
+                          'desktopLicense',
+                          'addonAction',
+                        ]
+                      "
+                    ></tr>
+                  </table>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+          <mat-card class="detail-card features-standalone-card">
+            <mat-card-header>
+              <mat-card-title>{{ 'tenants.featuresStandaloneSectionTitle' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ 'tenants.featuresStandaloneSectionHint' | translate }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              @if (standaloneFeaturesLoading()) {
+                <p class="tab-loading">{{ 'tenants.loadingStandaloneFeatures' | translate }}</p>
+              } @else if (standaloneFeatures().length === 0) {
+                <p class="tab-hint">{{ 'tenants.standaloneFeaturesEmpty' | translate }}</p>
+              } @else {
+                <table mat-table [dataSource]="standaloneFeatures()" class="modules-table modules-table--standalone">
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'tenants.moduleColumn' | translate }}</th>
+                    <td mat-cell *matCellDef="let sf">
+                      <div class="standalone-feature-name-cell">
+                        <span class="standalone-feature-name-title">{{ sf.featureName }}</span>
+                        <code class="standalone-feature-name-code">{{ sf.featureCode }}</code>
+                      </div>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'roles.description' | translate }}</th>
+                    <td mat-cell *matCellDef="let sf">{{ sf.description || '—' }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="platformEnabled">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'tenants.platformColumn' | translate }}</th>
+                    <td mat-cell *matCellDef="let sf">
+                      @if (sf.platformEnabled) {
+                        <span class="status-badge status-ok">{{ 'common.active' | translate }}</span>
+                      } @else {
+                        <span class="status-badge status-disabled">{{ 'tenants.disabled' | translate }}</span>
+                      }
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="planEnabled">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'tenants.inPlan' | translate }}</th>
+                    <td mat-cell *matCellDef="let sf">
+                      @if (sf.planEnabled !== false) {
+                        <span class="status-badge status-ok">{{ 'tenants.included' | translate }}</span>
+                      } @else {
+                        <span class="status-badge status-warn">{{ 'tenants.notIncluded' | translate }}</span>
+                      }
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="fromAddon">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'tenants.fromAddonCol' | translate }}</th>
+                    <td mat-cell *matCellDef="let sf">
+                      @if (sf.fromAddon === true) {
+                        <span class="status-badge status-ok">{{ 'common.yes' | translate }}</span>
+                      } @else {
+                        <span>—</span>
+                      }
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="effectiveEnabled">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'tenants.effectiveEnabledCol' | translate }}</th>
+                    <td mat-cell *matCellDef="let sf">
+                      @if (sf.enabled) {
+                        <span class="status-badge status-ok">{{ 'common.active' | translate }}</span>
+                      } @else {
+                        <span class="status-badge status-disabled">{{ 'tenants.disabled' | translate }}</span>
+                      }
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="addonAction">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'tenants.addonActionCol' | translate }}</th>
+                    <td mat-cell *matCellDef="let sf">
+                      @if (readonlyMode()) {
+                        <span>—</span>
+                      } @else if (canStandaloneAddonAction(sf)) {
+                        @if (!sf.fromAddon) {
+                          <button
+                            mat-stroked-button
+                            type="button"
+                            color="primary"
+                            (click)="onStandaloneAddonToggle(sf, true)"
+                            [disabled]="standaloneFeatureToggling() === sf.featureCode"
+                            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                          >
+                            {{
+                              standaloneFeatureToggling() === sf.featureCode
+                                ? ('common.saving' | translate)
+                                : ('tenants.addonActivate' | translate)
+                            }}
+                          </button>
+                        } @else {
+                          <button
+                            mat-button
+                            type="button"
+                            color="warn"
+                            (click)="onStandaloneAddonToggle(sf, false)"
+                            [disabled]="standaloneFeatureToggling() === sf.featureCode"
+                            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                          >
+                            {{
+                              standaloneFeatureToggling() === sf.featureCode
+                                ? ('common.saving' | translate)
+                                : ('tenants.addonRemove' | translate)
+                            }}
+                          </button>
+                        }
+                      } @else {
+                        <mat-slide-toggle
+                          [checked]="sf.enabled"
+                          (change)="onStandaloneFeatureToggle(sf, $event.checked)"
+                          [disabled]="standaloneFeatureToggling() === sf.featureCode"
+                          color="primary"
+                          *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                        >
+                          {{ sf.enabled ? ('common.yes' | translate) : ('common.no' | translate) }}
+                        </mat-slide-toggle>
+                        @if (standaloneFeatureToggling() === sf.featureCode) {
+                          <span class="module-saving">{{ 'common.saving' | translate }}</span>
+                        }
+                      }
+                    </td>
+                  </ng-container>
+                  <tr
+                    mat-header-row
+                    *matHeaderRowDef="['name', 'description', 'platformEnabled', 'planEnabled', 'fromAddon', 'effectiveEnabled', 'addonAction']"
+                  ></tr>
+                  <tr
+                    mat-row
+                    *matRowDef="
+                      let row;
+                      columns: ['name', 'description', 'platformEnabled', 'planEnabled', 'fromAddon', 'effectiveEnabled', 'addonAction']
+                    "
+                  ></tr>
+                </table>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="detail-card contract-capabilities-card">
+            <mat-card-header>
+              <mat-card-title>{{ 'tenants.contractCapabilitiesTitle' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ 'tenants.contractCapabilitiesSubtitle' | translate }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              @if (featuresLoading()) {
+                <p class="tab-loading">{{ 'tenants.loadingSettings' | translate }}</p>
+              } @else {
+                <p class="tab-hint">{{ 'tenants.featureFlagsCardHint' | translate }}</p>
+                <ul class="feature-flag-list">
+                  @for (f of tenantFeatures(); track f.featureCode) {
+                    <li class="feature-flag-row">
+                      <span class="feature-flag-label">{{ f.label }}</span>
+                      <mat-slide-toggle
+                        [checked]="f.enabled"
+                        (change)="toggleFeature(f)"
+                        [disabled]="featuresSaving() || readonlyMode()"
+                        color="primary"
+                        *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                      >
+                        {{ f.enabled ? 'ON' : 'OFF' }}
+                      </mat-slide-toggle>
+                    </li>
+                  }
+                </ul>
+                <p class="tab-hint">{{ 'tenants.featureFlagsComingSoon' | translate }}</p>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'tenants.usersTab' | translate">
+        <div class="tab-content">
+          @if (usersLoading()) {
+            <p class="tab-loading">{{ 'tenants.loadingUsers' | translate }}</p>
+          } @else {
+            <mat-card class="detail-card tenant-users-card">
+              <mat-card-content>
+                <p class="tab-hint">{{ 'tenants.usersTabHint' | translate }}</p>
+                @if (getUsageLimit('maxUsers') != null) {
+                  <p class="users-quota-line">{{ usersQuotaSummary() }}</p>
+                }
+                @if (planUsersExceeded()) {
+                  <p class="users-quota-warn">{{ 'tenants.usersOverPlanWarn' | translate }}</p>
+                }
+                @if (!readonlyMode()) {
+                  <div class="users-create" *hasPermission="PERMISSIONS.TENANTS_UPDATE">
+                    <mat-form-field appearance="outline" class="users-create-field">
+                      <mat-label>{{ 'tenants.tenantUserEmail' | translate }}</mat-label>
+                      <input
+                        matInput
+                        type="email"
+                        [ngModel]="newUserEmail()"
+                        (ngModelChange)="newUserEmail.set($event)"
+                        [disabled]="creatingTenantUser() || !canEnableInactiveUser()"
+                        autocomplete="off"
+                      />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="users-create-field">
+                      <mat-label>{{ 'tenants.tenantUserFirstName' | translate }}</mat-label>
+                      <input
+                        matInput
+                        [ngModel]="newUserFirstName()"
+                        (ngModelChange)="newUserFirstName.set($event)"
+                        [disabled]="creatingTenantUser()"
+                        autocomplete="off"
+                      />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="users-create-field">
+                      <mat-label>{{ 'tenants.tenantUserRole' | translate }}</mat-label>
+                      <mat-select
+                        [value]="newUserRoleId()"
+                        (valueChange)="newUserRoleId.set($event)"
+                        [disabled]="creatingTenantUser()"
+                      >
+                        @for (r of tenantRoles(); track r.roleId) {
+                          <mat-option [value]="'' + r.roleId">
+                            {{ r.roleName || r.roleCode || r.roleId }}
+                          </mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="users-create-field">
+                      <mat-label>{{ 'tenants.tenantUserPassword' | translate }}</mat-label>
+                      <input
+                        matInput
+                        type="password"
+                        [ngModel]="newUserPassword()"
+                        (ngModelChange)="newUserPassword.set($event)"
+                        [disabled]="creatingTenantUser()"
+                        autocomplete="new-password"
+                      />
+                    </mat-form-field>
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      type="button"
+                      (click)="createTenantUser()"
+                      [disabled]="
+                        creatingTenantUser() || !canEnableInactiveUser() || !newUserEmail().trim() || !newUserRoleId()
+                      "
+                    >
+                      {{
+                        creatingTenantUser()
+                          ? ('common.creating' | translate)
+                          : ('tenants.tenantUserAdd' | translate)
+                      }}
+                    </button>
+                  </div>
+                }
+                @if (tenantUsers().length === 0) {
+                  <p>{{ 'tenants.noUsers' | translate }}</p>
+                } @else {
+                  <table mat-table [dataSource]="tenantUsers()" class="users-table">
+                    <ng-container matColumnDef="username">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.colUsername' | translate }}</th>
+                      <td mat-cell *matCellDef="let u">{{ u.username }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="email">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.colEmail' | translate }}</th>
+                      <td mat-cell *matCellDef="let u">{{ u.email ?? '—' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="role">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.colRole' | translate }}</th>
+                      <td mat-cell *matCellDef="let u">{{ u.roleCode ?? '—' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="status">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'common.status' | translate }}</th>
+                      <td mat-cell *matCellDef="let u">
+                        <mat-chip [class.active]="u.isActive" [class.inactive]="!u.isActive">
+                          {{
+                            u.isActive ? ('common.active' | translate) : ('common.inactive' | translate)
+                          }}
+                        </mat-chip>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="password">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.colPassword' | translate }}</th>
+                      <td mat-cell *matCellDef="let u">
+                        @if (!readonlyMode()) {
+                          <button
+                            mat-icon-button
+                            type="button"
+                            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                            (click)="openTenantUserPasswordDialog(u)"
+                            [attr.aria-label]="'tenants.setPasswordAria' | translate"
+                          >
+                            <mat-icon>vpn_key</mat-icon>
+                          </button>
+                        } @else {
+                          <span class="users-password-placeholder">—</span>
+                        }
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="activeToggle">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.colContractActive' | translate }}</th>
+                      <td
+                        mat-cell
+                        *matCellDef="let u"
+                        [class.user-cell--quota-blocked]="!u.isActive && !canEnableInactiveUser()"
+                      >
+                        <mat-slide-toggle
+                          [checked]="u.isActive"
+                          [disabled]="userActiveToggleDisabled(u)"
+                          (change)="onTenantUserActiveToggle(u, $event.checked)"
+                          color="primary"
+                        >
+                          {{ u.isActive ? ('common.yes' | translate) : ('common.no' | translate) }}
+                        </mat-slide-toggle>
+                        @if (!u.isActive && !canEnableInactiveUser()) {
+                          <span class="user-quota-hint">{{ 'tenants.userInactiveQuotaHint' | translate }}</span>
+                        }
+                      </td>
+                    </ng-container>
+                    <tr
+                      mat-header-row
+                      *matHeaderRowDef="['username', 'email', 'role', 'status', 'password', 'activeToggle']"
+                    ></tr>
+                    <tr
+                      mat-row
+                      *matRowDef="
+                        let row;
+                        columns: ['username', 'email', 'role', 'status', 'password', 'activeToggle']
+                      "
+                    ></tr>
+                  </table>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'tenants.connectivityTab' | translate">
+        <div class="tab-content connectivity-tab">
+          <p class="tab-hint">{{ 'tenants.connectivityTabHint' | translate }}</p>
+          @if (apiKeysLoading()) {
+            <p class="tab-loading">{{ 'tenants.loadingApiKeys' | translate }}</p>
+          } @else {
+            <mat-card class="detail-card connectivity-section-card">
+              <mat-card-header>
+                <mat-card-title>{{ 'tenants.apiKeysTab' | translate }}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="tab-hint">{{ 'tenants.apiKeysHint' | translate }}</p>
+                <div class="api-keys-create">
+                  <mat-form-field appearance="outline" class="api-key-name-field">
+                    <mat-label>{{ 'tenants.apiKeyNameLabel' | translate }}</mat-label>
+                    <input matInput [ngModel]="newApiKeyName()" (ngModelChange)="newApiKeyName.set($event)" [placeholder]="'tenants.apiKeyNamePlaceholder' | translate" />
+                  </mat-form-field>
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    (click)="createApiKey()"
+                    [disabled]="creatingApiKey() || !newApiKeyName().trim()"
+                    *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                  >
+                    {{ creatingApiKey() ? ('common.creating' | translate) : ('tenants.createApiKey' | translate) }}
+                  </button>
+                </div>
+                @if (apiKeys().length === 0) {
+                  <p>{{ 'tenants.noApiKeys' | translate }}</p>
+                } @else {
+                  <table mat-table [dataSource]="apiKeys()" class="api-keys-table">
+                    <ng-container matColumnDef="name">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.name' | translate }}</th>
+                      <td mat-cell *matCellDef="let k">{{ k.name }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="apiKey">
+                      <th mat-header-cell *matHeaderCellDef>API Key</th>
+                      <td mat-cell *matCellDef="let k"><code class="api-key-value">{{ k.apiKey }}</code></td>
+                    </ng-container>
+                    <ng-container matColumnDef="createdAt">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.createdShort' | translate }}</th>
+                      <td mat-cell *matCellDef="let k">{{ k.createdAt | date:'short' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="status">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'common.status' | translate }}</th>
+                      <td mat-cell *matCellDef="let k">
+                        <mat-chip [class.active]="k.isActive" [class.inactive]="!k.isActive">
+                          {{ k.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
+                        </mat-chip>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'common.actions' | translate }}</th>
+                      <td mat-cell *matCellDef="let k">
+                        <button
+                          mat-button
+                          color="warn"
+                          (click)="deactivateApiKey(k)"
+                          [disabled]="!k.isActive"
+                          *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                        >
+                          {{ 'tenants.deactivate' | translate }}
+                        </button>
+                      </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="['name', 'apiKey', 'createdAt', 'status', 'actions']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['name', 'apiKey', 'createdAt', 'status', 'actions']"></tr>
+                  </table>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+          @if (webhooksLoading()) {
+            <p class="tab-loading">{{ 'tenants.loadingWebhooks' | translate }}</p>
+          } @else {
+            <mat-card class="detail-card connectivity-section-card">
+              <mat-card-header>
+                <mat-card-title>{{ 'tenants.webhooksTab' | translate }}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="tab-hint">{{ 'tenants.webhooksHint' | translate }}</p>
+                <div class="api-keys-create">
+                  <mat-form-field appearance="outline" class="api-key-name-field">
+                    <mat-label>{{ 'tenants.webhookUrlLabel' | translate }}</mat-label>
+                    <input matInput [ngModel]="newWebhookUrl()" (ngModelChange)="newWebhookUrl.set($event)" [placeholder]="'tenants.webhookUrlPlaceholder' | translate" />
+                  </mat-form-field>
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    (click)="createWebhook()"
+                    [disabled]="creatingWebhook() || !newWebhookUrl().trim()"
+                    *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                  >
+                    {{ creatingWebhook() ? ('common.creating' | translate) : ('tenants.createWebhook' | translate) }}
+                  </button>
+                </div>
+                @if (tenantWebhooks().length === 0) {
+                  <p>{{ 'tenants.noWebhooks' | translate }}</p>
+                } @else {
+                  <table mat-table [dataSource]="tenantWebhooks()" class="api-keys-table">
+                    <ng-container matColumnDef="url">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.webhookUrl' | translate }}</th>
+                      <td mat-cell *matCellDef="let w"><code class="api-key-value">{{ w.url }}</code></td>
+                    </ng-container>
+                    <ng-container matColumnDef="status">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'common.status' | translate }}</th>
+                      <td mat-cell *matCellDef="let w">
+                        <mat-chip [class.active]="w.isActive" [class.inactive]="!w.isActive">
+                          {{ w.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
+                        </mat-chip>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="createdAt">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'tenants.webhookCreated' | translate }}</th>
+                      <td mat-cell *matCellDef="let w">{{ w.createdAt | date:'short' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'common.actions' | translate }}</th>
+                      <td mat-cell *matCellDef="let w">
+                        <button
+                          mat-button
+                          color="warn"
+                          (click)="deactivateWebhook(w)"
+                          [disabled]="!w.isActive"
+                          *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                        >
+                          Desactivar
+                        </button>
+                      </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="['url', 'status', 'createdAt', 'actions']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['url', 'status', 'createdAt', 'actions']"></tr>
+                  </table>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      @if (hasNotificationsModule()) {
+        <mat-tab [label]="'tenants.notificationsTab' | translate">
+          <div class="tab-content notif-tab">
+            <mat-card class="detail-card notif-license-card">
+              <mat-card-header>
+                <mat-card-title>{{ 'tenants.notificationsTabLicenseCardTitle' | translate }}</mat-card-title>
+                <mat-card-subtitle>{{ 'tenants.notificationsTabLicenseCardHint' | translate }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <button
+                  mat-flat-button
+                  type="button"
+                  color="primary"
+                  (click)="downloadProvisioningPackage('notificaciones')"
+                  [disabled]="provisioningLoading()"
+                  *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                >
+                  @if (provisioningLoading()) {
+                    <mat-spinner diameter="18" class="btn-inline-spinner" />
+                  }
+                  {{
+                    provisioningLoading()
+                      ? ('tenants.provisioningGenerating' | translate)
+                      : ('tenants.provisioningGenerateButton' | translate)
+                  }}
+                </button>
+              </mat-card-content>
+            </mat-card>
+            <p class="tab-hint">{{ 'tenants.notificationsTabIntroGuided' | translate }}</p>
+            @if (tenantId(); as tid) {
+              <app-tenant-notifications-guided [tenantId]="tid" [readonlyMode]="readonlyMode()" />
+            }
+          </div>
+        </mat-tab>
+      }
+
+      <mat-tab [label]="'tenants.auditLogTab' | translate">
+        <div class="tab-content">
+          @if (auditLoading()) {
+            <p class="tab-loading">Cargando registro de auditoría...</p>
+          } @else {
+            <mat-card class="detail-card">
+              <mat-card-content>
+                <p class="tab-hint">Últimas 100 acciones del tenant.</p>
+                @if (tenantAudit().length === 0) {
+                  <p>No hay registros de auditoría.</p>
+                } @else {
+                  <table mat-table [dataSource]="tenantAudit()" class="audit-table">
+                    <ng-container matColumnDef="changedAt">
+                      <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                      <td mat-cell *matCellDef="let a">{{ a.changedAt | date:'short' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actionCode">
+                      <th mat-header-cell *matHeaderCellDef>Acción</th>
+                      <td mat-cell *matCellDef="let a">{{ a.actionCode }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="tableName">
+                      <th mat-header-cell *matHeaderCellDef>Tabla</th>
+                      <td mat-cell *matCellDef="let a">{{ a.tableName }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="changedByUserId">
+                      <th mat-header-cell *matHeaderCellDef>Usuario</th>
+                      <td mat-cell *matCellDef="let a">{{ a.changedByUserId ?? '—' }}</td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="['changedAt', 'actionCode', 'tableName', 'changedByUserId']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['changedAt', 'actionCode', 'tableName', 'changedByUserId']"></tr>
+                  </table>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'tenants.settingsTab' | translate">
+        <div class="tab-content tenant-settings-wrap">
+          <p class="tab-hint">{{ 'tenants.settingsTabIntro' | translate }}</p>
+          <mat-tab-group class="tenant-settings-subtabs" animationDuration="0ms">
+            <mat-tab [label]="'tenants.configSubTabIntegrations' | translate">
+            <mat-card class="detail-card email-smtp-card">
+              <mat-card-header>
+                <mat-card-title>{{ 'tenants.emailSmtpTitle' | translate }}</mat-card-title>
+                <mat-card-subtitle>{{ 'tenants.emailSmtpSubtitle' | translate }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                @if (tenantSmtpLoading()) {
+                  <div class="activity-loading">
+                    <mat-spinner diameter="28"></mat-spinner>
+                    <span>{{ 'common.loading' | translate }}</span>
+                  </div>
+                } @else {
+                  <form [formGroup]="tenantSmtpForm" (ngSubmit)="saveTenantEmailSmtp()" class="tenant-smtp-form">
+                    <mat-slide-toggle formControlName="useCustomSmtp" color="primary">
+                      {{ 'tenants.emailSmtpUseCustom' | translate }}
+                    </mat-slide-toggle>
+                    <p class="tab-hint smtp-fallback-hint">{{ 'tenants.emailSmtpFallbackHint' | translate }}</p>
+                    <div class="smtp-grid" [class.smtp-grid-disabled]="!tenantSmtpForm.controls.useCustomSmtp.value">
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>{{ 'tenants.emailSmtpHost' | translate }}</mat-label>
+                        <input matInput formControlName="host" autocomplete="off" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="smtp-port">
+                        <mat-label>{{ 'tenants.emailSmtpPort' | translate }}</mat-label>
+                        <input matInput type="number" formControlName="port" />
+                      </mat-form-field>
+                      <mat-checkbox formControlName="secure" class="smtp-secure">
+                        {{ 'tenants.emailSmtpSecure' | translate }}
+                      </mat-checkbox>
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>{{ 'tenants.emailSmtpUser' | translate }}</mat-label>
+                        <input matInput formControlName="user" autocomplete="off" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>{{ 'tenants.emailSmtpPass' | translate }}</mat-label>
+                        <input matInput type="password" formControlName="pass" autocomplete="new-password" />
+                        @if (tenantSmtpSnapshot()?.hasPassword) {
+                          <mat-hint>{{ 'tenants.emailSmtpPassKeptHint' | translate }}</mat-hint>
+                        }
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>{{ 'tenants.emailSmtpFrom' | translate }}</mat-label>
+                        <input matInput formControlName="from" autocomplete="off" />
+                      </mat-form-field>
+                      @if (tenantSmtpSnapshot()?.hasPassword) {
+                        <mat-checkbox formControlName="clearStoredPassword" class="full-width smtp-clear">
+                          {{ 'tenants.emailSmtpClearPassword' | translate }}
+                        </mat-checkbox>
+                      }
+                    </div>
+                    <div class="smtp-actions">
+                      <button
+                        mat-raised-button
+                        color="primary"
+                        type="submit"
+                        [disabled]="tenantSmtpSaving()"
+                        *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                      >
+                        {{ tenantSmtpSaving() ? ('common.saving' | translate) : ('common.save' | translate) }}
+                      </button>
+                    </div>
+                  </form>
+                }
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="detail-card mercadopago-card">
+              <mat-card-header>
+                <mat-card-title>{{ 'tenants.mercadoPagoTitle' | translate }}</mat-card-title>
+                <mat-card-subtitle>{{ 'tenants.mercadoPagoSubtitle' | translate }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                @if (tenantMpLoading()) {
+                  <div class="activity-loading">
+                    <mat-spinner diameter="28"></mat-spinner>
+                    <span>{{ 'common.loading' | translate }}</span>
+                  </div>
+                } @else {
+                  @if (tenantMpSnapshot()?.paymentsOnlineEntitled === false) {
+                    <p class="tab-hint warn-text">{{ 'tenants.mercadoPagoEntitlementHint' | translate }}</p>
+                  }
+                  <p class="tab-hint">{{ 'tenants.mercadoPagoFallbackHint' | translate }}</p>
+                  @if (tenantMpSnapshot()?.platformFallbackConfigured) {
+                    <p class="tab-hint smtp-fallback-hint">{{ 'tenants.mercadoPagoPlatformEnvOk' | translate }}</p>
+                  } @else if (
+                    tenantMpSnapshot()?.isEnabled === true && tenantMpSnapshot()?.tokenConfigured === true
+                  ) {
+                    <p class="tab-hint smtp-fallback-hint">{{ 'tenants.mercadoPagoTenantCredentialsActive' | translate }}</p>
+                  } @else {
+                    <p class="tab-hint smtp-fallback-hint warn-text">{{ 'tenants.mercadoPagoPlatformEnvMissing' | translate }}</p>
+                  }
+                  @if (tenantMpSnapshot()?.tokenPreview) {
+                    <p class="token-preview">
+                      {{ 'tenants.mercadoPagoTokenSaved' | translate }}:
+                      <code>{{ tenantMpSnapshot()?.tokenPreview }}</code>
+                    </p>
+                  }
+                  <form [formGroup]="tenantMpForm" (ngSubmit)="saveTenantMercadoPago()" class="tenant-mp-form">
+                    <mat-slide-toggle
+                      formControlName="isEnabled"
+                      color="primary"
+                      class="mp-toggle"
+                      [disabled]="
+                        tenantMpSnapshot()?.paymentsOnlineEntitled === false &&
+                        tenantMpSnapshot()?.isEnabled !== true
+                      "
+                    >
+                      {{ 'tenants.mercadoPagoUseTenant' | translate }}
+                    </mat-slide-toggle>
+                    <mat-slide-toggle
+                      formControlName="sandbox"
+                      color="primary"
+                      class="mp-toggle"
+                      [disabled]="tenantMpSnapshot()?.paymentsOnlineEntitled === false"
+                    >
+                      {{ 'tenants.mercadoPagoSandbox' | translate }}
+                    </mat-slide-toggle>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>{{ 'tenants.mercadoPagoAccessToken' | translate }}</mat-label>
+                      <input
+                        matInput
+                        type="password"
+                        formControlName="accessToken"
+                        autocomplete="new-password"
+                        [placeholder]="'tenants.mercadoPagoAccessTokenPlaceholder' | translate"
+                        [disabled]="tenantMpSnapshot()?.paymentsOnlineEntitled === false"
+                      />
+                      <mat-hint>{{ 'tenants.mercadoPagoAccessTokenHint' | translate }}</mat-hint>
+                    </mat-form-field>
+                    <div class="smtp-actions">
+                      <button
+                        mat-raised-button
+                        color="primary"
+                        type="submit"
+                        [disabled]="
+                          tenantMpSaving() ||
+                          (tenantMpSnapshot()?.paymentsOnlineEntitled === false &&
+                            tenantMpSnapshot()?.isEnabled !== true)
+                        "
+                        *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                      >
+                        {{ tenantMpSaving() ? ('common.saving' | translate) : ('common.save' | translate) }}
+                      </button>
+                    </div>
+                  </form>
+                }
+              </mat-card-content>
+            </mat-card>
+            </mat-tab>
+            
+          </mat-tab-group>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

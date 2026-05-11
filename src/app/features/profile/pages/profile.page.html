@@ -1,0 +1,54 @@
+<div class="profile-page">
+  <h1>{{ 'profile.title' | translate }}</h1>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() | translate }}</p>
+  }
+
+  @if (loading()) {
+    <div class="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>{{ 'common.loading' | translate }}</span>
+    </div>
+  } @else {
+    <mat-card class="profile-card">
+      <mat-card-content>
+        <div class="profile-header">
+          <img [src]="avatarUrl()" alt="" class="avatar" />
+          <div class="profile-info">
+            <h2>{{ name() }}</h2>
+            @if (role()) {
+              <p class="role">{{ role() }}</p>
+            }
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        <dl class="profile-fields">
+          <dt>{{ 'profile.name' | translate }}</dt>
+          <dd>{{ name() }}</dd>
+          <dt>{{ 'profile.email' | translate }}</dt>
+          <dd>{{ email() }}</dd>
+          <dt>{{ 'profile.profilePicture' | translate }}</dt>
+          <dd>
+            <img [src]="avatarUrl()" alt="" class="avatar-small" />
+          </dd>
+          <dt>{{ 'profile.language' | translate }}</dt>
+          <dd>{{ language() }}</dd>
+          <dt>{{ 'profile.timezone' | translate }}</dt>
+          <dd>{{ timezone() || ('profile.timezoneDefault' | translate) }}</dd>
+        </dl>
+        <mat-divider></mat-divider>
+        <div class="actions">
+          <button mat-stroked-button color="accent" (click)="openLoginHistory()">
+            <mat-icon>history</mat-icon>
+            {{ 'profile.viewLoginHistory' | translate }}
+          </button>
+          <button mat-raised-button color="primary" (click)="openChangePassword()">
+            <mat-icon>lock</mat-icon>
+            {{ 'profile.changePassword' | translate }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

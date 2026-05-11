@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>
+  {{
+    isEdit
+      ? ('tenants.tenantI18nDialogEditTitle' | translate)
+      : ('tenants.tenantI18nDialogCreateTitle' | translate)
+  }}
+</h2>
+
+<mat-dialog-content class="dialog-body">
+  @if (apiError()) {
+    <p class="err" role="alert">{{ apiError() }}</p>
+  }
+  <form [formGroup]="form" class="form-grid">
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>{{ 'tenants.tenantI18nLabelKey' | translate }}</mat-label>
+      <input matInput formControlName="labelKey" autocomplete="off" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>{{ 'tenants.tenantI18nLang' | translate }}</mat-label>
+      <input matInput formControlName="lang" autocomplete="off" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>{{ 'tenants.tenantI18nText' | translate }}</mat-label>
+      <textarea matInput formControlName="text" rows="4"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="saving()">
+    {{ 'common.cancel' | translate }}
+  </button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="saving()">
+    @if (saving()) {
+      <mat-spinner diameter="20" />
+    } @else {
+      {{ 'common.save' | translate }}
+    }
+  </button>
+</mat-dialog-actions>

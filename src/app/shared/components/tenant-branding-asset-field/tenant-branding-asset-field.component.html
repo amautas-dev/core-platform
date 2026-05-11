@@ -1,0 +1,77 @@
+<div class="branding-asset" [class.branding-asset--readonly]="disabled">
+  <span class="branding-asset__label">{{ labelKey | translate }}</span>
+  <p class="branding-asset__hint">{{ hintKey | translate }}</p>
+
+  <div
+    class="branding-asset__drop"
+    [class.branding-asset__drop--active]="dragOver()"
+    [class.branding-asset__drop--disabled]="disabled"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    (click)="!disabled && !uploading() && fileInput.click()"
+    (keydown.enter)="!disabled && !uploading() && fileInput.click()"
+    tabindex="0"
+    role="button"
+    [attr.aria-disabled]="disabled || uploading()"
+  >
+    <input
+      #fileInput
+      type="file"
+      class="branding-asset__file-input"
+      accept="image/*"
+      [disabled]="disabled || uploading()"
+      (change)="onPickFile($any($event.target).files); $any($event.target).value = ''"
+    />
+
+    @if (uploading()) {
+      <mat-icon class="branding-asset__icon">hourglass_empty</mat-icon>
+      <span>{{ 'tenants.brandingUploading' | translate }}</span>
+    } @else if (control.value?.trim()) {
+      @if (!previewError()) {
+        <img
+          [src]="control.value!.trim()"
+          [alt]="labelKey | translate"
+          class="branding-asset__preview"
+          [class.branding-asset__preview--favicon]="uploadType === 'favicon'"
+          [class.branding-asset__preview--cover]="uploadType === 'login_background'"
+          (error)="previewError.set(true)"
+        />
+      } @else {
+        <mat-icon class="branding-asset__icon">broken_image</mat-icon>
+        <span class="branding-asset__url-fallback">{{ control.value }}</span>
+      }
+      <span class="branding-asset__drop-hint">{{ 'tenants.brandingDropReplace' | translate }}</span>
+    } @else {
+      <mat-icon class="branding-asset__icon">cloud_upload</mat-icon>
+      <span class="branding-asset__drop-text">{{ 'tenants.brandingDropPrompt' | translate }}</span>
+    }
+  </div>
+
+  <div class="branding-asset__actions">
+    <button
+      type="button"
+      mat-stroked-button
+      (click)="fileInput.click(); $event.stopPropagation()"
+      [disabled]="disabled || uploading()"
+    >
+      {{ 'tenants.brandingChooseFile' | translate }}
+    </button>
+    @if (control.value?.trim()) {
+      <button type="button" mat-button (click)="clear(); $event.stopPropagation()" [disabled]="disabled || uploading()">
+        {{ 'tenants.brandingRemove' | translate }}
+      </button>
+    }
+  </div>
+
+  <mat-expansion-panel class="branding-asset__manual">
+    <mat-expansion-panel-header>
+      <mat-panel-title>{{ 'tenants.brandingManualUrl' | translate }}</mat-panel-title>
+    </mat-expansion-panel-header>
+    <p class="branding-asset__manual-hint">{{ 'tenants.brandingManualUrlHint' | translate }}</p>
+    <mat-form-field appearance="outline" class="branding-asset__manual-field">
+      <mat-label>{{ 'tenants.brandingManualUrlField' | translate }}</mat-label>
+      <input matInput [formControl]="control" placeholder="https://..." [disabled]="disabled" />
+    </mat-form-field>
+  </mat-expansion-panel>
+</div>

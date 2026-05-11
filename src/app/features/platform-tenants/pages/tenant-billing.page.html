@@ -1,0 +1,172 @@
+<div class="tenant-billing-page">
+  <header class="page-header">
+    <h1>{{ 'tenants.billingTitle' | translate }}</h1>
+    <div class="header-actions">
+      <a mat-button [routerLink]="tenantId() != null ? paths.tenantDetail(tenantId()!) : paths.tenants()">
+        {{ 'common.back' | translate }}
+      </a>
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>{{ 'common.loading' | translate }}</p>
+    </div>
+  } @else if (tenant(); as t) {
+    <div class="billing-grid">
+      <!-- Current plan -->
+      <mat-card class="billing-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'tenants.billingCurrentPlan' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ t.tenantName }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (clubLine(); as line) {
+            <p class="plan-name">
+              <strong>{{ line.planName ?? ('tenants.billingUnknownPlan' | translate) }}</strong>
+              @if (line.productName ?? line.productCode; as prod) {
+                <span class="muted"> · {{ prod }}</span>
+              }
+            </p>
+          } @else {
+            <p class="muted">{{ 'tenants.billingNoSubscription' | translate }}</p>
+          }
+
+          <h4 class="subsection-title">{{ 'tenants.billingIncludedModules' | translate }}</h4>
+          @if (currentPlanModules().length === 0) {
+            <p class="muted">{{ 'tenants.billingNoModules' | translate }}</p>
+          } @else {
+            <mat-chip-set class="chip-wrap">
+              @for (m of currentPlanModules(); track m.moduleId) {
+                @if (m.enabled) {
+                  <mat-chip>{{ m.moduleName ?? m.moduleCode }}</mat-chip>
+                }
+              }
+            </mat-chip-set>
+          }
+
+          <h4 class="subsection-title">{{ 'tenants.billingLimits' | translate }}</h4>
+          @if (currentPlanLimits().length === 0) {
+            <p class="muted">{{ 'tenants.contractLimitsEmpty' | translate }}</p>
+          } @else {
+            <ul class="limit-list">
+              @for (lim of currentPlanLimits(); track lim.limitCode) {
+                <li>
+                  <span>{{ limitLabel(lim.limitCode) }}</span>
+                  <strong>{{ lim.limitValue }}</strong>
+                </li>
+              }
+            </ul>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Available plans -->
+      <mat-card class="billing-card billing-card--wide">
+        <mat-card-header>
+          <mat-card-title>{{ 'tenants.billingAvailablePlans' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'tenants.billingAvailablePlansHint' | translate }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (sortedPlans().length === 0) {
+            <p class="muted">{{ 'tenants.billingNoPlans' | translate }}</p>
+          } @else {
+            <div class="plans-grid">
+              @for (plan of sortedPlans(); track plan.servicePlanId) {
+                <div class="plan-card" [class.plan-card--current]="isCurrentPlan(plan)">
+                  <div class="plan-card__head">
+                    <h3>{{ plan.planName }}</h3>
+                    @if (isCurrentPlan(plan)) {
+                      <mat-chip color="primary">{{ 'tenants.billingCurrentBadge' | translate }}</mat-chip>
+                    }
+                  </div>
+                  <p class="plan-price">{{ formatMoney(plan) }}</p>
+                  @let planDesc = billingPlanDescription(plan);
+                  @if (planDesc) {
+                    <p class="plan-desc muted">{{ planDesc }}</p>
+                  }
+                  <h4 class="subsection-title">{{ 'tenants.billingIncludedModules' | translate }}</h4>
+                  <ul class="module-bullets">
+                    @for (m of planModules(plan); track m.moduleId) {
+                      <li>{{ m.moduleName ?? m.moduleCode }}</li>
+                    }
+                  </ul>
+                  <button
+                    mat-stroked-button
+                    color="primary"
+                    type="button"
+                    class="plan-action"
+                    [disabled]="isCurrentPlan(plan)"
+                    (click)="upgradePlan(plan)"
+                  >
+                    {{ 'tenants.billingUpgradePlan' | translate }}
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Add-ons -->
+      <mat-card class="billing-card billing-card--wide">
+        <mat-card-header>
+          <mat-card-title>{{ 'tenants.billingAddons' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'tenants.billingAddonsHint' | translate }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (addons().length === 0) {
+            <p class="muted">{{ 'tenants.billingNoAddons' | translate }}</p>
+          } @else {
+            <div class="addon-table">
+              <div class="addon-row addon-row--head">
+                <span>{{ 'tenants.billingAddonName' | translate }}</span>
+                <span>{{ 'tenants.billingAddonDescription' | translate }}</span>
+                <span>{{ 'tenants.billingAddonAvailability' | translate }}</span>
+                <span></span>
+              </div>
+              <mat-divider></mat-divider>
+              @for (row of addons(); track row.productAddonId) {
+                <div class="addon-row">
+                  <span>{{ row.featureName ?? row.featureCode }}</span>
+                  <span class="addon-desc">{{ addonDescription(row) ?? '—' }}</span>
+                  <span>
+                    @switch (addonState(row)) {
+                      @case ('enabled') {
+                        <mat-chip class="state-chip state-chip--on">{{ 'tenants.billingStateEnabled' | translate }}</mat-chip>
+                      }
+                      @case ('available') {
+                        <mat-chip class="state-chip state-chip--avail">{{ 'tenants.billingStateAvailable' | translate }}</mat-chip>
+                      }
+                      @default {
+                        <mat-chip class="state-chip state-chip--locked">{{ 'tenants.billingStateLocked' | translate }}</mat-chip>
+                      }
+                    }
+                  </span>
+                  <span class="addon-actions">
+                    @if (addonState(row) === 'available') {
+                      <button
+                        mat-button
+                        type="button"
+                        [disabled]="addonActivatingProductAddonId() === row.productAddonId"
+                        (click)="enableAddon(row)"
+                      >
+                        {{ 'tenants.billingEnableAddon' | translate }}
+                      </button>
+                    }
+                  </span>
+                </div>
+                <mat-divider></mat-divider>
+              }
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

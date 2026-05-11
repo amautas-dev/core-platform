@@ -1,0 +1,26 @@
+<div class="app-shell" [class.collapsed]="isCollapsed()">
+  <app-sidebar
+    [menuItems]="menuItems()"
+    [collapsed]="isCollapsed()"
+    [isMobile]="isMobile()"
+    (toggle)="toggleSidebar()"
+    (logout)="logout()"
+  ></app-sidebar>
+
+  <div class="main">
+    <app-header
+      [currentTitle]="currentTitle()"
+      [isMobile]="isMobile()"
+      [userName]="userName()"
+      [avatarUrl]="avatarUrl"
+      (toggleSidebar)="toggleSidebar()"
+      (logout)="logout()"
+    ></app-header>
+
+    <app-active-market-bar></app-active-market-bar>
+
+    <div class="main__page">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

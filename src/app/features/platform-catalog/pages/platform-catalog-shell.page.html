@@ -1,0 +1,23 @@
+<div class="platform-catalog-shell">
+  @if (tabs().length) {
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="platform-catalog-shell__tabs">
+      @for (tab of tabs(); track tab.path) {
+        <a
+          mat-tab-link
+          [routerLink]="tab.path"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [routerLinkActiveOptions]="{ exact: false }"
+          [active]="rla.isActive"
+        >
+          {{ tab.labelKey | translate }}
+        </a>
+      }
+    </nav>
+    <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+  }
+
+  <div class="platform-catalog-shell__outlet">
+    <router-outlet />
+  </div>
+</div>

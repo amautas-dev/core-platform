@@ -1,0 +1,117 @@
+<div class="modules-list-page">
+  <header class="page-header">
+    <div class="header-text">
+      <h1>{{ 'modules.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'modules.subtitle' | translate }}</p>
+    </div>
+    <a
+      mat-raised-button
+      color="primary"
+      [routerLink]="paths.catalogModulesCreate()"
+      *hasPermission="PERMISSIONS.MODULES_CREATE"
+    >
+      {{ 'modules.createModule' | translate }}
+    </a>
+  </header>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (modulesLoading()) {
+    <div class="loading-wrap">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>{{ 'modules.loading' | translate }}</p>
+    </div>
+  } @else {
+    <mat-card class="catalog-hint-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'modules.catalogHintTitle' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="catalog-hint-body">{{ 'modules.catalogHintBody' | translate }}</p>
+        <p class="hint-stats">
+          {{ 'modules.unassignedIntro' | translate }} <strong>{{ unassignedFeatureCount() }}</strong>.
+        </p>
+        @if (unassignedFeatureCount() > 0) {
+          <p class="hint-codes"><strong>{{ 'modules.unassignedCodes' | translate }}:</strong> {{ unassignedFeaturesLabel() }}</p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <div class="table-with-paginator">
+    <table mat-table [dataSource]="dataSource" class="modules-table">
+      <ng-container matColumnDef="code">
+        <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.code' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.code ?? '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>{{ 'tenants.name' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.name ?? '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="featureCount">
+        <th mat-header-cell *matHeaderCellDef>{{ 'modules.featuresColumn' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ featureCountForModule(row) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef>{{ 'modules.description' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.description ?? '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>{{ 'common.status' | translate }}</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="toggle">
+        <th mat-header-cell *matHeaderCellDef>{{ 'modules.activate' | translate }}</th>
+        <td mat-cell *matCellDef="let row">
+          <mat-slide-toggle
+            [checked]="row.isActive"
+            (change)="onToggle(row, $event.checked)"
+            color="primary"
+            *hasPermission="PERMISSIONS.MODULES_UPDATE"
+          >
+          </mat-slide-toggle>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>{{ 'common.actions' | translate }}</th>
+        <td mat-cell *matCellDef="let row">
+          <a
+            mat-icon-button
+            [routerLink]="paths.catalogModuleEdit(row.moduleId)"
+            [attr.aria-label]="'common.edit' | translate"
+            *hasPermission="PERMISSIONS.MODULES_UPDATE"
+          >
+            <mat-icon>edit</mat-icon>
+          </a>
+          <button
+            mat-icon-button
+            color="warn"
+            type="button"
+            (click)="deleteModule(row)"
+            [attr.aria-label]="'modules.delete' | translate"
+            *hasPermission="PERMISSIONS.MODULES_DELETE"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          {{ 'modules.noModules' | translate }}
+        </td>
+      </tr>
+    </table>
+    <mat-paginator
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      showFirstLastButtons
+      aria-label="Paginación"
+    />
+    </div>
+  }
+</div>

@@ -1,0 +1,17 @@
+.label-key {
+  margin-bottom: 1rem;
+  word-break: break-all;
+}
+.loading {
+  padding: 1rem 0;
+  display: flex;
+  justify-content: center;
+}
+.error {
+  color: var(--mat-warn-color, #c62828);
+  margin-bottom: 1rem;
+}
+.full-width {
+  width: 100%;
+  display: block;
+}

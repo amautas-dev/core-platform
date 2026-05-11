@@ -1,0 +1,244 @@
+<div class="tenant-onboarding-wizard">
+  @if (success(); as s) {
+    <mat-card class="success-card">
+      <mat-card-header>
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <mat-card-title>{{ 'tenants.onboarding.successTitle' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ 'tenants.onboarding.successMessage' | translate }}</p>
+        <dl class="success-summary">
+          <dt>{{ 'tenants.name' | translate }}</dt>
+          <dd>{{ s.tenantName }}</dd>
+          <dt>{{ 'tenants.code' | translate }}</dt>
+          <dd>{{ s.tenantCode }}</dd>
+        </dl>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-button type="button" (click)="createAnother()">
+          {{ 'tenants.onboarding.createAnother' | translate }}
+        </button>
+        <button mat-raised-button color="primary" type="button" (click)="goToTenants()">
+          {{ 'tenants.onboarding.viewTenants' | translate }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  } @else {
+    <header class="page-header">
+      <h1>{{ 'tenants.onboarding.title' | translate }}</h1>
+      <a mat-button [routerLink]="paths.tenants()">{{ 'common.back' | translate }}</a>
+    </header>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    @if (loading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="32"></mat-spinner>
+        <p>{{ 'servicePlans.loading' | translate }}</p>
+      </div>
+    } @else {
+      <mat-stepper #stepper linear>
+        <!-- Step 1: Organization -->
+        <mat-step [stepControl]="step1">
+          <ng-template matStepLabel>{{ 'tenants.onboarding.stepOrganization' | translate }}</ng-template>
+          <form [formGroup]="step1">
+            <div class="step-org-fields">
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>{{ 'tenants.name' | translate }}</mat-label>
+                <input matInput formControlName="tenantName" [placeholder]="'tenants.onboarding.tenantNamePlaceholder' | translate" />
+                <mat-error>{{ 'common.required' | translate }}, {{ 'common.minLength2' | translate }}</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>{{ 'tenants.code' | translate }}</mat-label>
+                <input matInput formControlName="tenantCode" [placeholder]="'tenants.onboarding.tenantCodePlaceholder' | translate" />
+                @if (step1.get('tenantCode')?.hasError('tenantCodeExists')) {
+                  <mat-error>{{ 'tenants.tenantCodeAlreadyExists' | translate }}</mat-error>
+                } @else {
+                  <mat-error>{{ 'common.required' | translate }}, {{ 'common.minLength2' | translate }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </form>
+          <div class="step-actions">
+            <button mat-button matStepperNext [disabled]="step1.invalid">{{ 'common.next' | translate }}</button>
+          </div>
+        </mat-step>
+
+        <!-- Step 2: Plan -->
+        <mat-step [stepControl]="step2">
+          <ng-template matStepLabel>{{ 'tenants.onboarding.stepPlan' | translate }}</ng-template>
+          <form [formGroup]="step2">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ 'tenants.country' | translate }}</mat-label>
+              <mat-select formControlName="countryCode" (selectionChange)="onCountryChangeForPlans()">
+                @for (c of countries(); track c.countryCode) {
+                  <mat-option [value]="c.countryCode">{{ c.name }} ({{ c.countryCode }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-slide-toggle
+              class="onboarding-show-inactive"
+              [checked]="showInactivePlans()"
+              (change)="onShowInactivePlansChange($event.checked)"
+              color="primary"
+            >
+              {{ 'servicePlans.showInactivePlansToggle' | translate }}
+            </mat-slide-toggle>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ 'tenants.plan' | translate }}</mat-label>
+              <mat-select formControlName="servicePlanId" (selectionChange)="onPlanChange()">
+                <mat-option [value]="0">{{ 'tenants.selectPlan' | translate }}</mat-option>
+                @for (plan of plans(); track plan.servicePlanId) {
+                  <mat-option [value]="plan.servicePlanId">{{ planDisplayName(plan) }}</mat-option>
+                }
+              </mat-select>
+              <mat-error>{{ 'tenants.selectPlanError' | translate }}</mat-error>
+            </mat-form-field>
+            @if (enabledPlanModules().length > 0) {
+              <p class="plan-modules-label">{{ 'tenants.onboarding.modulesIncludedInPlan' | translate }}</p>
+              <ul class="plan-modules-list">
+                @for (mod of enabledPlanModules(); track mod.moduleId) {
+                  <li class="plan-module-item">
+                    <span class="plan-module-check">✔</span>
+                    <span>{{ mod.moduleName ?? mod.moduleCode ?? mod.moduleId }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          </form>
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>{{ 'common.previous' | translate }}</button>
+            <button mat-button matStepperNext [disabled]="step2.invalid">{{ 'common.next' | translate }}</button>
+          </div>
+        </mat-step>
+
+        <!-- Step 3: Product -->
+        <mat-step [stepControl]="step3Product">
+          <ng-template matStepLabel>{{ 'tenants.onboarding.stepProduct' | translate }}</ng-template>
+          <form [formGroup]="step3Product">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ 'tenants.onboarding.selectProduct' | translate }}</mat-label>
+              <mat-select formControlName="productId" (selectionChange)="onProductChange()">
+                <mat-option [value]="0">{{ 'tenants.onboarding.noProductUsePlan' | translate }}</mat-option>
+                @for (product of products(); track product.productId) {
+                  <mat-option [value]="product.productId">{{ productDisplayName(product) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <p class="step-hint">{{ 'tenants.onboarding.productStepHint' | translate }}</p>
+          </form>
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>{{ 'common.previous' | translate }}</button>
+            <button mat-button matStepperNext>{{ 'common.next' | translate }}</button>
+          </div>
+        </mat-step>
+
+        <!-- Step 4: Modules -->
+        <mat-step>
+          <ng-template matStepLabel>{{ 'tenants.onboarding.stepModules' | translate }}</ng-template>
+          <p class="step-hint">{{ 'tenants.modulesStepHint' | translate }}</p>
+          @if (modulesForSelection().length === 0) {
+            <p>{{ 'tenants.onboarding.selectPlanAndOrProductHint' | translate }}</p>
+          } @else {
+            <div class="module-list">
+              @for (mod of modulesForSelection(); track mod.moduleId) {
+                <label class="module-item">
+                  <mat-checkbox
+                    [checked]="isModuleSelected(mod.moduleId)"
+                    (change)="toggleModule(mod.moduleId)"
+                  />
+                  <span>{{ mod.moduleName ?? mod.moduleCode ?? mod.moduleId }}</span>
+                </label>
+              }
+            </div>
+          }
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>{{ 'common.previous' | translate }}</button>
+            <button mat-button matStepperNext>{{ 'common.next' | translate }}</button>
+          </div>
+        </mat-step>
+
+        <!-- Step 5: Admin User -->
+        <mat-step [stepControl]="step5">
+          <ng-template matStepLabel>{{ 'tenants.onboarding.stepAdmin' | translate }}</ng-template>
+          <form [formGroup]="step5">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ 'tenants.adminName' | translate }}</mat-label>
+              <input matInput formControlName="adminName" [placeholder]="'tenants.onboarding.adminNamePlaceholder' | translate" />
+              <mat-error>{{ 'common.required' | translate }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ 'users.email' | translate }}</mat-label>
+              <input matInput type="email" formControlName="adminEmail" [placeholder]="'tenants.onboarding.adminEmailPlaceholder' | translate" />
+              <mat-error>{{ 'users.validationEmailInvalid' | translate }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ 'tenants.tempPassword' | translate }}</mat-label>
+              <input matInput type="password" formControlName="adminPassword" />
+              <mat-error>{{ 'users.validationPasswordMinLength' | translate }}</mat-error>
+            </mat-form-field>
+            <div class="password-strength" [class.strength-weak]="passwordStrength().level === 'weak'" [class.strength-medium]="passwordStrength().level === 'medium'" [class.strength-strong]="passwordStrength().level === 'strong'">
+              <div class="password-strength-bar" aria-hidden="true">
+                <span class="segment" [class.filled]="passwordStrength().score >= 1"></span>
+                <span class="segment" [class.filled]="passwordStrength().score >= 2"></span>
+                <span class="segment" [class.filled]="passwordStrength().score >= 3"></span>
+              </div>
+              <span class="password-strength-label">{{ 'tenants.onboarding.passwordStrength.' + passwordStrength().level | translate }}</span>
+            </div>
+            <label class="checkbox-row">
+              <mat-checkbox formControlName="sendInvitationEmail" />
+              <span>{{ 'users.sendInvitationEmail' | translate }}</span>
+            </label>
+          </form>
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>{{ 'common.previous' | translate }}</button>
+            <button mat-button matStepperNext [disabled]="step5.invalid">{{ 'common.next' | translate }}</button>
+          </div>
+        </mat-step>
+
+        <!-- Step 6: Review -->
+        <mat-step>
+          <ng-template matStepLabel>{{ 'tenants.onboarding.stepReview' | translate }}</ng-template>
+          <div class="review-section">
+            <h3>{{ 'tenants.summary' | translate }}</h3>
+            <dl>
+              <dt>{{ 'tenants.name' | translate }}</dt>
+              <dd>{{ summary().tenantName }}</dd>
+              <dt>{{ 'tenants.code' | translate }}</dt>
+              <dd>{{ summary().tenantCode }}</dd>
+              <dt>{{ 'tenants.plan' | translate }}</dt>
+              <dd>{{ summary().planName }}</dd>
+              @if (summary().productName) {
+                <dt>{{ 'tenants.onboarding.product' | translate }}</dt>
+                <dd>{{ summary().productName }}</dd>
+              }
+              <dt>{{ 'tenants.modulesEnabled' | translate }}</dt>
+              <dd>{{ summary().modulesCount }} — {{ summary().moduleNames }}</dd>
+              <dt>{{ 'tenants.onboarding.adminUser' | translate }}</dt>
+              <dd>{{ summary().adminName }} ({{ summary().adminEmail }})</dd>
+              <dt>{{ 'users.sendInvitationEmail' | translate }}</dt>
+              <dd>{{ summary().sendInvitationEmail ? ('common.yes' | translate) : ('common.no' | translate) }}</dd>
+            </dl>
+          </div>
+          <label class="checkbox-row">
+            <mat-checkbox [checked]="createApiKey()" (change)="createApiKey.set($event.checked)" />
+            <span>{{ 'tenants.onboarding.createApiKeyForTenant' | translate }}</span>
+          </label>
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>{{ 'common.previous' | translate }}</button>
+            <button mat-raised-button color="primary" (click)="submit()" [disabled]="submitting()">
+              @if (submitting()) {
+                <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+                {{ 'common.creating' | translate }}
+              } @else {
+                {{ 'tenants.create' | translate }}
+              }
+            </button>
+          </div>
+        </mat-step>
+      </mat-stepper>
+    }
+  }
+</div>

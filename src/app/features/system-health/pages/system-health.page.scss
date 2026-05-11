@@ -1,0 +1,90 @@
+.system-health-page {
+  padding: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+    
+  h1 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.5rem;
+  }
+
+  .page-subtitle {
+    margin: 0 0 1.5rem 0;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.95rem;
+  }
+
+  .loading-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .error-card {
+    border: 1px solid var(--mat-warn-color, #c62828);
+    background: rgba(198, 40, 40, 0.06);
+
+    mat-card-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .error-icon {
+        color: var(--mat-warn-color, #c62828);
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+
+      p {
+        margin: 0;
+        color: var(--mat-warn-color, #c62828);
+      }
+    }
+  }
+
+  .health-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .health-card {
+    mat-card-header {
+      margin-bottom: 0.5rem;
+
+      mat-card-title {
+        font-size: 1rem;
+      }
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    .status-label {
+      color: rgba(0, 0, 0, 0.65);
+      font-size: 0.9rem;
+    }
+
+    .status-value {
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+
+      &.error {
+        color: var(--mat-warn-color, #c62828);
+        font-weight: 600;
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+}
+
+.app-shell {
+  display: flex;
+  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  .main {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    margin-left: 250px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    transition: all 0.3s ease;
+    overflow: hidden;
+
+    app-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: var(--surface, #fff);
+    }
+
+    .main__page {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 0;
+    }
+  }
+
+  &.collapsed .main {
+    margin-left: 70px;
+  }
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    flex-direction: column;
+
+    .main {
+      margin-left: 0 !important;
+      width: 100%;
+    }
+
+    &.mobile-open {
+      overflow: hidden;
+    }
+  }
+}

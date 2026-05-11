@@ -1,0 +1,200 @@
+@use "../../../../styles/tokens" as *;
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+  background-color: var(--login-page-bg, #0f172a);
+  background-image: var(--theme-login-hero-url);
+  background-size: cover;
+  background-position: center;
+
+  .login-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .brand {
+    width: min(450px, 92vw);
+    min-height: 5rem;
+    height: 220px;
+    background-image: var(--theme-logo-url);
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    /* Halo claro + sombra suave para leer el logo sobre fondos oscuros */
+    filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.65))
+      drop-shadow(0 0 28px rgba(255, 255, 255, 0.4)) drop-shadow(0 4px 20px rgba(0, 0, 0, 0.35));
+  }
+
+  .panel {
+    width: 100%;
+    max-width: 480px;
+    padding: 1.5rem;
+    border-radius: v(radius-lg);
+    /* Tarjeta clara: el botón primary (marca) contrasta con el fondo del panel */
+    background: rgba(255, 255, 255, 0.97);
+    color: var(--color-text-primary, #0f2f3a);
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.18),
+      0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+
+    form {
+      display: grid;
+      gap: 1rem;
+    }
+
+    h3 {
+      margin: 0.25rem 0 0.25rem;
+      font-weight: 700;
+      color: var(--color-text-primary, #0f2f3a);
+    }
+
+    .login-field,
+    .w-100 {
+      width: 100%;
+    }
+
+    .mat-mdc-form-field {
+      width: 100%;
+    }
+
+    /*
+      Un solo color de superficie bajo el outline (misma tarjeta): evita el rectángulo
+      interior más blanco que el resto del campo.
+    */
+    $login-field-surface: #ffffff;
+
+    ::ng-deep .login-field {
+      .mat-mdc-text-field-wrapper {
+        background-color: #{$login-field-surface};
+      }
+
+      .mat-mdc-form-field-flex,
+      .mat-mdc-form-field-infix {
+        background-color: #{$login-field-surface};
+      }
+
+      .mdc-text-field--outlined:not(.mdc-text-field--disabled) {
+        background-color: #{$login-field-surface} !important;
+      }
+
+      .mdc-text-field__input,
+      input.mat-mdc-input-element {
+        background-color: #{$login-field-surface} !important;
+        box-shadow: none !important;
+      }
+
+      .mat-mdc-form-field-focus-overlay {
+        opacity: 0;
+      }
+    }
+
+    ::ng-deep .login-field input:-webkit-autofill,
+    ::ng-deep .login-field input:-webkit-autofill:hover,
+    ::ng-deep .login-field input:-webkit-autofill:focus,
+    ::ng-deep .login-field input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 1000px #{$login-field-surface} inset !important;
+      box-shadow: 0 0 0 1000px #{$login-field-surface} inset !important;
+      -webkit-text-fill-color: var(--color-text-primary, #0f2f3a) !important;
+      caret-color: var(--color-text-primary, #0f2f3a);
+      transition: background-color 99999s ease-out;
+    }
+
+    .toggle-password mat-icon {
+      color: var(--color-primary-500, #0a9ac6);
+    }
+
+    .login-submit {
+      width: 100%;
+      min-height: 44px;
+      font-weight: 600;
+    }
+
+    /* Refuerzo del CTA primario (evita que parezca deshabilitado por estilos globales) */
+    .login-submit.mat-mdc-raised-button.mat-primary {
+      --mdc-protected-button-container-color: var(
+        --login-primary-tint,
+        var(--color-action-primary, var(--color-primary-500, #0a9ac6))
+      ) !important;
+      --mdc-protected-button-label-text-color: #ffffff !important;
+      background-color: var(
+        --login-primary-tint,
+        var(--color-action-primary, var(--color-primary-500, #0a9ac6))
+      ) !important;
+      color: #ffffff !important;
+      opacity: 1;
+    }
+
+    .login-submit.mat-mdc-raised-button.mat-primary:hover:not(:disabled) {
+      --mdc-protected-button-container-color: var(--color-action-primary-hover, var(--color-primary-hover, #1e66d3)) !important;
+      background-color: var(--color-action-primary-hover, var(--color-primary-hover, #1e66d3)) !important;
+    }
+
+    .forgot {
+      color: var(--login-primary-tint, var(--color-primary-500, #0a9ac6));
+      text-decoration: underline;
+      font-size: 0.92rem;
+      justify-self: center;
+    }
+
+    .error {
+      margin: 0.25rem 0 0;
+      color: var(--mat-warn-color, #c62828);
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .login-content {
+      gap: 1.5rem;
+    }
+
+    .brand {
+      width: min(280px, 88vw);
+      height: 100px;
+    }
+
+    .panel {
+      padding: 1.25rem;
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+
+    .login-content {
+      gap: 1rem;
+    }
+
+    .brand {
+      width: min(240px, 85vw);
+      height: 85px;
+    }
+
+    .panel {
+      padding: 1rem;
+
+      h3 {
+        font-size: 0.95rem;
+      }
+
+      form {
+        gap: 0.75rem;
+      }
+
+      .forgot {
+        font-size: 0.85rem;
+      }
+    }
+  }
+}

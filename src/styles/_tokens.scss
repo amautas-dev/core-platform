@@ -1,0 +1,76 @@
+/* Usa variables CSS de brand.css */
+@function v($name) {
+  @return var(--#{$name});
+}
+
+/* Botón base + variantes */
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border: 0;
+  border-radius: v(radius-md);
+  box-shadow: var(--elevation-1);
+  transition: background-color 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
+  cursor: pointer;
+  text-decoration: none;
+  width: 100%; /* en formularios suele funcionar bien full width */
+}
+
+@mixin btn($bg, $fg, $hover) {
+  @include btn-base;
+  background: v($bg);
+  color: v($fg);
+  &:hover {
+    background: v($hover);
+  }
+  &:disabled {
+    filter: grayscale(0.3);
+    opacity: 0.7;
+    cursor: default;
+  }
+}
+
+/* Variantes semánticas */
+.btn--primary {
+  @include btn(color-action-primary, color-text-inverse, color-action-primary-hover);
+}
+.btn--secondary {
+  @include btn(color-accent-500, color-text-inverse, color-accent-hover);
+}
+.btn--tertiary {
+  @include btn(color-accent-700, color-text-inverse, color-accent-800);
+}
+
+/* Superficie de panel / tarjeta */
+@mixin panel {
+  background: v(color-action-primary);
+  color: v(color-text-inverse);
+  border-radius: v(radius-lg);
+  box-shadow: var(--elevation-1);
+}
+
+/* Campos de entrada estilo 'fill' con fondo completo */
+@mixin filled-field {
+  .mat-mdc-form-field {
+    width: 100%;
+
+    --mdc-filled-text-field-container-color: var(--color-surface-variant);
+    --mdc-filled-text-field-focus-active-indicator-color: var(--color-primary-500);
+    --mdc-filled-text-field-hover-active-indicator-color: var(--color-primary-500);
+    --mdc-filled-text-field-input-text-color: var(--color-text-primary);
+    --mdc-filled-text-field-label-text-color: color-mix(
+      in srgb,
+      var(--color-text-primary) 60%,
+      transparent
+    );
+
+    .mdc-text-field {
+      border-radius: var(--radius-md);
+    }
+  }
+}

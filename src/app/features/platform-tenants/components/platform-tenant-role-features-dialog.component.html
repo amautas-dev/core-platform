@@ -1,0 +1,83 @@
+<h2 mat-dialog-title>
+  {{ 'tenants.consoleRoleFeaturesTitle' | translate }}
+  <span class="role-label">{{ data.role.name }} ({{ data.role.code }})</span>
+</h2>
+
+<mat-dialog-content class="dialog-body">
+  @if (loading()) {
+    <div class="loading">
+      <mat-spinner diameter="36" />
+    </div>
+  } @else if (loadError()) {
+    <p class="err" role="alert">{{ 'tenants.consoleRoleFeaturesLoadError' | translate }}</p>
+  } @else {
+    <p class="hint">{{ 'tenants.consoleRoleFeaturesHint' | translate }}</p>
+    @if (saveError()) {
+      <p class="err soft" role="alert">{{ 'tenants.consoleRoleFeaturesSaveError' | translate }}</p>
+    }
+    <ul class="feature-list">
+      @for (row of flatRows(); track row.node.id) {
+        <li class="feature-row" [style.padding-left.rem]="row.depth * 1.25 + 0.25">
+          <div class="row-main">
+            <label class="row-label">
+              <mat-checkbox
+                [checked]="isChecked(row.node.id)"
+                (change)="toggle(row.node.id, $event.checked)"
+              />
+              <span class="row-text">
+                <span class="fname">{{ row.node.name }}</span>
+                <span class="fcode">{{ row.node.code }}</span>
+                @if (row.node.route) {
+                  <span class="froute">{{ row.node.route }}</span>
+                }
+              </span>
+            </label>
+          </div>
+          @if (isChecked(row.node.id)) {
+            <div class="row-meta">
+              <mat-form-field appearance="outline" class="field-order" subscriptSizing="dynamic">
+                <mat-label>{{ 'tenants.consoleRoleFeaturesMenuOrder' | translate }}</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [value]="getMeta(row.node.id).order"
+                  (input)="setOrder(row.node.id, $any($event.target).value)"
+                />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="field-show" subscriptSizing="dynamic">
+                <mat-label>{{ 'tenants.consoleRoleFeaturesMenuVisible' | translate }}</mat-label>
+                <mat-select
+                  [value]="getMeta(row.node.id).show"
+                  (valueChange)="setShow(row.node.id, $event)"
+                >
+                  <mat-option value="inherit">{{ 'tenants.consoleRoleFeaturesInherit' | translate }}</mat-option>
+                  <mat-option value="yes">{{ 'tenants.consoleRoleFeaturesShowYes' | translate }}</mat-option>
+                  <mat-option value="no">{{ 'tenants.consoleRoleFeaturesShowNo' | translate }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="saving()">
+    {{ 'common.cancel' | translate }}
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="save()"
+    [disabled]="loading() || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner diameter="20" />
+    } @else {
+      {{ 'common.save' | translate }}
+    }
+  </button>
+</mat-dialog-actions>

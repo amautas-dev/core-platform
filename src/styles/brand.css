@@ -1,0 +1,50 @@
+@import "theme-defaults.css";
+
+:root {
+  /* Semántica UI (runtime: applyDocumentTheme → applySemanticToDocument) */
+  --color-bg: #fbf1e8;
+  --color-surface: #ffffff;
+  --color-sidebar: var(--color-primary-700);
+  --color-header: var(--color-primary-600);
+  --color-surface-variant: var(--color-header);
+  --color-text-primary: #0f2f3a;
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-inverse: #ffffff;
+  --text-secondary: var(--color-text-secondary);
+
+  --color-action-primary: var(--color-primary-500);
+  --color-action-primary-hover: var(--color-primary-hover);
+  --color-action-primary-active: var(--color-primary-700);
+  --color-action-secondary-border: var(--color-primary-500);
+  --color-action-secondary-text: var(--color-primary-500);
+  --color-action-secondary-hover-bg: color-mix(in srgb, var(--color-primary-500) 8%, transparent);
+  --color-action-ghost: var(--color-neutral-100);
+  --color-action-cancel: #3a383d;
+  --color-action-cancel-hover: color-mix(in srgb, var(--color-action-cancel) 88%, black);
+  --color-border: #dbe7ec;
+  --color-focus-ring: var(--color-primary-400);
+
+  --elevation-1: 0 4px 10px rgba(0, 0, 0, 0.12);
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* Login: sin imágenes embebidas; el login carga logo/fondo vía GET público (platform_setting). */
+  --theme-logo-url: none;
+  --theme-logo-alt-url: url("../assets/brand/amautas-logo-alt.png");
+  --theme-logo-url-reduc: url("../assets/brand/amautas-logo-reduc.png");
+  --theme-logo-alt-url-reduc: url("../assets/brand/amautas-logo-alt-reduc.png");
+  --theme-login-hero-url: none;
+  --login-page-bg: #0f172a;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0f171b;
+  --color-surface: #121c21;
+  --color-text-primary: #e9f2f6;
+  --color-surface-variant: #1a242a;
+  --color-border: #28343b;
+
+  --color-primary-500: #1f6feb;
+  --color-primary-hover: #1e66d3;
+  --color-action-primary-active: #14448b;
+}

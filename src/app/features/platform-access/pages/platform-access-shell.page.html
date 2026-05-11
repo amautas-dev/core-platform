@@ -1,0 +1,20 @@
+<div class="platform-access-shell">
+  @if (tabs().length) {
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="platform-access-shell__tabs">
+      @for (tab of tabs(); track tab.path) {
+        <a
+          mat-tab-link
+          [routerLink]="tab.path"
+          [active]="tab.tab === 'users' ? usersTabActive() : rolesTabActive()"
+        >
+          {{ tab.labelKey | translate }}
+        </a>
+      }
+    </nav>
+    <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+  }
+
+  <div class="platform-access-shell__outlet">
+    <router-outlet />
+  </div>
+</div>

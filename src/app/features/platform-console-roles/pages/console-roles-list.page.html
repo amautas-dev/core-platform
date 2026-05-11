@@ -1,0 +1,70 @@
+<div class="console-roles-list-page">
+  <header class="page-header">
+    <h1>{{ 'consoleRolesPage.title' | translate }}</h1>
+    <p class="subtitle">{{ 'consoleRolesPage.subtitle' | translate }}</p>
+  </header>
+
+  @if (error()) {
+    <p class="error-banner">{{ error() }}</p>
+  }
+
+  <mat-card class="hint-card">
+    <mat-card-content>
+      <p>{{ 'consoleRolesPage.hintMovedFromTenant' | translate }}</p>
+    </mat-card-content>
+  </mat-card>
+
+  @if (loading()) {
+    <p>{{ 'common.loading' | translate }}</p>
+  } @else {
+    <div class="table-with-paginator">
+    <table mat-table [dataSource]="dataSource" class="roles-table">
+      <ng-container matColumnDef="productCode">
+        <th mat-header-cell *matHeaderCellDef>{{ 'consoleRolesPage.colProductCode' | translate }}</th>
+        <td mat-cell *matCellDef="let row">
+          <code class="product-code-cell">{{ row.productCode ?? '—' }}</code>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="code">
+        <th mat-header-cell *matHeaderCellDef>{{ 'consoleRolesPage.colCode' | translate }}</th>
+        <td mat-cell *matCellDef="let row"><code>{{ row.code }}</code></td>
+      </ng-container>
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>{{ 'consoleRolesPage.colName' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+      </ng-container>
+      <ng-container matColumnDef="featureCount">
+        <th mat-header-cell *matHeaderCellDef>{{ 'consoleRolesPage.colFeatures' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.featureCount }}</td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="col-actions">{{ 'consoleRolesPage.colActions' | translate }}</th>
+        <td mat-cell *matCellDef="let row" class="col-actions">
+          <a
+            mat-stroked-button
+            color="primary"
+            [routerLink]="paths.catalogConsoleRoleFeatures(row.consoleRoleId)"
+            [queryParams]="configureQueryParams(row)"
+          >
+            <mat-icon aria-hidden="true">tune</mat-icon>
+            {{ 'consoleRolesPage.configure' | translate }}
+          </a>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          {{ 'consoleRolesPage.emptyList' | translate }}
+        </td>
+      </tr>
+    </table>
+    <mat-paginator
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      showFirstLastButtons
+      aria-label="Paginación"
+    />
+    </div>
+  }
+</div>

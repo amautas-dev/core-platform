@@ -1,0 +1,45 @@
+<div class="branding-asset" [class.branding-asset--compact]="compactPreview" [class.branding-asset--favicon]="faviconPreview">
+  <div class="branding-asset__head">
+    <span class="branding-asset__label">{{ label }}</span>
+    @if (inherited) {
+      <span class="branding-asset__badge" [matTooltip]="inheritedLabelKey | translate">{{ 'settings.branding.inheritedBadge' | translate }}</span>
+    }
+  </div>
+
+  <div class="branding-asset__preview" [class.branding-asset__preview--empty]="!displayUrl()">
+    @if (displayUrl(); as src) {
+      @if (!previewLoadFailed()) {
+        <img [src]="src" [alt]="label" loading="eager" decoding="async" (error)="onPreviewImageError()" />
+      } @else if (effectiveFallbackImg(); as fb) {
+        <img [src]="fb" [alt]="label" class="branding-asset__fallback" loading="eager" />
+      } @else {
+        <div class="branding-asset__placeholder" aria-hidden="true"></div>
+      }
+    } @else if (effectiveFallbackImg(); as fb) {
+      <img [src]="fb" [alt]="label" class="branding-asset__fallback" loading="lazy" />
+    } @else {
+      <div class="branding-asset__placeholder" aria-hidden="true"></div>
+    }
+  </div>
+
+  <div class="branding-asset__actions">
+    <input type="file" accept="image/*" class="branding-asset__file" (change)="onFileInput($event)" [disabled]="disabled || uploading()" #fileInp />
+    <button type="button" mat-stroked-button (click)="fileInp.click()" [disabled]="disabled || uploading() || uploadHandler === null">
+      @if (uploading()) {
+        <mat-spinner diameter="18" />
+      } @else {
+        {{ 'settings.branding.uploadImage' | translate }}
+      }
+    </button>
+    @if (showRevertToInherit) {
+      <button type="button" mat-button (click)="revertInherit.emit()" [disabled]="disabled || uploading()">
+        {{ 'settings.branding.revertInherit' | translate }}
+      </button>
+    }
+    @if (showRemove && !inherited) {
+      <button type="button" mat-button color="warn" (click)="cleared.emit()" [disabled]="disabled || uploading()">
+        {{ 'common.delete' | translate }}
+      </button>
+    }
+  </div>
+</div>

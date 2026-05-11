@@ -1,0 +1,106 @@
+.features-list-page {
+  padding: 1.5rem;
+
+  .view-market-bar {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem;
+
+    .field-view-market {
+      min-width: min(100%, 280px);
+    }
+  }
+
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    .header-text {
+      flex: 1;
+    }
+
+    h1 {
+      margin: 0 0 0.25rem 0;
+      font-size: 1.5rem;
+    }
+
+    .page-subtitle {
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 0.875rem;
+    }
+  }
+
+  .error {
+    color: var(--mat-warn-color, #c62828);
+    margin-bottom: 1rem;
+  }
+
+  .loading-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+
+    p {
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  .table-with-paginator {
+    mat-paginator {
+      margin-top: 0.5rem;
+    }
+  }
+
+  .features-table {
+    width: 100%;
+
+    .cell-numeric {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cell-price-market {
+      vertical-align: middle;
+    }
+
+    .price-market-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.35rem 0.5rem;
+      text-align: right;
+    }
+
+    .price-suffix.muted {
+      font-size: 0.8rem;
+      color: rgba(0, 0, 0, 0.55);
+    }
+
+    .pricing-chip-set {
+      --mat-chip-container-height: 22px;
+      font-size: 0.75rem;
+    }
+
+    .chip-override {
+      background-color: color-mix(in srgb, var(--mat-sys-primary, var(--color-primary-500, #0a9ac6)) 18%, transparent);
+    }
+
+    .chip-base {
+      background-color: rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  .empty-hint {
+    margin-top: 1rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}

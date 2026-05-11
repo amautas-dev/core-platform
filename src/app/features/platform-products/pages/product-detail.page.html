@@ -1,0 +1,166 @@
+<div class="product-detail-page">
+  <header class="page-header">
+    <h1>{{ 'products.detailTitle' | translate }}</h1>
+    <div class="header-actions">
+      <a mat-button [routerLink]="paths.catalogProducts()">{{ 'common.back' | translate }}</a>
+      <mat-form-field appearance="outline" class="country-field" subscriptSizing="dynamic">
+        <mat-label>{{ 'products.hub.country' | translate }}</mat-label>
+        <mat-select [value]="selectedCountry()" (selectionChange)="onCountryChange($event.value)">
+          @for (c of countries(); track c.countryCode) {
+            <mat-option [value]="c.countryCode">{{ c.name }} ({{ c.countryCode }})</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <a
+        mat-raised-button
+        color="primary"
+        [routerLink]="editLinkWithCountry()"
+        [queryParams]="editQueryParams()"
+        *hasPermission="PERMISSIONS.PRODUCTS_UPDATE"
+      >
+        {{ 'common.edit' | translate }}
+      </a>
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p>{{ 'common.loading' | translate }}</p>
+  } @else if (product(); as p) {
+    <mat-tab-group animationDuration="0ms" class="product-hub-tabs">
+      <mat-tab [label]="'products.hub.tabOverview' | translate">
+        <mat-card class="detail-card">
+          <mat-card-header>
+            <mat-card-title>{{ p.productName || p.productCode || 'Producto' }}</mat-card-title>
+            <mat-card-subtitle>{{ p.productCode }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <dl class="profile-dl">
+              <dt>ID</dt>
+              <dd>{{ p.productId }}</dd>
+              <dt>{{ 'products.code' | translate }}</dt>
+              <dd>{{ p.productCode ?? '—' }}</dd>
+              <dt>{{ 'products.name' | translate }}</dt>
+              <dd>{{ p.productName ?? '—' }}</dd>
+              <dt>{{ 'products.description' | translate }}</dt>
+              <dd>{{ p.description ?? '—' }}</dd>
+              <dt>{{ 'common.status' | translate }}</dt>
+              <dd>
+                <mat-chip [class.active]="p.isActive" [class.inactive]="!p.isActive">
+                  {{ p.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
+                </mat-chip>
+              </dd>
+              @if (p.createdAt) {
+                <dt>{{ 'tenants.createdAtLabel' | translate }}</dt>
+                <dd>{{ p.createdAt | date : 'medium' }}</dd>
+              }
+            </dl>
+            <h3 class="setup-section-title">{{ 'products.sections.setupReference' | translate }}</h3>
+            <dl class="profile-dl setup-dl">
+              <dt>{{ 'products.setupFeeAmautas' | translate }}</dt>
+              <dd>{{ p.setupFeeAmautas != null ? p.setupFeeAmautas : '—' }}</dd>
+              <dt>{{ 'products.setupFeeClient' | translate }}</dt>
+              <dd>{{ p.setupFeeClient != null ? p.setupFeeClient : '—' }}</dd>
+            </dl>
+          </mat-card-content>
+        </mat-card>
+      </mat-tab>
+
+      <mat-tab [label]="'products.hub.tabPlans' | translate">
+        <div class="plans-tab-toolbar">
+          <mat-slide-toggle
+            [checked]="showInactivePlans()"
+            (change)="onShowInactivePlansChange($event.checked)"
+            color="primary"
+          >
+            {{ 'servicePlans.showInactivePlansToggle' | translate }}
+          </mat-slide-toggle>
+        </div>
+        @if (plansLoading()) {
+          <p>{{ 'common.loading' | translate }}</p>
+        } @else if (productPlans().length === 0) {
+          <p class="muted">{{ 'products.hub.noPlansForProduct' | translate }}</p>
+        } @else {
+          <table mat-table [dataSource]="productPlans()" class="plans-mini-table">
+            <ng-container matColumnDef="planCode">
+              <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.code' | translate }}</th>
+              <td mat-cell *matCellDef="let row">{{ row.planCode }}</td>
+            </ng-container>
+            <ng-container matColumnDef="planName">
+              <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.name' | translate }}</th>
+              <td mat-cell *matCellDef="let row">{{ row.planName }}</td>
+            </ng-container>
+            <ng-container matColumnDef="price">
+              <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.price' | translate }}</th>
+              <td mat-cell *matCellDef="let row">{{ row.price }}</td>
+            </ng-container>
+            <ng-container matColumnDef="currency">
+              <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.currency' | translate }}</th>
+              <td mat-cell *matCellDef="let row">{{ row.currency }}</td>
+            </ng-container>
+            <ng-container matColumnDef="isActive">
+              <th mat-header-cell *matHeaderCellDef>{{ 'common.status' | translate }}</th>
+              <td mat-cell *matCellDef="let row">
+                <mat-chip [class.active]="row.isActive" [class.inactive]="!row.isActive">
+                  {{ row.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
+                </mat-chip>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>{{ 'common.actions' | translate }}</th>
+              <td mat-cell *matCellDef="let row">
+                <a mat-icon-button [routerLink]="paths.catalogServicePlanDetail(row.servicePlanId)" *hasPermission="PERMISSIONS.PLANS_READ">
+                  <mat-icon>visibility</mat-icon>
+                </a>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="plansDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: plansDisplayedColumns"></tr>
+          </table>
+        }
+      </mat-tab>
+
+      <mat-tab [label]="'products.sections.modulesIncluded' | translate">
+        @if (modulesLoading()) {
+          <p>{{ 'common.loading' | translate }}</p>
+        } @else if (productModules().length === 0) {
+          <p class="muted">{{ 'products.noModulesAssigned' | translate }}</p>
+        } @else {
+          <ul class="modules-list">
+            @for (m of productModules(); track m.moduleId) {
+              @if (m.enabled) {
+                <li>
+                  <mat-chip>{{ m.moduleName || m.moduleCode || 'Módulo ' + m.moduleId }}</mat-chip>
+                </li>
+              }
+            }
+          </ul>
+        }
+        <a mat-button [routerLink]="editLinkWithCountry()" [queryParams]="editQueryParams()" *hasPermission="PERMISSIONS.PRODUCTS_UPDATE">
+          {{ 'products.editModules' | translate }}
+        </a>
+      </mat-tab>
+
+      <mat-tab [label]="'products.hub.tabAddons' | translate">
+        @if (addonsLoading()) {
+          <p>{{ 'common.loading' | translate }}</p>
+        } @else if (productAddons().length === 0) {
+          <p class="muted">{{ 'products.hub.noAddons' | translate }}</p>
+        } @else {
+          <ul class="addons-list">
+            @for (a of productAddons(); track a.productAddonId) {
+              @if (a.isActive) {
+                <li>
+                  <mat-chip>{{ a.featureName || a.featureCode || a.featureId }}</mat-chip>
+                </li>
+              }
+            }
+          </ul>
+        }
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

@@ -1,0 +1,15 @@
+<div class="active-market-bar" role="region" [attr.aria-label]="'market.barAria' | translate">
+  <span class="active-market-bar__label">
+    {{ 'market.activePrefix' | translate }}
+    <strong class="active-market-bar__name">{{ market.regionName() }}</strong>
+    <span class="active-market-bar__flag" aria-hidden="true">{{ market.flagEmoji() }}</span>
+  </span>
+  <mat-form-field appearance="outline" class="active-market-bar__select" subscriptSizing="dynamic">
+    <mat-label>{{ 'market.countryCode' | translate }}</mat-label>
+    <mat-select [value]="market.countryCode()" (selectionChange)="onCountryChange($event.value)">
+      @for (cc of market.countrySelectOptions(); track cc) {
+        <mat-option [value]="cc">{{ cc }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</div>

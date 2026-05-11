@@ -1,0 +1,19 @@
+.platform-catalog-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 100%;
+}
+
+/** Alineado con el padding de las páginas del catálogo (p. ej. features-list: 1.5rem). */
+.platform-catalog-shell__tabs {
+  margin: 0 0 1rem;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.platform-catalog-shell__outlet {
+  flex: 1;
+  min-height: 0;
+}

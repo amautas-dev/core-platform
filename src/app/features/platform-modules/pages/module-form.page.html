@@ -1,0 +1,161 @@
+<div class="module-form-page">
+  <header class="page-header">
+    <h1>{{ isEdit() ? ('modules.editModule' | translate) : ('modules.createModule' | translate) }}</h1>
+    <a mat-button [routerLink]="paths.catalogModules()" [queryParams]="market.catalogQueryParams()">{{ 'common.back' | translate }}</a>
+  </header>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading() && isEdit()) {
+    <div class="loading-wrap">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>{{ 'modules.loading' | translate }}</p>
+    </div>
+  } @else {
+    <mat-card class="form-section form-section--module-basic">
+      <mat-card-header>
+        <mat-card-title>{{ 'modules.sectionBasic' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-fields">
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'servicePlans.code' | translate }}</mat-label>
+              <input matInput formControlName="code" [readonly]="isEdit()" placeholder="e.g. reports" />
+              @if (form.get('code')?.hasError('required')) {
+                <mat-error>{{ 'modules.required' | translate }}</mat-error>
+              }
+              @if (form.get('code')?.hasError('maxlength')) {
+                <mat-error>{{ 'modules.maxLength50' | translate }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'tenants.name' | translate }}</mat-label>
+              <input matInput formControlName="name" placeholder="e.g. Reports" />
+              @if (form.get('name')?.hasError('maxlength')) {
+                <mat-error>{{ 'modules.maxLength100' | translate }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>{{ 'modules.description' | translate }}</mat-label>
+              <textarea matInput formControlName="description" rows="2" placeholder="Optional description"></textarea>
+              @if (form.get('description')?.hasError('maxlength')) {
+                <mat-error>{{ 'modules.maxLength255' | translate }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="toggle-row">
+            <mat-slide-toggle formControlName="isActive" color="primary">
+              {{ 'modules.enabled' | translate }}
+            </mat-slide-toggle>
+          </div>
+
+          <div class="actions">
+            <a mat-button [routerLink]="paths.catalogModules()" [queryParams]="market.catalogQueryParams()">{{ 'common.cancel' | translate }}</a>
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || saving() || loading()">
+              {{ saving() ? ('common.saving' | translate) : (isEdit() ? ('common.save' | translate) : ('modules.createModule' | translate)) }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    @if (isEdit()) {
+      <mat-card class="form-section form-section--module-pricing">
+        <mat-card-header>
+          <mat-card-title>{{ 'modules.sectionPricing' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="module-pricing-summary">
+            <p class="module-pricing-summary__explainer">{{ 'modules.pricingDerivedShort' | translate }}</p>
+            <div class="module-pricing-summary__market">
+              <mat-form-field appearance="outline" class="field-pricing-country">
+                <mat-label>{{ 'modules.pricingMarketLabel' | translate }}</mat-label>
+                <mat-select [value]="priceCountry()" (selectionChange)="onModulePricingCountrySelect($event.value)">
+                  @for (cc of modulePricingCountryOptions(); track cc) {
+                    <mat-option [value]="cc">{{ cc }}</mat-option>
+                  }
+                </mat-select>
+                <mat-hint>{{ 'modules.pricingMarketHintShort' | translate }}</mat-hint>
+              </mat-form-field>
+            </div>
+            <div class="module-pricing-summary__kpis">
+              <div class="module-pricing-kpi">
+                <span class="module-pricing-kpi__label">{{ 'modules.pricingKpiBase' | translate }}</span>
+                <span class="module-pricing-kpi__value">{{ sumFeatureMonthlyInModule() | number: '1.2-2' }}</span>
+              </div>
+              <div class="module-pricing-kpi">
+                <span class="module-pricing-kpi__label">{{ 'modules.pricingKpiSuggested' | translate }}</span>
+                <span class="module-pricing-kpi__value module-pricing-kpi__value--accent">{{ moduleSuggestedPrice() | number: '1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @if (isEdit()) {
+      <mat-card class="features-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'modules.featuresSection' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="features-hint">{{ 'modules.featuresSectionHintShort' | translate }}</p>
+          @if (featuresError()) {
+            <p class="error">{{ featuresError() }}</p>
+          }
+          @if (!canUpdateFeatures()) {
+            <p class="features-readonly-hint">{{ 'modules.featuresReadonlyHint' | translate }}</p>
+          }
+          <div class="table-scroll">
+            <table mat-table [dataSource]="features()" class="module-features-table">
+              <ng-container matColumnDef="code">
+                <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.code' | translate }}</th>
+                <td mat-cell *matCellDef="let row">{{ row.code ?? '—' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>{{ 'tenants.name' | translate }}</th>
+                <td mat-cell *matCellDef="let row">{{ row.name ?? '—' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="priceMonthly">
+                <th mat-header-cell *matHeaderCellDef>
+                  {{ 'modules.featurePriceMonthlyColumn' | translate }}
+                  <span class="col-country">({{ priceCountry() }})</span>
+                </th>
+                <td mat-cell *matCellDef="let row">{{ effectiveMonthlyForFeature(row) | number: '1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="otherModule">
+                <th mat-header-cell *matHeaderCellDef>{{ 'modules.featureOtherModuleColumn' | translate }}</th>
+                <td mat-cell *matCellDef="let row">
+                  @if (otherModuleCode(row)) {
+                    <span class="other-mod">{{ otherModuleCode(row) }}</span>
+                  } @else {
+                    <span class="dash">—</span>
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="inModule">
+                <th mat-header-cell *matHeaderCellDef>{{ 'modules.featureInThisModule' | translate }}</th>
+                <td mat-cell *matCellDef="let row">
+                  <mat-slide-toggle
+                    [checked]="isFeatureInThisModule(row)"
+                    [disabled]="!canUpdateFeatures() || isAssigningFeature(row.featureId)"
+                    color="primary"
+                    (change)="onFeatureModuleToggle(row, $event.checked)"
+                  ></mat-slide-toggle>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="featureColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: featureColumns"></tr>
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+</div>

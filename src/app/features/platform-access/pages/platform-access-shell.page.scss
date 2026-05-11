@@ -1,0 +1,16 @@
+.platform-access-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 100%;
+}
+
+.platform-access-shell__tabs {
+  margin: 0 0 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.platform-access-shell__outlet {
+  flex: 1;
+  min-height: 0;
+}

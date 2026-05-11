@@ -1,0 +1,1086 @@
+@use "styles/theme";
+@use "styles/brand-helpers" as brand;
+@use "styles/sidebar";
+@import "styles/brand.css";
+@import "styles/brand-utilities.css";
+
+html,
+body {
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+app-root {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--color-bg, #fbf1e8);
+  color: var(--color-text-primary, #0f2f3a);
+}
+
+/* Keep Material system tokens anchored to runtime brand tokens */
+:root,
+body {
+  --mat-sys-primary: var(--color-primary-500, #1f6feb) !important;
+  --mat-sys-on-primary: var(--color-on-primary, #ffffff) !important;
+  --mat-sys-secondary: var(--color-accent-500, #4dd2f0) !important;
+  --mat-sys-on-secondary: var(--color-on-primary, #ffffff) !important;
+  --mat-option-selected-state-label-text-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-datepicker-selected-date-background-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-datepicker-selected-date-text-color: var(--color-on-primary, #ffffff) !important;
+  --mat-stepper-header-selected-state-icon-background-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-stepper-header-selected-state-icon-foreground-color: var(--color-on-primary, #ffffff) !important;
+  --mat-select-focused-arrow-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-option-selected-state-layer-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 14%, white) !important;
+  --mat-option-hover-state-layer-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 10%, white) !important;
+  --mdc-outlined-text-field-focus-outline-color: var(--color-focus-ring, var(--color-primary-400, #1f6feb)) !important;
+  --mdc-outlined-text-field-focus-label-text-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-outlined-text-field-caret-color: var(--color-primary-500, #1f6feb) !important;
+}
+
+/* Hint "Solo 6 dígitos" un poco más chico */
+::ng-deep .mat-mdc-form-field-hint:has(.hint-seis-digitos),
+::ng-deep .hint-seis-digitos,
+::ng-deep mat-hint.hint-seis-digitos {
+  font-size: 0.7rem !important;
+  opacity: 0.85;
+}
+
+
+/*::ng-deep .pedido-dialog-responsive .mat-dialog-container {
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}*/
+
+/* ============================================
+   ESTILOS UNIFICADOS PARA DIÁLOGOS
+   ============================================ */
+
+::ng-deep .mat-dialog-container {
+  padding: 0 !important;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Quitar padding y background del frame para diálogos de configuración */
+::ng-deep .mat-dialog-container:has(.dialog-container),
+::ng-deep .mat-mdc-dialog-container:has(.dialog-container) {
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Header unificado para todos los diálogos - ESTILOS GLOBALES */
+::ng-deep h2[mat-dialog-title],
+::ng-deep .mat-dialog-title,
+::ng-deep h2.mat-dialog-title,
+::ng-deep .mat-mdc-dialog-title,
+::ng-deep h2.mat-mdc-dialog-title,
+::ng-deep [mat-dialog-title],
+::ng-deep [matDialogTitle],
+::ng-deep .mat-dialog-container h2[mat-dialog-title],
+::ng-deep .mat-dialog-container .mat-dialog-title,
+::ng-deep .mat-dialog-container h2.mat-dialog-title,
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-title,
+::ng-deep .mat-mdc-dialog-container h2.mat-mdc-dialog-title,
+::ng-deep .mat-dialog-container [mat-dialog-title],
+::ng-deep .mat-dialog-container [matDialogTitle],
+::ng-deep .cdk-overlay-pane h2[mat-dialog-title],
+::ng-deep .cdk-overlay-pane .mat-dialog-title,
+::ng-deep .cdk-overlay-pane h2.mat-dialog-title,
+::ng-deep .cdk-overlay-pane .mat-mdc-dialog-title,
+::ng-deep .cdk-overlay-pane h2.mat-mdc-dialog-title,
+::ng-deep .cdk-overlay-pane [mat-dialog-title],
+::ng-deep .cdk-overlay-pane [matDialogTitle],
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-title,
+::ng-deep .mat-mdc-dialog-container h2.mat-mdc-dialog-title,
+::ng-deep .mat-mdc-dialog-container [mat-dialog-title],
+::ng-deep .mat-mdc-dialog-container [matDialogTitle],
+::ng-deep .cdk-overlay-container .mat-mdc-dialog-container .mat-mdc-dialog-title,
+::ng-deep .cdk-overlay-container .mat-mdc-dialog-container h2.mat-mdc-dialog-title,
+::ng-deep .cdk-overlay-container .mat-mdc-dialog-container [mat-dialog-title] {
+  margin: 0 !important;
+  padding: 6px 15px !important;
+  min-height: 45px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-500, #1f6feb) 0%,
+    var(--color-primary-hover, #1e66d3) 100%
+  ) !important;
+  background-color: var(--color-primary-500, #1f6feb) !important;
+  border-bottom: none !important;
+  border-radius: 8px 8px 0 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ============================================
+   MATERIAL GLOBAL THEME OVERRIDES (runtime via --color-*)
+   ============================================ */
+
+/* Primary buttons (all Material variants) follow runtime brand */
+.mat-mdc-raised-button:not(:disabled),
+.mat-mdc-raised-button.mat-primary {
+  --mdc-protected-button-container-color: var(--color-action-primary, var(--color-primary-500, #1f6feb)) !important;
+  --mdc-protected-button-label-text-color: var(--color-on-primary, #ffffff) !important;
+  background-color: var(--color-action-primary, var(--color-primary-500, #1f6feb)) !important;
+  color: var(--color-on-primary, #ffffff) !important;
+}
+
+.mat-mdc-unelevated-button:not(:disabled),
+.mat-mdc-unelevated-button.mat-primary {
+  --mdc-filled-button-container-color: var(--color-action-primary, var(--color-primary-500, #1f6feb)) !important;
+  --mdc-filled-button-label-text-color: var(--color-on-primary, #ffffff) !important;
+  background-color: var(--color-action-primary, var(--color-primary-500, #1f6feb)) !important;
+  color: var(--color-on-primary, #ffffff) !important;
+}
+
+.mat-mdc-raised-button:not(:disabled) .mdc-button__label,
+.mat-mdc-unelevated-button:not(:disabled) .mdc-button__label,
+.mat-mdc-raised-button.mat-primary:not(:disabled) .mdc-button__label,
+.mat-mdc-unelevated-button.mat-primary:not(:disabled) .mdc-button__label {
+  color: var(--color-on-primary, #ffffff) !important;
+}
+
+.mat-mdc-raised-button.mat-primary:hover {
+  --mdc-protected-button-container-color: var(--color-action-primary-hover, var(--color-primary-hover, #1e66d3)) !important;
+  background-color: var(--color-action-primary-hover, var(--color-primary-hover, #1e66d3)) !important;
+}
+
+.mat-mdc-raised-button.mat-primary:active:not(:disabled) {
+  --mdc-protected-button-container-color: var(--color-action-primary-active, var(--color-primary-700, #1b5bbd)) !important;
+  background-color: var(--color-action-primary-active, var(--color-primary-700, #1b5bbd)) !important;
+}
+
+.mat-mdc-unelevated-button.mat-primary:hover {
+  --mdc-filled-button-container-color: var(--color-action-primary-hover, var(--color-primary-hover, #1e66d3)) !important;
+  background-color: var(--color-action-primary-hover, var(--color-primary-hover, #1e66d3)) !important;
+}
+
+.mat-mdc-unelevated-button.mat-primary:active:not(:disabled) {
+  --mdc-filled-button-container-color: var(--color-action-primary-active, var(--color-primary-700, #1b5bbd)) !important;
+  background-color: var(--color-action-primary-active, var(--color-primary-700, #1b5bbd)) !important;
+}
+
+/* Disabled state must still reflect selected theme */
+.mat-mdc-raised-button.mat-primary:disabled,
+.mat-mdc-raised-button.mat-primary.mat-mdc-button-disabled,
+.mat-mdc-unelevated-button.mat-primary:disabled,
+.mat-mdc-unelevated-button.mat-primary.mat-mdc-button-disabled {
+  --mdc-protected-button-disabled-container-color: color-mix(in srgb, var(--color-action-primary, var(--color-primary-500, #1f6feb)) 38%, white) !important;
+  --mdc-protected-button-disabled-label-text-color: color-mix(in srgb, var(--color-on-primary, #ffffff) 92%, black) !important;
+  --mdc-filled-button-disabled-container-color: color-mix(in srgb, var(--color-action-primary, var(--color-primary-500, #1f6feb)) 38%, white) !important;
+  --mdc-filled-button-disabled-label-text-color: color-mix(in srgb, var(--color-on-primary, #ffffff) 92%, black) !important;
+  background-color: color-mix(in srgb, var(--color-action-primary, var(--color-primary-500, #1f6feb)) 38%, white) !important;
+  color: color-mix(in srgb, var(--color-on-primary, #ffffff) 92%, black) !important;
+  opacity: 1 !important;
+}
+
+.mat-mdc-outlined-button.mat-primary {
+  --mdc-outlined-button-label-text-color: var(--color-action-secondary-text, var(--color-primary-500, #1f6feb)) !important;
+  --mdc-outlined-button-outline-color: var(--color-action-secondary-border, var(--color-primary-500, #1f6feb)) !important;
+}
+
+/* Tabs (label + ink bar) follow current brand */
+.mat-mdc-tab-group {
+  --mdc-tab-indicator-active-indicator-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-tab-header-active-label-text-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-tab-header-active-focus-label-text-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-tab-header-active-hover-label-text-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-tab-header-active-focus-indicator-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-tab-header-active-hover-indicator-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-tab-header-active-ripple-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-tab-header-inactive-ripple-color: var(--color-primary-500, #1f6feb) !important;
+}
+
+/* Strong fallback for tab text/underline in case CSS vars are ignored by current Material build */
+.mat-mdc-tab.mdc-tab .mdc-tab__text-label {
+  color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 55%, var(--color-text-primary, #0f2630)) !important;
+}
+
+.mat-mdc-tab .mdc-tab__text-label {
+  transition: color 140ms ease;
+}
+
+.mat-mdc-tab:not(.mdc-tab--active):hover .mdc-tab__text-label,
+.mat-mdc-tab:not(.mdc-tab--active).mdc-tab--active-focus .mdc-tab__text-label {
+  color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 72%, var(--color-text-primary, #0f2630)) !important;
+}
+
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: var(--color-primary-500, #1f6feb) !important;
+}
+
+.mat-mdc-tab .mdc-tab-indicator__content--underline {
+  border-color: var(--color-primary-500, #1f6feb) !important;
+}
+
+.mat-mdc-tab-header,
+.mat-mdc-tab-header .mdc-tab {
+  --mat-tab-header-active-focus-label-text-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-tab-header-active-hover-label-text-color: var(--color-primary-500, #1f6feb) !important;
+}
+
+.mat-mdc-tab-header .mdc-tab--active .mdc-tab__text-label {
+  color: var(--color-primary-500, #1f6feb) !important;
+}
+
+.mat-mdc-tab .mdc-tab__ripple::before,
+.mat-mdc-tab .mdc-tab__ripple::after {
+  background-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 18%, transparent) !important;
+}
+
+.settings-tabs .mat-mdc-tab .mdc-tab__text-label {
+  color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 52%, var(--color-text-primary, #0f2630)) !important;
+}
+
+.settings-tabs .mat-mdc-tab:hover .mdc-tab__text-label,
+.settings-tabs .mat-mdc-tab.cdk-focused .mdc-tab__text-label {
+  color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 78%, var(--color-text-primary, #0f2630)) !important;
+}
+
+.settings-tabs .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: var(--color-primary-500, #1f6feb) !important;
+}
+
+/* Text / link buttons: Cancelar, Volver, pasos (M3 usa --mat-button-text-*, no --mdc-text-button-*) */
+a.mat-mdc-button:not(.mat-mdc-icon-button):not(.mat-primary):not(.mat-warn),
+button.mat-mdc-button:not(.mat-mdc-icon-button):not(.mat-primary):not(.mat-warn) {
+  --mat-button-text-label-text-color: var(--color-action-cancel, #5f6b7a) !important;
+  --mat-button-text-state-layer-color: var(--color-action-cancel, #5f6b7a) !important;
+  --mat-button-text-ripple-color: color-mix(
+    in srgb,
+    var(--color-action-cancel, #5f6b7a) 12%,
+    transparent
+  ) !important;
+  --mdc-text-button-label-text-color: var(--color-action-cancel, #5f6b7a) !important;
+  color: var(--color-action-cancel, #5f6b7a) !important;
+}
+
+a.mat-mdc-button:not(.mat-mdc-icon-button):not(.mat-primary):not(.mat-warn):hover,
+button.mat-mdc-button:not(.mat-mdc-icon-button):not(.mat-primary):not(.mat-warn):hover {
+  --mat-button-text-label-text-color: var(--color-action-cancel-hover, #4a5568) !important;
+  --mat-button-text-state-layer-color: var(--color-action-cancel-hover, #4a5568) !important;
+  --mat-button-text-ripple-color: color-mix(
+    in srgb,
+    var(--color-action-cancel-hover, #4a5568) 12%,
+    transparent
+  ) !important;
+  color: var(--color-action-cancel-hover, #4a5568) !important;
+}
+
+/* Mat icons/buttons used as accents */
+.mat-mdc-icon-button.mat-primary,
+.mat-mdc-button.mat-primary,
+.mat-mdc-outlined-button.mat-primary {
+  --mat-button-text-label-text-color: var(--color-action-primary, var(--color-primary-500, #1f6feb)) !important;
+  --mat-button-outlined-label-text-color: var(--color-action-primary, var(--color-primary-500, #1f6feb)) !important;
+  --mdc-text-button-label-text-color: var(--color-action-primary, var(--color-primary-500, #1f6feb)) !important;
+  --mdc-outlined-button-label-text-color: var(--color-action-primary, var(--color-primary-500, #1f6feb)) !important;
+}
+
+.mat-mdc-icon-button.mat-primary mat-icon {
+  color: var(--color-action-primary, var(--color-primary-500, #1f6feb)) !important;
+}
+
+/* Iconos de acción en tablas: mismo rol que CTA, no color de texto body */
+.mat-mdc-table .mat-mdc-cell .mat-mdc-icon-button:not(.mat-warn) mat-icon,
+.mat-table .mat-cell .mat-mdc-icon-button:not(.mat-warn) mat-icon {
+  color: var(--color-action-primary, var(--color-primary-500, #1f6feb)) !important;
+}
+
+/* Columna matColumnDef="actions" — alineación end (design system 07) */
+.mat-mdc-table .mat-mdc-cell.mat-column-actions,
+.mat-mdc-table .mat-mdc-header-cell.mat-column-actions,
+.mat-table .mat-cell.mat-column-actions,
+.mat-table .mat-header-cell.mat-column-actions {
+  text-align: end;
+}
+
+/* Slide toggles / switches (selected state) */
+.mat-mdc-slide-toggle {
+  --mat-slide-toggle-selected-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  --mat-slide-toggle-selected-handle-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-slide-toggle-selected-hover-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  --mat-slide-toggle-selected-hover-handle-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-slide-toggle-selected-focus-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  --mat-slide-toggle-selected-focus-handle-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-slide-toggle-selected-pressed-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  --mat-slide-toggle-selected-pressed-handle-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-switch-selected-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  --mat-switch-selected-handle-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-switch-selected-hover-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  --mat-switch-selected-hover-handle-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-switch-selected-pressed-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  --mat-switch-selected-pressed-handle-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-switch-selected-focus-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  --mat-switch-selected-focus-handle-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-switch-selected-focus-state-layer-color: var(--color-primary-500, #1f6feb);
+  --mdc-switch-selected-handle-color: var(--color-primary-500, #1f6feb);
+  --mdc-switch-selected-hover-state-layer-color: var(--color-primary-500, #1f6feb);
+  --mdc-switch-selected-pressed-state-layer-color: var(--color-primary-500, #1f6feb);
+  --mdc-switch-selected-focus-handle-color: var(--color-primary-500, #1f6feb);
+  --mdc-switch-selected-hover-handle-color: var(--color-primary-500, #1f6feb);
+  --mdc-switch-selected-pressed-handle-color: var(--color-primary-500, #1f6feb);
+  --mdc-switch-selected-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white);
+  --mdc-switch-selected-focus-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white);
+  --mdc-switch-selected-hover-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white);
+  --mdc-switch-selected-pressed-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white);
+}
+
+.mat-mdc-slide-toggle .mdc-switch {
+  --mat-slide-toggle-selected-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  --mat-slide-toggle-selected-handle-color: var(--color-primary-500, #1f6feb) !important;
+  --mat-switch-selected-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  --mat-switch-selected-handle-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-switch-selected-track-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  --mdc-switch-selected-handle-color: var(--color-primary-500, #1f6feb) !important;
+}
+
+/* Hard override for MDC internals used by slide-toggle */
+.mat-mdc-slide-toggle.mat-mdc-slide-toggle-checked .mdc-switch__track,
+.mat-mdc-slide-toggle .mdc-switch.mdc-switch--selected .mdc-switch__track {
+  background-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+  border-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 45%, white) !important;
+}
+
+.mat-mdc-slide-toggle.mat-mdc-slide-toggle-checked .mdc-switch__handle::after,
+.mat-mdc-slide-toggle .mdc-switch.mdc-switch--selected .mdc-switch__handle::after {
+  background-color: var(--color-primary-500, #1f6feb) !important;
+}
+
+/* Checkbox / radio selected states */
+.mat-mdc-checkbox.mat-primary,
+.mat-mdc-checkbox {
+  --mdc-checkbox-selected-checkmark-color: var(--color-on-primary, #ffffff) !important;
+  --mdc-checkbox-selected-focus-icon-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-checkbox-selected-hover-icon-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-checkbox-selected-icon-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-checkbox-selected-pressed-icon-color: var(--color-primary-500, #1f6feb) !important;
+}
+
+.mat-mdc-checkbox .mdc-checkbox {
+  --mdc-checkbox-selected-checkmark-color: var(--color-on-primary, #ffffff) !important;
+  --mdc-checkbox-selected-icon-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-checkbox-selected-hover-icon-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-checkbox-selected-focus-icon-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-checkbox-selected-pressed-icon-color: var(--color-primary-500, #1f6feb) !important;
+}
+
+/* Hard override for checkbox selected visuals */
+.mat-mdc-checkbox.mat-mdc-checkbox-checked .mdc-checkbox__background,
+.mat-mdc-checkbox .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background,
+.mat-mdc-checkbox .mdc-checkbox__native-control:enabled:indeterminate ~ .mdc-checkbox__background {
+  background-color: var(--color-primary-500, #1f6feb) !important;
+  border-color: var(--color-primary-500, #1f6feb) !important;
+}
+
+.mat-mdc-checkbox .mdc-checkbox__checkmark {
+  color: var(--color-on-primary, #ffffff) !important;
+}
+
+/* Form fields / selects focus + selected option */
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: var(--color-primary-500, #1f6feb) !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-floating-label {
+  color: var(--color-primary-500, #1f6feb) !important;
+}
+
+.mat-mdc-select-arrow {
+  color: var(--color-primary-500, #1f6feb) !important;
+}
+
+.mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) .mdc-list-item__primary-text {
+  color: var(--color-primary-500, #1f6feb) !important;
+}
+
+.mat-mdc-option.mat-mdc-option-active,
+.mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+  background: color-mix(in srgb, var(--color-primary-500, #1f6feb) 10%, white) !important;
+}
+
+.mat-mdc-radio-button.mat-primary,
+.mat-mdc-radio-button {
+  --mdc-radio-selected-focus-icon-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-radio-selected-hover-icon-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-radio-selected-icon-color: var(--color-primary-500, #1f6feb) !important;
+  --mdc-radio-selected-pressed-icon-color: var(--color-primary-500, #1f6feb) !important;
+}
+
+/* Status chips/badges */
+.mat-mdc-chip.active,
+mat-chip.active {
+  background: color-mix(in srgb, var(--color-primary-500, #1f6feb) 14%, white) !important;
+  color: var(--color-primary-500, #1f6feb) !important;
+  border-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 35%, white) !important;
+}
+
+.mat-mdc-chip.inactive,
+mat-chip.inactive {
+  background: color-mix(in srgb, #c62828 12%, white) !important;
+  color: #b71c1c !important;
+  border-color: color-mix(in srgb, #c62828 35%, white) !important;
+}
+
+/* Estilos para el icono dentro del título */
+::ng-deep h2[mat-dialog-title] > mat-icon:first-child,
+::ng-deep .mat-dialog-title > mat-icon:first-child,
+::ng-deep [mat-dialog-title] > mat-icon:first-child,
+::ng-deep .mat-mdc-dialog-title > mat-icon:first-child,
+::ng-deep h2.mat-mdc-dialog-title > mat-icon:first-child,
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-title > mat-icon:first-child,
+::ng-deep .mat-mdc-dialog-container h2.mat-mdc-dialog-title > mat-icon:first-child {
+  color: #ffffff !important;
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Estilos para el span del texto */
+::ng-deep h2[mat-dialog-title] > span,
+::ng-deep .mat-dialog-title > span,
+::ng-deep [mat-dialog-title] > span,
+::ng-deep .mat-mdc-dialog-title > span,
+::ng-deep h2.mat-mdc-dialog-title > span,
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-title > span,
+::ng-deep .mat-mdc-dialog-container h2.mat-mdc-dialog-title > span {
+  flex: 1;
+  color: #ffffff !important;
+}
+
+/* Estilos para el botón de cerrar */
+::ng-deep h2[mat-dialog-title] > button[mat-icon-button],
+::ng-deep .mat-dialog-title > button[mat-icon-button],
+::ng-deep [mat-dialog-title] > button[mat-icon-button],
+::ng-deep .mat-mdc-dialog-title > button[mat-icon-button],
+::ng-deep h2.mat-mdc-dialog-title > button[mat-icon-button],
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-title > button[mat-icon-button],
+::ng-deep .mat-mdc-dialog-container h2.mat-mdc-dialog-title > button[mat-icon-button] {
+  margin-left: auto !important;
+  color: #ffffff !important;
+}
+
+::ng-deep h2[mat-dialog-title] > button[mat-icon-button]:hover,
+::ng-deep .mat-dialog-title > button[mat-icon-button]:hover,
+::ng-deep [mat-dialog-title] > button[mat-icon-button]:hover,
+::ng-deep .mat-mdc-dialog-title > button[mat-icon-button]:hover,
+::ng-deep h2.mat-mdc-dialog-title > button[mat-icon-button]:hover,
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-title > button[mat-icon-button]:hover,
+::ng-deep .mat-mdc-dialog-container h2.mat-mdc-dialog-title > button[mat-icon-button]:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+::ng-deep h2[mat-dialog-title] > button[mat-icon-button] mat-icon,
+::ng-deep .mat-dialog-title > button[mat-icon-button] mat-icon,
+::ng-deep [mat-dialog-title] > button[mat-icon-button] mat-icon,
+::ng-deep .mat-mdc-dialog-title > button[mat-icon-button] mat-icon,
+::ng-deep h2.mat-mdc-dialog-title > button[mat-icon-button] mat-icon,
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-title > button[mat-icon-button] mat-icon,
+::ng-deep .mat-mdc-dialog-container h2.mat-mdc-dialog-title > button[mat-icon-button] mat-icon {
+  color: #ffffff !important;
+}
+
+/* Estilos globales para dialog-header */
+::ng-deep .dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 15px;
+  min-height: 45px !important;
+  background: linear-gradient(135deg, var(--color-primary-500, #1f6feb) 0%, var(--color-primary-hover, #1e66d3) 100%);
+  color: var(--color-on-primary, #ffffff);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0;
+
+  /* Estilos para h2 dentro de dialog-header */
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-on-primary, #ffffff);
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    .header-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: var(--color-on-primary, #ffffff);
+    }
+
+    .header-text {
+      .header-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--color-on-primary, #ffffff);
+      }
+
+      .header-subtitle {
+        margin: 4px 0 0 0;
+        opacity: 0.9;
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--color-on-primary, #ffffff);
+      }
+    }
+  }
+
+  .btn-cerrar {
+    color: var(--color-on-primary, #ffffff);
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+/* Estilos para h2.dialog-header (caso especial) */
+::ng-deep h2.dialog-header {
+  margin: 0;
+  padding: 6px 15px;
+  min-height: 45px !important;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-on-primary, #ffffff);
+  background: linear-gradient(135deg, var(--color-primary-500, #1f6feb) 0%, var(--color-primary-hover, #1e66d3) 100%);
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Contenido del diálogo */
+::ng-deep mat-dialog-content {
+  padding: 24px !important;
+  margin: 0 !important;
+  max-height: calc(90vh - 140px);
+}
+
+/* Estilos para el diálogo de Registrar Entrega */
+::ng-deep .registrar-entrega-dialog {
+  // Centrar el diálogo
+  .mat-mdc-dialog-container {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    max-width: 1400px !important;
+    width: 95vw !important;
+    height: 95vh !important;
+    max-height: 95vh !important;
+    padding: 0 !important;
+  }
+  
+  // El backdrop usa el estilo global estándar automáticamente
+  // No necesita estilos adicionales, el .cdk-overlay-backdrop global se aplica
+}
+
+// Bloquear scroll del body cuando hay un diálogo abierto
+body.cdk-global-scrollblock {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+// Asegurar que el overlay del diálogo bloquee el scroll
+// Este estilo se elimina porque el estilo global unificado ya lo maneja
+.cdk-overlay-container {
+  // El backdrop se maneja en el estilo global unificado (línea 337)
+}
+
+/* Footer unificado para botones de acción */
+::ng-deep mat-dialog-actions {
+  margin: 0;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  background-color: var(--color-surface, #fff);
+  border-top: 1px solid var(--color-border, #e0e0e0);
+  min-height: 72px;
+  box-sizing: border-box;
+}
+
+/* Estilos para botones en el footer */
+::ng-deep mat-dialog-actions button {
+  min-width: 120px;
+}
+
+/* Compatibilidad con clases personalizadas de acciones */
+::ng-deep .dialog-actions,
+::ng-deep .acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+  margin: 0;
+  background-color: var(--color-surface, #fff);
+  border-top: 1px solid var(--color-border, #e0e0e0);
+  min-height: 72px;
+  box-sizing: border-box;
+}
+
+/* Diálogo de Pedidos de Zonas - Superposición sobre el menú */
+/* El sidebar tiene z-index: 100, los diálogos deben estar más altos */
+
+/* Cuando el diálogo tiene la clase personalizada */
+::ng-deep .mat-dialog-container.pedidos-zonas-dialog-overlay {
+  position: relative !important;
+}
+
+/* Asegurar que el overlay container esté encima de TODO, incluyendo scroll */
+::ng-deep .cdk-overlay-container {
+  z-index: 10000 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+}
+
+/* El panel del diálogo debe estar por encima del backdrop */
+::ng-deep .cdk-overlay-pane {
+  z-index: 10001 !important;
+  position: relative !important;
+  pointer-events: auto !important;
+}
+
+/* Contenedor del diálogo */
+::ng-deep .mat-dialog-container {
+  z-index: 10001 !important;
+  position: relative !important;
+}
+
+/* ============================================
+   BACKDROP ESTÁNDAR UNIFICADO PARA DIÁLOGOS
+   ============================================ */
+/* 
+ * Estilo estándar usado por todos los diálogos del sistema.
+ * Si un diálogo no especifica backdropClass, este estilo se aplica automáticamente.
+ * Para ser explícito, puedes usar backdropClass: 'dialog-backdrop'
+ */
+
+/* Backdrop base - aplica a todos los diálogos por defecto */
+::ng-deep .cdk-overlay-backdrop {
+  z-index: 10000 !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: auto !important;
+  touch-action: none !important; /* Bloquea scroll táctil */
+  overflow: hidden !important;
+  -webkit-overflow-scrolling: none !important;
+  overscroll-behavior: none !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transition: opacity 400ms cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* Backdrop cuando está mostrándose (con blur) */
+::ng-deep .cdk-overlay-backdrop.cdk-overlay-backdrop-showing {
+  z-index: 10000 !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  touch-action: none !important; /* Bloquea scroll táctil */
+  overflow: hidden !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Clase estándar explícita - Aplica todos los estilos del backdrop estándar */
+/* Cobertura completa para todas las variantes de Angular Material con máxima especificidad */
+::ng-deep .cdk-overlay-backdrop.dialog-backdrop,
+::ng-deep .cdk-overlay-backdrop.cdk-overlay-backdrop.dialog-backdrop,
+::ng-deep .dialog-backdrop.cdk-overlay-backdrop,
+::ng-deep .dialog-backdrop {
+  z-index: 10000 !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: auto !important;
+  touch-action: none !important;
+  overflow: hidden !important;
+  -webkit-overflow-scrolling: none !important;
+  overscroll-behavior: none !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transition: opacity 400ms cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+::ng-deep .cdk-overlay-backdrop.dialog-backdrop.cdk-overlay-backdrop-showing,
+::ng-deep .cdk-overlay-backdrop.cdk-overlay-backdrop.dialog-backdrop.cdk-overlay-backdrop-showing,
+::ng-deep .dialog-backdrop.cdk-overlay-backdrop.cdk-overlay-backdrop-showing,
+::ng-deep .dialog-backdrop.cdk-overlay-backdrop-showing {
+  z-index: 10000 !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  touch-action: none !important;
+  overflow: hidden !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Bloquear scroll del body cuando hay un diálogo abierto */
+/* Angular Material agrega la clase cdk-global-scrollblock automáticamente */
+body.cdk-global-scrollblock {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+html.cdk-global-scrollblock {
+  overflow: hidden !important;
+}
+
+/* Bloquear scroll cuando hay un backdrop visible */
+::ng-deep body:has(.cdk-overlay-backdrop-showing),
+::ng-deep body.cdk-global-scrollblock {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+/* Bloquear scroll del contenido principal cuando hay diálogo */
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .app-shell .main__page,
+::ng-deep body.cdk-global-scrollblock .app-shell .main__page {
+  overflow: hidden !important;
+  pointer-events: none !important;
+  touch-action: none !important;
+  -webkit-overflow-scrolling: auto !important;
+}
+
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .app-shell .main,
+::ng-deep body.cdk-global-scrollblock .app-shell .main {
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
+/* Asegurar que el backdrop no se pueda hacer clic para cerrar el diálogo */
+/* El backdrop solo bloquea interacciones, el cierre se controla con disableClose */
+::ng-deep .cdk-overlay-backdrop.cdk-overlay-backdrop-showing {
+  cursor: not-allowed;
+}
+
+/* Panel del diálogo Configurar Carga */
+::ng-deep .configurar-carga-dialog {
+  z-index: 10001 !important;
+}
+
+/* Panel del diálogo Configurar Carga - solo z-index para el panel */
+::ng-deep .configurar-carga-dialog {
+  z-index: 10001 !important;
+}
+
+/* Panel del diálogo Registrar Entrega - z-index para el panel (igual que configurar-carga) */
+::ng-deep .registrar-entrega-dialog {
+  z-index: 10001 !important;
+}
+
+/* El backdrop para registrar-entrega usa el estilo global automáticamente (igual que configurar-carga) */
+
+/* El backdrop para configurar-carga usa la clase dialog-backdrop que ya tiene todos los estilos necesarios */
+
+/* 
+ * Backdrops específicos - DEPRECADOS: Estos estilos se mantienen solo para
+ * compatibilidad hacia atrás. Los componentes ahora usan 'dialog-backdrop' o
+ * no especifican backdropClass (usa el estilo global).
+ * 
+ * TODO: Eliminar estos estilos después de verificar que no hay otros usos
+ */
+
+/* Bloquear scroll del contenido principal cuando hay diálogo */
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .app-shell .main__page {
+  overflow: hidden !important;
+  pointer-events: none !important;
+  touch-action: none !important;
+}
+
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .app-shell .main {
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
+/* Alternativa usando clase cuando :has no está disponible */
+::ng-deep .cdk-overlay-backdrop-showing ~ * .app-shell .main__page,
+::ng-deep .cdk-global-scrollblock ~ * .app-shell .main__page {
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ============================================
+   ESTILOS ESPECÍFICOS PARA DIÁLOGO REGISTRAR ENTREGA
+   ============================================ */
+
+::ng-deep .registrar-entrega-dialog {
+  // Centrar el diálogo
+  .mat-mdc-dialog-container {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    max-width: 1400px !important;
+    width: 95vw !important;
+    height: 95vh !important;
+    max-height: 95vh !important;
+    padding: 0 !important;
+  }
+  
+  // Asegurar que el overlay pane esté centrado
+  .cdk-overlay-pane {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
+
+// Bloquear completamente el scroll del fondo cuando el diálogo está abierto
+::ng-deep body:has(.registrar-entrega-dialog),
+::ng-deep body:has(.cdk-overlay-backdrop-showing),
+::ng-deep body.cdk-global-scrollblock {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+  -webkit-overflow-scrolling: none !important;
+}
+
+::ng-deep html:has(.registrar-entrega-dialog),
+::ng-deep html:has(.cdk-overlay-backdrop-showing),
+::ng-deep html.cdk-global-scrollblock {
+  overflow: hidden !important;
+  height: 100% !important;
+  overscroll-behavior: none !important;
+}
+
+// Bloquear scroll en el contenido principal cuando el diálogo está abierto
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .app-shell,
+::ng-deep body:has(.registrar-entrega-dialog) .app-shell,
+::ng-deep body.cdk-global-scrollblock .app-shell {
+  overflow: hidden !important;
+  height: 100vh !important;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+  position: relative !important;
+  max-height: 100vh !important;
+}
+
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .app-shell .main,
+::ng-deep body:has(.registrar-entrega-dialog) .app-shell .main,
+::ng-deep body.cdk-global-scrollblock .app-shell .main {
+  overflow: hidden !important;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+}
+
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .app-shell .main__page,
+::ng-deep body:has(.registrar-entrega-dialog) .app-shell .main__page,
+::ng-deep body.cdk-global-scrollblock .app-shell .main__page {
+  overflow: hidden !important;
+  pointer-events: none !important;
+  touch-action: none !important;
+  -webkit-overflow-scrolling: none !important;
+  overscroll-behavior: none !important;
+  height: 100vh !important;
+  position: relative !important;
+  max-height: 100vh !important;
+}
+
+// Bloquear scroll en todos los elementos hijos del contenido principal
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .app-shell .main__page *,
+::ng-deep body:has(.registrar-entrega-dialog) .app-shell .main__page *,
+::ng-deep body.cdk-global-scrollblock .app-shell .main__page * {
+  overflow: hidden !important;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+}
+
+// Bloquear scroll en elementos con clase específica y todos los contenedores
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .lista-entregas,
+::ng-deep body:has(.registrar-entrega-dialog) .lista-entregas,
+::ng-deep body.cdk-global-scrollblock .lista-entregas,
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .lista-entregas-mapa,
+::ng-deep body:has(.registrar-entrega-dialog) .lista-entregas-mapa,
+::ng-deep body.cdk-global-scrollblock .lista-entregas-mapa,
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .entregas-container,
+::ng-deep body:has(.registrar-entrega-dialog) .entregas-container,
+::ng-deep body.cdk-global-scrollblock .entregas-container,
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .tab-content,
+::ng-deep body:has(.registrar-entrega-dialog) .tab-content,
+::ng-deep body.cdk-global-scrollblock .tab-content {
+  overflow: hidden !important;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+  pointer-events: none !important;
+  -webkit-overflow-scrolling: none !important;
+}
+
+// Asegurar que el backdrop use el estilo global estándar
+// El backdrop para registrar-entrega usa automáticamente el estilo global .cdk-overlay-backdrop
+// No se necesitan estilos adicionales aquí
+
+// Prevenir que el scroll del diálogo se propague al fondo
+::ng-deep .registrar-entrega-dialog .dialog-content {
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+// Bloquear cualquier scroll que pueda estar pasando por el backdrop
+// Bloquear scroll en TODOS los elementos detrás del diálogo
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .app-shell,
+::ng-deep body:has(.registrar-entrega-dialog) .app-shell,
+::ng-deep body.cdk-global-scrollblock .app-shell {
+  overscroll-behavior: none !important;
+  -webkit-overflow-scrolling: none !important;
+}
+
+// Prevenir que el scroll se propague desde el diálogo
+::ng-deep body:has(.registrar-entrega-dialog) *:not(.registrar-entrega-dialog):not(.dialog-content):not(.dialog-container) {
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+}
+
+// Prevenir que el scroll del diálogo se propague al fondo
+::ng-deep .registrar-entrega-dialog .dialog-content {
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+// Bloquear cualquier scroll que pueda estar pasando por el backdrop
+::ng-deep body:has(.cdk-overlay-backdrop-showing) * {
+  overscroll-behavior: none !important;
+}
+
+::ng-deep body:has(.registrar-entrega-dialog) *:not(.registrar-entrega-dialog *):not(.dialog-content *):not(.dialog-container *),
+::ng-deep body.cdk-global-scrollblock *:not(.registrar-entrega-dialog *):not(.dialog-content *):not(.dialog-container *) {
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+}
+
+// Bloquear scroll específicamente en elementos con scroll detrás del diálogo
+::ng-deep body:has(.cdk-overlay-backdrop-showing) .main__page,
+::ng-deep body:has(.registrar-entrega-dialog) .main__page,
+::ng-deep body.cdk-global-scrollblock .main__page {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+  -webkit-overflow-scrolling: none !important;
+  pointer-events: none !important;
+  position: relative !important;
+  max-height: 100vh !important;
+  height: 100vh !important;
+}
+
+/* ============================================
+   ESTILOS PARA DIÁLOGO DE GRÁFICOS MAXIMIZADOS
+   ============================================ */
+
+::ng-deep .chart-maximized-dialog {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    max-width: 90vw !important;
+    max-height: 90vh !important;
+    width: 90vw !important;
+    height: 90vh !important;
+  }
+}
+
+/* ============================================
+   ESTILOS PARA DIÁLOGO DE PENDIENTES DE RENDIR
+   ============================================ */
+
+::ng-deep .pendientes-rendir-dialog-panel {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    max-width: 90vw !important;
+    max-height: 90vh !important;
+    width: 90vw !important;
+    height: 90vh !important;
+  }
+}
+
+/* ============================================
+   ALINEACIÓN DE INPUTS NUMÉRICOS Y MONEY
+   ============================================ */
+
+/* Alinear a la derecha todos los inputs de tipo number */
+input[type="number"],
+input[type="number"]:focus,
+input[type="number"]:not(:focus) {
+  text-align: right !important;
+}
+
+/* Alinear a la derecha inputs dentro de mat-form-field de tipo number */
+::ng-deep mat-form-field input[type="number"],
+::ng-deep .mat-mdc-form-field input[type="number"],
+::ng-deep .mat-form-field input[type="number"] {
+  text-align: right !important;
+}
+
+/* Alinear a la derecha inputs con atributo type="money" o clase money */
+input[type="money"],
+input.money,
+::ng-deep mat-form-field input[type="money"],
+::ng-deep .mat-mdc-form-field input[type="money"],
+::ng-deep .mat-form-field input[type="money"],
+::ng-deep mat-form-field input.money,
+::ng-deep .mat-mdc-form-field input.money,
+::ng-deep .mat-form-field input.money {
+  text-align: right !important;
+}
+
+/* UI Kit premium (tokens + Material); debe ir al final para refinar encima de overrides */
+@import "styles/ui-kit.scss";

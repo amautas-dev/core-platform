@@ -1,0 +1,70 @@
+.console-roles-list-page {
+  padding: 1.5rem;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+
+.page-header {
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.65));
+    font-size: 0.95rem;
+  }
+}
+
+.error-banner {
+  padding: 0.75rem 1rem;
+  background: var(--mat-sys-error-container, #ffebee);
+  color: var(--mat-sys-on-error-container, #b71c1c);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.hint-card {
+  margin-bottom: 1.25rem;
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+}
+
+.table-with-paginator {
+  overflow-x: auto;
+
+  mat-paginator {
+    border-top: 1px solid color-mix(in srgb, var(--mat-sys-outline, #ccc) 40%, transparent);
+  }
+}
+
+.roles-table {
+  width: 100%;
+}
+
+.col-actions {
+  width: 1%;
+  white-space: nowrap;
+  text-align: end;
+}
+
+.col-actions a {
+  text-decoration: none;
+}
+
+code {
+  font-size: 0.85rem;
+}
+
+.product-code-cell {
+  font-weight: 600;
+}

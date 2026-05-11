@@ -1,0 +1,107 @@
+<div class="system-health-page">
+  <h1>{{ 'systemHealth.title' | translate }}</h1>
+  <p class="page-subtitle">{{ 'systemHealth.subtitle' | translate }}</p>
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>{{ 'systemHealth.loading' | translate }}</span>
+    </div>
+  }
+
+  @if (error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon class="error-icon">error</mat-icon>
+        <p>{{ 'systemHealth.fetchError' | translate }}</p>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (!loading() && health(); as h) {
+    <section class="health-cards">
+      <mat-card class="health-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'systemHealth.infrastructure' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="status-row">
+            <span class="status-label">{{ 'systemHealth.database' | translate }}</span>
+            <span class="status-value" [class.error]="!isOk(h.database)">
+              {{ h.database }}
+            </span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">{{ 'systemHealth.redis' | translate }}</span>
+            <span class="status-value" [class.error]="!isOk(h.redis)">
+              {{ h.redis }}
+            </span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">{{ 'systemHealth.workersRunning' | translate }}</span>
+            <span class="status-value" [class.error]="!isOk(h.redis)">
+              {{ h.redis === 'ok' ? ('systemHealth.ok' | translate) : ('systemHealth.error' | translate) }}
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="health-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'systemHealth.queues' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="status-row">
+            <span class="status-label">{{ 'systemHealth.waitingJobs' | translate }}</span>
+            <span class="status-value">{{ h.workers.queuedJobs | number }}</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">{{ 'systemHealth.activeJobs' | translate }}</span>
+            <span class="status-value">{{ h.workers.activeJobs | number }}</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">{{ 'systemHealth.failedJobs' | translate }}</span>
+            <span class="status-value" [class.error]="h.workers.failedJobs > 0">
+              {{ h.workers.failedJobs | number }}
+            </span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">{{ 'systemHealth.delayedJobs' | translate }}</span>
+            <span class="status-value">{{ h.workers.delayedJobs | number }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="health-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'systemHealth.resources' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="status-row">
+            <span class="status-label">{{ 'systemHealth.memoryUsage' | translate }}</span>
+            <span class="status-value">
+              @if (h.system.memoryUsage && (h.system.memoryUsage.usedMb != null || h.system.memoryUsage.totalMb != null)) {
+                {{ h.system.memoryUsage.usedMb ?? 0 }} / {{ h.system.memoryUsage.totalMb ?? 0 }} MB
+                ({{ h.system.memoryUsage.usagePercent ?? 0 }}%)
+              } @else {
+                —
+              }
+            </span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">{{ 'systemHealth.nodeVersion' | translate }}</span>
+            <span class="status-value">{{ h.system.nodeVersion || '—' }}</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">{{ 'systemHealth.uptime' | translate }}</span>
+            <span class="status-value">{{ formatUptime(h.system.uptime) }}</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">{{ 'systemHealth.environment' | translate }}</span>
+            <span class="status-value">{{ h.system.environment || '—' }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+  }
+</div>

@@ -1,0 +1,51 @@
+<header class="header">
+  @if (isMobile) {
+    <button class="hamburger" type="button" (click)="toggleSidebar.emit()">
+      <mat-icon>menu</mat-icon>
+    </button>
+  }
+
+  <span class="title">{{ currentTitle | translate }}</span>
+
+  <div class="actions">
+    <!-- Language switcher -->
+    <button mat-icon-button [matMenuTriggerFor]="langMenu" class="lang-button" [attr.aria-label]="'language.label' | translate">
+      <mat-icon>language</mat-icon>
+    </button>
+    <span class="lang-code" aria-hidden="true">{{ languageService.currentLang | uppercase }}</span>
+    <mat-menu #langMenu="matMenu" class="lang-menu">
+      <button mat-menu-item (click)="languageService.setLanguage('es')">
+        <span>Español</span>
+        @if (languageService.currentLang === 'es') {
+          <mat-icon class="check">check</mat-icon>
+        }
+      </button>
+      <button mat-menu-item (click)="languageService.setLanguage('en')">
+        <span>English</span>
+        @if (languageService.currentLang === 'en') {
+          <mat-icon class="check">check</mat-icon>
+        }
+      </button>
+    </mat-menu>
+
+    <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-button">
+      <img class="avatar-img" [src]="avatarUrl" alt="Avatar" />
+    </button>
+
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item disabled>
+        <mat-icon>person</mat-icon>
+        <span>{{ userName || ('common.user' | translate) }}</span>
+      </button>
+      <button mat-menu-item type="button" (click)="goToProfile()">
+        <mat-icon>manage_accounts</mat-icon>
+        <span>{{ 'menu.profile' | translate }}</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout.emit()">
+        <mat-icon>logout</mat-icon>
+        <span>{{ 'common.logout' | translate }}</span>
+      </button>
+    </mat-menu>
+  </div>
+</header>

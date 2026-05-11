@@ -1,0 +1,59 @@
+<div class="login-page">
+  <div class="login-content">
+    <div class="brand" aria-label="Amautas"></div>
+
+    <div class="panel mat-elevation-z4">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <h3>{{ 'authLogin.emailTitle' | translate }}</h3>
+        <mat-form-field appearance="outline" class="login-field w-100">
+          <mat-label>{{ 'authLogin.emailLabel' | translate }}</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="username"
+            name="username"
+            autocomplete="email"
+            inputmode="email"
+          />
+        </mat-form-field>
+
+        <h3>{{ 'authLogin.passwordTitle' | translate }}</h3>
+        <mat-form-field appearance="outline" class="login-field w-100">
+          <mat-label>{{ 'authLogin.passwordLabel' | translate }}</mat-label>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            name="password"
+            autocomplete="current-password"
+          />
+          <button
+            class="toggle-password"
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword.set(!hidePassword())"
+            [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!--<mat-checkbox formControlName="remember">Recordarme</mat-checkbox>-->
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="login-submit"
+          [disabled]="loading()"
+        >
+          {{ loading() ? ('authLogin.submitting' | translate) : ('authLogin.submit' | translate) }}
+        </button>
+
+        <a class="forgot" href="javascript:void(0)">{{ 'authLogin.forgotPassword' | translate }}</a>
+        <p *ngIf="error()" class="error">{{ error()! | translate }}</p>
+      </form>
+    </div>
+  </div>
+</div>

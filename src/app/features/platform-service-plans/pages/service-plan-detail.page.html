@@ -1,0 +1,167 @@
+<div class="service-plan-detail-page">
+  <header class="page-header">
+    <h1>{{ 'servicePlans.detailTitle' | translate }}</h1>
+    <div class="header-actions">
+      <a mat-button [routerLink]="paths.catalogServicePlans()" [queryParams]="listQueryParams()">{{
+        'common.back' | translate
+      }}</a>
+      @if (routePlanId() !== null) {
+        <a
+          mat-raised-button
+          color="primary"
+          [routerLink]="paths.catalogServicePlanEdit(routePlanId()!)"
+          [queryParams]="listQueryParams()"
+          *hasPermission="PERMISSIONS.PLANS_UPDATE"
+        >
+          {{ 'common.edit' | translate }}
+        </a>
+      }
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p>{{ 'servicePlans.loading' | translate }}</p>
+  } @else if (plan(); as p) {
+    <p class="catalog-country-banner">{{ catalogCountryContextText() }}</p>
+    <mat-tab-group>
+      <mat-tab [label]="'servicePlans.planInfo' | translate">
+        <mat-card class="detail-card">
+          <mat-card-header>
+            <mat-card-title>{{ p.planName }}</mat-card-title>
+            <mat-card-subtitle>{{ p.planCode }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <dl class="profile-dl">
+              <dt>ID</dt>
+              <dd>{{ p.servicePlanId }}</dd>
+              <dt>{{ 'servicePlans.code' | translate }}</dt>
+              <dd>{{ p.planCode }}</dd>
+              <dt>{{ 'servicePlans.name' | translate }}</dt>
+              <dd>{{ p.planName }}</dd>
+              @if (p.description) {
+                <dt>{{ 'servicePlans.description' | translate }}</dt>
+                <dd class="plan-description">{{ p.description }}</dd>
+              }
+              <dt>{{ 'servicePlans.price' | translate }}</dt>
+              <dd>{{ p.price }} {{ p.currency }}</dd>
+              <dt>{{ 'common.status' | translate }}</dt>
+              <dd>
+                <mat-chip [class.active]="p.isActive" [class.inactive]="!p.isActive">
+                  {{ p.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
+                </mat-chip>
+              </dd>
+              <dt>{{ 'tenants.createdAtLabel' | translate }}</dt>
+              <dd>{{ p.createdAt | date : 'medium' }}</dd>
+            </dl>
+          </mat-card-content>
+        </mat-card>
+      </mat-tab>
+
+      <mat-tab [label]="'servicePlans.limitsTab' | translate">
+        @if (limitsLoading()) {
+          <p>{{ 'servicePlans.loadingLimits' | translate }}</p>
+        } @else {
+          <mat-card class="detail-card">
+            <mat-card-header>
+              <mat-card-title>{{ 'servicePlans.limitsTitle' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ 'servicePlans.limitsSubtitle' | translate }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="tab-hint">{{ 'servicePlans.limitsTabHint' | translate }}</p>
+              <table mat-table [dataSource]="editableLimits()" class="limits-table">
+                <ng-container matColumnDef="limitCode">
+                  <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.limitCode' | translate }}</th>
+                  <td mat-cell *matCellDef="let row; let i = index">
+                    <input
+                      matInput
+                      [value]="row.limitCode"
+                      (input)="updateEditableLimit(i, 'limitCode', $any($event.target).value)"
+                      placeholder="ej. maxUsers"
+                    />
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="limitValue">
+                  <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.limitValue' | translate }}</th>
+                  <td mat-cell *matCellDef="let row; let i = index">
+                    <input
+                      matInput
+                      type="number"
+                      [value]="row.limitValue"
+                      (input)="updateEditableLimit(i, 'limitValue', $any($event.target).value)"
+                      placeholder="0"
+                    />
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let row; let i = index">
+                    <button mat-icon-button type="button" (click)="removeLimitRow(i)" [attr.aria-label]="'servicePlans.removeLimit' | translate">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="['limitCode', 'limitValue', 'actions']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['limitCode', 'limitValue', 'actions']"></tr>
+              </table>
+              <div class="limits-actions">
+                <button mat-button type="button" (click)="addLimitRow()">
+                  <mat-icon>add</mat-icon>
+                  {{ 'servicePlans.addLimit' | translate }}
+                </button>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  (click)="saveLimits()"
+                  [disabled]="limitsSaving()"
+                  *hasPermission="PERMISSIONS.PLANS_UPDATE"
+                >
+                  {{ limitsSaving() ? ('common.saving' | translate) : ('servicePlans.saveLimits' | translate) }}
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </mat-tab>
+
+      <mat-tab [label]="'servicePlans.modulesTab' | translate">
+        @if (modulesLoading()) {
+          <p>{{ 'servicePlans.loading' | translate }}</p>
+        } @else {
+          <mat-card class="detail-card">
+            <mat-card-header>
+              <mat-card-title>{{ 'servicePlans.planModulesTitle' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ 'servicePlans.planModulesSubtitle' | translate }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="tab-hint">{{ 'servicePlans.planModulesHint' | translate }}</p>
+              <p class="tab-hint tab-hint--strong">{{ planModulesMarketHintText() }}</p>
+              @if (planModules().length === 0) {
+                <p>No hay módulos en la plataforma.</p>
+              } @else {
+                <ul class="plan-modules-list">
+                  @for (m of planModules(); track m.moduleId) {
+                    <li class="plan-module-row">
+                      <span class="module-label">{{ m.moduleName || m.moduleCode || 'Módulo ' + m.moduleId }}</span>
+                      <mat-slide-toggle
+                        [checked]="!!m.enabled"
+                        (change)="onModuleToggle(m, $event.checked)"
+                        [disabled]="modulesSaving()"
+                        color="primary"
+                        *hasPermission="PERMISSIONS.PLANS_UPDATE"
+                      >
+                      </mat-slide-toggle>
+                    </li>
+                  }
+                </ul>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

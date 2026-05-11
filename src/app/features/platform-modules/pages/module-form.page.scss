@@ -1,0 +1,206 @@
+.module-form-page {
+  padding: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+  }
+
+  .error {
+    color: var(--mat-warn-color, #c62828);
+    margin-bottom: 1rem;
+  }
+
+  .form-fields {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    .field-full {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+
+    .field-half {
+      width: 100%;
+      min-width: 0;
+    }
+
+    @media (min-width: 960px) {
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+    }
+  }
+
+  .toggle-row {
+    margin-bottom: 1rem;
+  }
+
+  .form-section {
+    margin-bottom: 1.5rem;
+
+    mat-card-title {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+  }
+
+  .form-section--module-pricing {
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--mat-sys-primary, var(--color-primary-500, #0a9ac6)) 22%, transparent);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--mat-sys-primary, var(--color-primary-500, #0a9ac6)) 6%, #fff) 0%,
+      #fff 52%
+    );
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+    .module-pricing-summary {
+      margin-top: 0;
+      padding: 0;
+      background: transparent;
+      border: none;
+    }
+  }
+
+  .module-pricing-summary {
+    margin: 1.25rem 0 0;
+    padding: 1rem 1.125rem;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.035);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+
+    &__title {
+      margin: 0 0 0.5rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    &__explainer {
+      margin: 0 0 0.875rem;
+      font-size: 0.875rem;
+      line-height: 1.45;
+      color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.68));
+    }
+
+    &__market {
+      margin-bottom: 0.75rem;
+    }
+
+    .field-pricing-country {
+      width: 100%;
+      max-width: 280px;
+    }
+
+    &__kpis {
+      display: grid;
+      gap: 0.75rem;
+
+      @media (min-width: 520px) {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  }
+
+  .module-pricing-kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+
+    &__label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: rgba(0, 0, 0, 0.55);
+    }
+
+    &__value {
+      font-size: 1.125rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+
+      &--accent {
+        color: var(--mat-sys-primary, var(--color-primary-500, #0a9ac6));
+      }
+    }
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .loading-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+  }
+
+  .features-card {
+    margin-top: 1.5rem;
+  }
+
+  .features-hint {
+    margin: 0 0 1rem;
+    color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.65));
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .features-readonly-hint {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.65));
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .module-features-table {
+    width: 100%;
+    min-width: 640px;
+
+    th .col-country {
+      font-weight: 400;
+      opacity: 0.75;
+      margin-left: 0.15rem;
+    }
+
+    .mat-column-priceMonthly {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .other-mod {
+      font-size: 0.875rem;
+    }
+
+    .dash {
+      color: var(--mat-sys-outline, rgba(0, 0, 0, 0.38));
+    }
+  }
+}

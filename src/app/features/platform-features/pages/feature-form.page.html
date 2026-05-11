@@ -1,0 +1,252 @@
+<div class="feature-form-page">
+  <header class="page-header">
+    <h1>{{ isEdit() ? ('features.editFeature' | translate) : ('features.createFeature' | translate) }}</h1>
+    <a mat-button [routerLink]="paths.catalogFeatures()" [queryParams]="market.catalogQueryParams()">{{ 'common.back' | translate }}</a>
+  </header>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <mat-card>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <!-- A. Básico -->
+        <section class="form-block form-block--basic" aria-labelledby="feat-block-basic">
+          <h2 id="feat-block-basic" class="section-title">{{ 'features.sectionBasic' | translate }}</h2>
+          <div class="form-fields">
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'servicePlans.code' | translate }}</mat-label>
+              <input matInput formControlName="code" placeholder="e.g. orders.create" [readonly]="isEdit()" />
+              @if (form.get('code')?.hasError('required')) {
+                <mat-error>{{ 'modules.required' | translate }}</mat-error>
+              }
+              @if (form.get('code')?.hasError('maxlength')) {
+                <mat-error>{{ 'features.maxLength80' | translate }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'tenants.name' | translate }}</mat-label>
+              <input matInput formControlName="name" placeholder="e.g. Create order" />
+              @if (form.get('name')?.hasError('maxlength')) {
+                <mat-error>{{ 'features.maxLength120' | translate }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>{{ 'modules.description' | translate }}</mat-label>
+              <textarea matInput formControlName="description" rows="2" placeholder="Optional description"></textarea>
+              @if (form.get('description')?.hasError('maxlength')) {
+                <mat-error>{{ 'modules.maxLength255' | translate }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </section>
+
+        <!-- B. Comercial -->
+        <section class="form-block form-block--commercial" aria-labelledby="feat-block-commercial">
+          <h2 id="feat-block-commercial" class="section-title">{{ 'features.sectionCommercial' | translate }}</h2>
+          <div class="form-fields">
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'features.taxonomy.label' | translate }}</mat-label>
+              <mat-select formControlName="featureType">
+                <mat-option value="">{{ 'features.taxonomy.unset' | translate }}</mat-option>
+                <mat-option value="CORE">{{ 'features.taxonomy.CORE' | translate }}</mat-option>
+                <mat-option value="FEATURE">{{ 'features.taxonomy.FEATURE' | translate }}</mat-option>
+                <mat-option value="ADDON">{{ 'features.taxonomy.ADDON' | translate }}</mat-option>
+              </mat-select>
+              <mat-hint>{{ 'features.taxonomy.hintShort' | translate }}</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'features.moduleCode' | translate }}</mat-label>
+              <mat-select formControlName="moduleCode">
+                <mat-option value="">—</mat-option>
+                @for (mod of modules(); track mod.moduleId) {
+                  <mat-option [value]="mod.code ?? ''">{{ mod.code ?? mod.name ?? mod.moduleId }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          @if (isAddonTaxonomySelected()) {
+            <p class="addon-pricing-callout" role="note">{{ 'features.addonPricingCalloutShort' | translate }}</p>
+          }
+
+          <h3 class="subsection-title">
+            {{ isAddonTaxonomySelected() ? ('features.sectionPricingAddon' | translate) : ('features.sectionPricing' | translate) }}
+          </h3>
+          <p class="section-hint">
+            {{
+              isAddonTaxonomySelected()
+                ? ('features.sectionPricingAddonHintShort' | translate)
+                : ('features.sectionPricingHintShort' | translate)
+            }}
+          </p>
+          <div class="form-fields">
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'features.priceMonthly' | translate }}</mat-label>
+              <input matInput type="number" formControlName="priceMonthly" min="0" step="0.01" />
+              <mat-hint>{{
+                isAddonTaxonomySelected()
+                  ? ('features.priceMonthlyHintAddon' | translate)
+                  : ('features.priceMonthlyHint' | translate)
+              }}</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'features.priceSetup' | translate }}</mat-label>
+              <input matInput type="number" formControlName="priceSetup" min="0" step="0.01" />
+              <mat-hint>{{
+                isAddonTaxonomySelected()
+                  ? ('features.priceSetupHintAddon' | translate)
+                  : ('features.priceSetupHint' | translate)
+              }}</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <h3 class="subsection-title">{{ 'features.sectionMarketPricing' | translate }}</h3>
+          <p class="section-hint">
+            {{
+              isAddonTaxonomySelected()
+                ? ('features.sectionMarketPricingAddonHintShort' | translate)
+                : ('features.sectionMarketPricingHintShort' | translate)
+            }}
+          </p>
+          <div class="base-prices-summary">
+            <span class="base-label">{{ 'features.priceBaseSummary' | translate }}</span>
+            <span class="base-values">
+              {{ form.get('priceMonthly')?.value ?? '—' }} / {{ form.get('priceSetup')?.value ?? '—' }}
+            </span>
+          </div>
+
+          <div class="overrides-list" formArrayName="overrides">
+            @for (ctrl of overridesArray.controls; track $index) {
+              <div class="override-card" [formGroup]="$any(ctrl)">
+                <div class="override-card-head">
+                  @if (showOverrideBadge(ctrl)) {
+                    <span class="override-badge">{{ 'features.overrideActiveBadge' | translate }}</span>
+                  }
+                  <span class="override-card-head-spacer"></span>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="remove-override"
+                    (click)="removeMarket($index)"
+                    [attr.aria-label]="'features.removeMarket' | translate"
+                  >
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+                <div class="form-fields">
+                  <mat-form-field appearance="outline" class="field-compact">
+                    <mat-label>{{ 'features.countryCode' | translate }}</mat-label>
+                    <input matInput formControlName="countryCode" maxlength="2" class="country-input" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="field-half">
+                    <mat-label>{{ 'features.priceMonthlyMarket' | translate: { code: overrideRowCountryCode(ctrl) } }}</mat-label>
+                    <input matInput type="number" formControlName="priceMonthly" min="0" step="0.01" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="field-half">
+                    <mat-label>{{ 'features.priceSetupMarket' | translate: { code: overrideRowCountryCode(ctrl) } }}</mat-label>
+                    <input matInput type="number" formControlName="priceSetup" min="0" step="0.01" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="field-compact">
+                    <mat-label>{{ 'features.currencyCode' | translate }}</mat-label>
+                    <input matInput formControlName="currencyCode" maxlength="3" class="currency-input" />
+                  </mat-form-field>
+                </div>
+                @if (showUsesBaseHint(ctrl)) {
+                  <p class="effective-line">
+                    {{ 'features.effectiveUsesBase' | translate }}:
+                    {{ effectiveMonthly(ctrl) ?? '—' }} / {{ effectiveSetup(ctrl) ?? '—' }}
+                  </p>
+                }
+              </div>
+            }
+          </div>
+          <div class="add-market-wrap">
+            <button mat-stroked-button type="button" (click)="addMarket()">
+              {{ 'features.addMarket' | translate }}
+            </button>
+          </div>
+        </section>
+
+        <!-- C. Avanzado (colapsable) -->
+        <mat-expansion-panel class="form-block form-block--advanced" [expanded]="false">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ 'features.sectionAdvanced' | translate }}</mat-panel-title>
+            <mat-panel-description>{{ 'features.sectionAdvancedHintShort' | translate }}</mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <h3 class="subsection-title">{{ 'features.sectionNavigation' | translate }}</h3>
+          <p class="section-hint">{{ 'features.sectionNavigationHintShort' | translate }}</p>
+          <div class="form-fields">
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'features.route' | translate }}</mat-label>
+              <input matInput formControlName="route" placeholder="/dashboard" />
+              @if (form.get('route')?.hasError('maxlength')) {
+                <mat-error>{{ 'modules.maxLength255' | translate }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'features.icon' | translate }}</mat-label>
+              <input matInput formControlName="icon" placeholder="dashboard" />
+              @if (form.get('icon')?.hasError('maxlength')) {
+                <mat-error>{{ 'features.maxLength80' | translate }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'features.parentFeature' | translate }}</mat-label>
+              <mat-select formControlName="parentFeatureId">
+                <mat-option value="">—</mat-option>
+                @for (f of parentOptions(); track f.featureId) {
+                  <mat-option [value]="'' + f.featureId">{{ f.code ?? f.featureId }} ({{ f.featureId }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'features.sortOrder' | translate }}</mat-label>
+              <input matInput type="number" formControlName="sortOrder" min="0" />
+            </mat-form-field>
+          </div>
+
+          <h3 class="subsection-title">{{ 'features.sectionFlags' | translate }}</h3>
+          <div class="form-fields">
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'features.isMenu' | translate }}</mat-label>
+              <mat-select formControlName="isMenu">
+                <mat-option value="unset">{{ 'features.triUnset' | translate }}</mat-option>
+                <mat-option value="yes">{{ 'common.yes' | translate }}</mat-option>
+                <mat-option value="no">{{ 'common.no' | translate }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'features.isRoute' | translate }}</mat-label>
+              <mat-select formControlName="isRoute">
+                <mat-option value="unset">{{ 'features.triUnset' | translate }}</mat-option>
+                <mat-option value="yes">{{ 'common.yes' | translate }}</mat-option>
+                <mat-option value="no">{{ 'common.no' | translate }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="field-full toggle-row">
+              <mat-slide-toggle formControlName="showInSidebar">{{ 'features.showInSidebar' | translate }}</mat-slide-toggle>
+            </div>
+          </div>
+        </mat-expansion-panel>
+
+        <div class="actions">
+          <a mat-button [routerLink]="paths.catalogFeatures()" [queryParams]="market.catalogQueryParams()">{{ 'common.cancel' | translate }}</a>
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading()">
+            {{ loading() ? ('common.loading' | translate) : (isEdit() ? ('common.save' | translate) : ('features.createFeature' | translate)) }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

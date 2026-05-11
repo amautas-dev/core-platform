@@ -1,0 +1,111 @@
+<div class="fine-tuning" [class.fine-tuning--readonly]="editMode === 'auto'">
+  @for (scaleKey of scaleKeys; track scaleKey) {
+    <div class="fine-tuning__scale">
+      <div class="fine-tuning__scale-head">
+        <h5 class="fine-tuning__scale-title">{{ 'themePalette.scale.' + scaleKey | translate }}</h5>
+        @if (editMode === 'manual') {
+          <button
+            type="button"
+            mat-icon-button
+            class="fine-tuning__reset-scale"
+            (click)="emitResetScale(scaleKey)"
+            [matTooltip]="'themePalette.resetScale' | translate"
+          >
+            <mat-icon>restart_alt</mat-icon>
+          </button>
+        }
+      </div>
+      <div class="fine-tuning__row">
+        @for (stop of stops; track stop) {
+          <div class="fine-tuning__cell">
+            <span class="fine-tuning__stop-label">{{ stop }}</span>
+            <div
+              class="fine-tuning__swatch"
+              [class.fine-tuning__swatch--overridden]="isOverridden(scaleKey, stop)"
+              [style.background]="resolved[scaleKey][stop]"
+            ></div>
+            <input
+              type="color"
+              class="fine-tuning__picker"
+              [value]="resolved[scaleKey][stop]"
+              [disabled]="editMode === 'auto'"
+              (input)="onScaleColorChange(scaleKey, stop, $any($event.target).value)"
+            />
+            <input
+              type="text"
+              class="fine-tuning__hex"
+              maxlength="7"
+              [value]="resolved[scaleKey][stop]"
+              [disabled]="editMode === 'auto'"
+              (change)="onScaleColorChange(scaleKey, stop, $any($event.target).value)"
+            />
+            @if (editMode === 'manual' && isOverridden(scaleKey, stop)) {
+              <button
+                type="button"
+                mat-icon-button
+                class="fine-tuning__reset-one"
+                (click)="resetOne(scaleKey, stop)"
+                [matTooltip]="'themePalette.resetToken' | translate"
+              >
+                <mat-icon>undo</mat-icon>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="fine-tuning__functional">
+    <div class="fine-tuning__scale-head">
+      <h5 class="fine-tuning__scale-title">{{ 'themePalette.functional' | translate }}</h5>
+      @if (editMode === 'manual') {
+        <button
+          type="button"
+          mat-icon-button
+          class="fine-tuning__reset-scale"
+          (click)="emitResetScale('functional')"
+          [matTooltip]="'themePalette.resetScale' | translate"
+        >
+          <mat-icon>restart_alt</mat-icon>
+        </button>
+      }
+    </div>
+    <div class="fine-tuning__row fine-tuning__row--functional">
+      @for (key of functionalKeys; track key) {
+        <div class="fine-tuning__cell">
+          <span class="fine-tuning__stop-label">{{ key }}</span>
+          <div
+            class="fine-tuning__swatch"
+            [class.fine-tuning__swatch--overridden]="isFunctionalOverridden(key)"
+            [style.background]="resolved.functional[key]"
+          ></div>
+          <input
+            type="color"
+            class="fine-tuning__picker"
+            [value]="resolved.functional[key]"
+            [disabled]="editMode === 'auto'"
+            (input)="onFunctionalChange(key, $any($event.target).value)"
+          />
+          <input
+            type="text"
+            class="fine-tuning__hex"
+            maxlength="7"
+            [value]="resolved.functional[key]"
+            [disabled]="editMode === 'auto'"
+            (change)="onFunctionalChange(key, $any($event.target).value)"
+          />
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (editMode === 'manual') {
+    <div class="fine-tuning__actions">
+      <button type="button" mat-stroked-button (click)="emitResetAll()">
+        <mat-icon>refresh</mat-icon>
+        {{ 'themePalette.resetAll' | translate }}
+      </button>
+    </div>
+  }
+</div>

@@ -1,0 +1,1606 @@
+import { Component, inject, signal, OnInit, computed, DestroyRef, effect, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { RouterModule, ActivatedRoute, Router, NavigationEnd } from '@angular/router';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialog } from '@angular/material/dialog';
+import { TenantService } from '../services/tenant.service';
+import { PlatformRoutePathsService } from '../../../core/routing/platform-route-paths.service';
+import type {
+  TenantConsoleRoleRow,
+  TenantEmailSmtpDto,
+  TenantI18nOverrideRow,
+  TenantMercadoPagoConfigDto,
+} from '../services/tenant.service';
+import { PlatformTenantRoleFeaturesDialogComponent } from '../components/platform-tenant-role-features-dialog.component';
+import { PlatformTenantI18nOverrideDialogComponent } from '../components/platform-tenant-i18n-override-dialog.component';
+import type { TenantDetail, TenantServiceSubscriptionLine } from '../models/tenant-detail.interface';
+import type { ServicePlan } from '../models/service-plan.interface';
+import { TenantStandaloneFeature } from '../models/tenant-feature.interface';
+
+/** Map tenant_audit_log action codes to i18n keys (activity.*). */
+const HEX_PATTERN = /^#[0-9A-Fa-f]{6}$/;
+
+const ACTIVITY_ACTION_KEYS: Record<string, string> = {
+  'user.created': 'activity.userCreated',
+  'user.updated': 'activity.userUpdated',
+  'user.deleted': 'activity.userDeleted',
+  'module.enabled': 'activity.moduleEnabled',
+  'module.disabled': 'activity.moduleDisabled',
+  'role.created': 'activity.roleCreated',
+  'role.updated': 'activity.roleUpdated',
+  'role.deleted': 'activity.roleDeleted',
+  'tenant.updated': 'activity.tenantUpdated',
+  'api_key.created': 'activity.apiKeyCreated',
+  'api_key.deactivated': 'activity.apiKeyDeactivated',
+  'webhook.created': 'activity.webhookCreated',
+  'webhook.deactivated': 'activity.webhookDeactivated',
+};
+import type { TenantModule } from '../models/tenant-module.interface';
+import { TenantUser } from '../models/tenant-user.interface';
+import type { TenantRoleOption } from '../models/tenant-role-option.interface';
+import { TenantAudit } from '../models/tenant-audit.interface';
+import type { TenantUsage } from '../models/tenant-usage.interface';
+import type { TenantActivityItem } from '../models/tenant-activity.interface';
+import type { TenantApiKey } from '../models/tenant-api-key.interface';
+import type { TenantWebhook } from '../models/tenant-webhook.interface';
+import type { TenantLogoVariant, TenantThemeConfig } from '../models/tenant-theme.interface';
+import { THEME_PALETTES, type ThemePalette } from '../../../shared/theming/theme-palettes';
+import { buildAdvisorGeneratedPalette } from '../../../shared/theming/palette-assistant';
+import { FONT_PRESETS } from '../../../shared/theming/font-presets';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTableModule } from '@angular/material/table';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MessageBoxService } from 'ui-kit';
+import { HasPermissionDirective } from '../../../core/permissions/has-permission.directive';
+import { PERMISSIONS } from '../../../core/permissions/permissions.const';
+import { PlatformTranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslateService } from '@ngx-translate/core';
+import { escapeHtml } from '../../../core/utils/escape-html.util';
+import { CountriesService } from '../../platform-products/services/countries.service';
+import type { CountryMarket } from '../../platform-products/models/country-market.interface';
+
+@Component({
+  selector: 'app-tenant-detail-page',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatTabsModule,
+    MatButtonModule,
+    MatCardModule,
+    MatChipsModule,
+    MatCheckboxModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatSlideToggleModule,
+    MatTableModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatMenuModule,
+    MatExpansionModule,
+    HasPermissionDirective,
+    PlatformTranslatePipe,
+  ],
+  templateUrl: './tenant-detail.page.html',
+  styleUrls: ['./tenant-detail.page.scss'],
+})
+export class TenantDetailPage implements OnInit {
+  private readonly tenantService = inject(TenantService);
+  private readonly countriesService = inject(CountriesService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  readonly paths = inject(PlatformRoutePathsService);
+  private readonly msgBox = inject(MessageBoxService);
+  private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly dialog = inject(MatDialog);
+
+  readonly tenant = signal<TenantDetail | null>(null);
+  /** Features de catálogo sin módulo (pestaña Funcionalidades → «Otras funcionalidades»). */
+  readonly standaloneFeatures = signal<TenantStandaloneFeature[]>([]);
+  readonly standaloneFeaturesLoading = signal(false);
+  readonly standaloneFeatureToggling = signal<string | null>(null);
+  readonly modules = signal<TenantModule[]>([]);
+  readonly tenantUsers = signal<TenantUser[]>([]);
+  /** Roles del tenant (selector al crear usuario). */
+  readonly tenantRoles = signal<TenantRoleOption[]>([]);
+  readonly creatingTenantUser = signal(false);
+  readonly userTogglingId = signal<number | null>(null);
+  readonly newUserEmail = signal('');
+  readonly newUserFirstName = signal('');
+  readonly newUserPassword = signal('');
+  /** role_id como string (BigInt en API). */
+  readonly newUserRoleId = signal<string | null>(null);
+  readonly tenantAudit = signal<TenantAudit[]>([]);
+  readonly plans = signal<ServicePlan[]>([]);
+  readonly countries = signal<CountryMarket[]>([]);
+  readonly planNameById = signal<Record<number, string>>({});
+  readonly loading = signal(true);
+  readonly modulesLoading = signal(false);
+  readonly usersLoading = signal(false);
+  readonly auditLoading = signal(false);
+  readonly plansLoading = signal(false);
+  readonly planUpdating = signal(false);
+  readonly selectedPlanId = signal<number | null>(null);
+  /** servicePlanId elegido por productId (selector resumen). */
+  readonly planSelectionByProduct = signal<Record<number, number>>({});
+  readonly tenantUsage = signal<TenantUsage | null>(null);
+  readonly moduleTogglingId = signal<number | null>(null);
+  readonly addonTogglingId = signal<number | null>(null);
+  readonly usageLoading = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly actionPending = signal(false);
+  readonly apiKeys = signal<TenantApiKey[]>([]);
+  readonly apiKeysLoading = signal(false);
+  readonly creatingApiKey = signal(false);
+  readonly newApiKeyName = signal('');
+  readonly tenantWebhooks = signal<TenantWebhook[]>([]);
+  readonly webhooksLoading = signal(false);
+  readonly creatingWebhook = signal(false);
+  readonly newWebhookUrl = signal('');
+  readonly activity = signal<TenantActivityItem[]>([]);
+  readonly activityLoading = signal(false);
+  readonly tenantTheme = signal<TenantThemeConfig | null>(null);
+  readonly themeLoading = signal(false);
+  readonly themeSaving = signal(false);
+  readonly themePalettes = THEME_PALETTES;
+  readonly selectedTenantPaletteId = signal<string | null>(null);
+  /** Misma UX que `settings.page` (Configuración global): asistente + paletas + formulario reactivo. */
+  readonly showPaletteTools = signal(false);
+  readonly advisorColor1 = signal('#0FA2CC');
+  readonly advisorColor2 = signal('');
+  readonly advisorColor3 = signal('');
+  readonly paletteRecommendations = signal<ThemePalette[]>([]);
+  readonly fontPresets = FONT_PRESETS;
+  readonly selectedFontPresetId = signal<string>('custom');
+
+  /** Consola tenant: menú lateral plano para no admin (tenant_setting). */
+  readonly consoleSidebarFlatten = signal<boolean | null>(null);
+  readonly consoleSidebarLoading = signal(false);
+  readonly consoleSidebarSaving = signal(false);
+  readonly consoleRoles = signal<TenantConsoleRoleRow[]>([]);
+  readonly consoleRolesLoading = signal(false);
+  readonly tenantI18nOverrides = signal<TenantI18nOverrideRow[]>([]);
+  readonly tenantI18nOverridesLoading = signal(false);
+
+  readonly tenantSmtpLoading = signal(false);
+  readonly tenantSmtpSaving = signal(false);
+  readonly tenantSmtpSnapshot = signal<TenantEmailSmtpDto | null>(null);
+
+  readonly tenantSmtpForm = this.fb.nonNullable.group({
+    useCustomSmtp: [false],
+    host: [''],
+    port: [587, [Validators.min(1), Validators.max(65535)]],
+    secure: [false],
+    user: [''],
+    pass: [''],
+    from: [''],
+    clearStoredPassword: [false],
+  });
+
+  readonly tenantMpLoading = signal(false);
+  readonly tenantMpSaving = signal(false);
+  readonly tenantMpSnapshot = signal<TenantMercadoPagoConfigDto | null>(null);
+  readonly tenantMpForm = this.fb.nonNullable.group({
+    accessToken: [''],
+    sandbox: [true],
+    isEnabled: [false],
+  });
+
+  /** Código y nombre de empresa (pestaña Resumen, modo edición). */
+  readonly tenantSummaryForm = this.fb.nonNullable.group({
+    tenantCode: ['', [Validators.required, Validators.minLength(2)]],
+    tenantName: ['', [Validators.required, Validators.minLength(2)]],
+  });
+  readonly summarySaving = signal(false);
+
+  readonly tenantBrandingForm = this.fb.nonNullable.group({
+    primaryColor: ['#0fa2cc', Validators.pattern(HEX_PATTERN)],
+    secondaryColor: ['#f4ece4', Validators.pattern(HEX_PATTERN)],
+    sidebarBgColor: ['#0fa2cc', Validators.pattern(HEX_PATTERN)],
+    headerBgColor: ['#f4ece4', Validators.pattern(HEX_PATTERN)],
+    pageBackgroundColor: ['#fbf1e8', Validators.pattern(HEX_PATTERN)],
+    buttonPrimaryColor: ['#0fa2cc', Validators.pattern(HEX_PATTERN)],
+    buttonSecondaryColor: ['#f4ece4', Validators.pattern(HEX_PATTERN)],
+    buttonCancelColor: ['#5f6b7a', Validators.pattern(HEX_PATTERN)],
+    textColor: ['#0f2630', Validators.pattern(HEX_PATTERN)],
+    fontFamily: [''],
+    headingFontFamily: [''],
+    baseFontSize: [16 as number | string],
+    loginBackgroundUrl: [''],
+    logoUrl: [''],
+    logoDarkUrl: [''],
+    logoReducedUrl: [''],
+    logoDarkReducedUrl: [''],
+    faviconUrl: [''],
+    logoSlotSidebar: ['primary' as TenantLogoVariant],
+    logoSlotLogin: ['primary' as TenantLogoVariant],
+    logoSlotFavicon: ['primary' as TenantLogoVariant],
+    logoSlotSidebarCollapsed: ['primary' as TenantLogoVariant],
+  });
+
+  readonly tenantId = computed(() => this.tenant()?.tenantId ?? null);
+  readonly planDisplayName = computed(() => {
+    const t = this.tenant();
+    if (!t) return '';
+    const catalog = this.planNameById()[t.servicePlanId];
+    if (catalog) return catalog;
+    return t.planName ?? String(t.servicePlanId);
+  });
+
+  readonly logoSlotOptions: { value: TenantLogoVariant; labelKey: string }[] = [
+    { value: 'primary', labelKey: 'tenants.logoVariantPrimary' },
+    { value: 'alternate', labelKey: 'tenants.logoVariantAlternate' },
+    { value: 'primary_reduced', labelKey: 'tenants.logoVariantPrimaryReduced' },
+    { value: 'alternate_reduced', labelKey: 'tenants.logoVariantAlternateReduced' },
+  ];
+
+  readonly PERMISSIONS = PERMISSIONS;
+
+  /**
+   * Vista `/tenants/:id`: solo lectura (sin mutaciones en UI).
+   * Edición `/tenants/:id/edit`: requiere `tenants.update` (guard) y habilita cambios.
+   */
+  readonly readonlyMode = signal(true);
+
+  constructor() {
+    effect(() => {
+      const ro = this.readonlyMode();
+      untracked(() => {
+        for (const f of [this.tenantSummaryForm, this.tenantBrandingForm, this.tenantSmtpForm, this.tenantMpForm]) {
+          if (ro) {
+            f.disable({ emitEvent: false });
+          } else {
+            f.enable({ emitEvent: false });
+          }
+        }
+      });
+    });
+  }
+
+  private syncReadonlyFromUrl(): void {
+    const path = this.router.url.split('?')[0].replace(/\/$/, '');
+    const isEdit = path.endsWith('/edit') || path.endsWith('/editar');
+    this.readonlyMode.set(!isEdit);
+  }
+
+  ngOnInit(): void {
+    this.syncReadonlyFromUrl();
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.syncReadonlyFromUrl());
+
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      const numId = parseInt(id, 10);
+      if (!isNaN(numId)) {
+        this.countriesService.list().subscribe({
+          next: (list) => this.countries.set(list),
+          error: () => this.countries.set([]),
+        });
+        this.loadTenant(numId);
+        this.loadTenantFeatureFlags(numId);
+        this.loadModules(numId);
+        this.loadUsers(numId);
+        this.loadAudit(numId);
+        this.loadUsage(numId);
+        this.loadApiKeys(numId);
+        this.loadWebhooks(numId);
+        this.loadActivity(numId);
+        this.loadTenantTheme(numId);
+        this.loadConsoleSidebar(numId);
+        this.loadConsoleRoles(numId);
+        this.loadTenantI18nOverrides(numId);
+        this.loadTenantEmailSmtp(numId);
+        this.loadTenantMercadoPago(numId);
+        this.tenantBrandingForm.controls.fontFamily.valueChanges
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(() => this.syncFontPresetFromForm());
+        this.recomputeRecommendations();
+      } else {
+        this.loading.set(false);
+        this.error.set('ID de tenant inválido');
+      }
+    } else {
+      this.loading.set(false);
+      this.error.set('Tenant no especificado');
+    }
+  }
+
+  private loadServicePlans(countryCode: string): void {
+    this.plansLoading.set(true);
+    this.tenantService.getServicePlans({ country: countryCode }).subscribe({
+      next: (plans) => {
+        this.plans.set(plans);
+        const map: Record<number, string> = {};
+        plans.forEach((p) => (map[p.servicePlanId] = p.servicePlanName ?? p.planName ?? ''));
+        this.planNameById.set(map);
+        this.plansLoading.set(false);
+      },
+      error: () => this.plansLoading.set(false),
+    });
+  }
+
+  saveTenantSummary(): void {
+    if (this.tenantSummaryForm.invalid) return;
+    const id = this.tenantId();
+    if (id === null) return;
+    const { tenantCode, tenantName } = this.tenantSummaryForm.getRawValue();
+    this.summarySaving.set(true);
+    this.error.set(null);
+    this.tenantService
+      .updateTenant(id, {
+        tenantCode: tenantCode.trim(),
+        tenantName: tenantName.trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.summarySaving.set(false);
+          this.loadTenant(id);
+        },
+        error: (err) => {
+          this.summarySaving.set(false);
+          this.error.set(err?.message ?? err?.error?.error ?? 'Error al guardar datos de la empresa');
+        },
+      });
+  }
+
+  onTenantCountryChange(countryCode: string): void {
+    const id = this.tenantId();
+    if (id === null) return;
+    this.actionPending.set(true);
+    this.error.set(null);
+    this.tenantService.updateTenant(id, { countryCode }).subscribe({
+      next: () => {
+        this.actionPending.set(false);
+        this.loadTenant(id);
+      },
+      error: (err) => {
+        this.actionPending.set(false);
+        this.error.set(err?.message ?? 'Error al actualizar país');
+      },
+    });
+  }
+
+  hostingDeploymentLabel(value: string | null | undefined): string {
+    const v = value ?? 'amautas';
+    return v === 'external'
+      ? this.translate.instant('tenants.hostingExternal')
+      : this.translate.instant('tenants.hostingAmautas');
+  }
+
+  onHostingDeploymentChange(value: 'amautas' | 'external'): void {
+    const id = this.tenantId();
+    if (id === null) return;
+    this.actionPending.set(true);
+    this.error.set(null);
+    this.tenantService.updateTenant(id, { hostingDeployment: value }).subscribe({
+      next: () => {
+        this.actionPending.set(false);
+        this.loadTenant(id);
+      },
+      error: (err) => {
+        this.actionPending.set(false);
+        this.error.set(err?.message ?? 'Error al actualizar despliegue');
+      },
+    });
+  }
+
+  getServicePlanName(servicePlanId: number): string {
+    return this.planNameById()[servicePlanId] ?? String(servicePlanId);
+  }
+
+  /**
+   * Mismo nombre comercial que el desplegable (catálogo regional). `planName` del API viene del
+   * registro base en BD (p. ej. código interno «Starter») y puede no coincidir con la etiqueta del catálogo («Básico»).
+   */
+  subscriptionPlanCatalogLabel(line: TenantServiceSubscriptionLine): string {
+    const id = line.servicePlanId;
+    if (id != null) {
+      const fromMap = this.planNameById()[id];
+      if (fromMap) return fromMap;
+      const p = this.plans().find((sp) => sp.servicePlanId === id);
+      if (p) return p.servicePlanName ?? p.planName ?? '';
+    }
+    return line.planName ?? '—';
+  }
+
+  private loadConsoleSidebar(tenantId: number): void {
+    this.consoleSidebarLoading.set(true);
+    this.tenantService.getTenantConsoleSidebar(tenantId).subscribe({
+      next: (r) => {
+        this.consoleSidebarFlatten.set(r.flattenGroupsForNonAdmin);
+        this.consoleSidebarLoading.set(false);
+      },
+      error: () => {
+        this.consoleSidebarFlatten.set(null);
+        this.consoleSidebarLoading.set(false);
+      },
+    });
+  }
+
+  private loadConsoleRoles(tenantId: number): void {
+    this.consoleRolesLoading.set(true);
+    this.tenantService.listTenantConsoleRoles(tenantId).subscribe({
+      next: (r) => {
+        this.consoleRoles.set(r.items ?? []);
+        this.consoleRolesLoading.set(false);
+      },
+      error: () => {
+        this.consoleRoles.set([]);
+        this.consoleRolesLoading.set(false);
+      },
+    });
+  }
+
+  private loadTenantI18nOverrides(tenantId: number): void {
+    this.tenantI18nOverridesLoading.set(true);
+    this.tenantService.listTenantI18nOverrides(tenantId).subscribe({
+      next: (r) => {
+        this.tenantI18nOverrides.set(r.items ?? []);
+        this.tenantI18nOverridesLoading.set(false);
+      },
+      error: () => {
+        this.tenantI18nOverrides.set([]);
+        this.tenantI18nOverridesLoading.set(false);
+      },
+    });
+  }
+
+  openConsoleRoleFeaturesDialog(role: TenantConsoleRoleRow): void {
+    const tid = this.tenantId();
+    if (tid == null) return;
+    this.dialog
+      .open(PlatformTenantRoleFeaturesDialogComponent, {
+        width: 'min(800px, 96vw)',
+        maxHeight: '90vh',
+        autoFocus: 'dialog',
+        data: { tenantId: tid, role },
+      })
+      .afterClosed()
+      .subscribe((saved) => {
+        if (saved) this.loadConsoleRoles(tid);
+      });
+  }
+
+  openTenantI18nCreateDialog(): void {
+    const tid = this.tenantId();
+    if (tid == null) return;
+    this.dialog
+      .open(PlatformTenantI18nOverrideDialogComponent, {
+        width: 'min(480px, 94vw)',
+        data: { tenantId: tid, existing: null },
+      })
+      .afterClosed()
+      .subscribe((saved) => {
+        if (saved) this.loadTenantI18nOverrides(tid);
+      });
+  }
+
+  openTenantI18nEditDialog(row: TenantI18nOverrideRow): void {
+    const tid = this.tenantId();
+    if (tid == null) return;
+    this.dialog
+      .open(PlatformTenantI18nOverrideDialogComponent, {
+        width: 'min(480px, 94vw)',
+        data: { tenantId: tid, existing: row },
+      })
+      .afterClosed()
+      .subscribe((saved) => {
+        if (saved) this.loadTenantI18nOverrides(tid);
+      });
+  }
+
+  async onConsoleSidebarFlattenChange(checked: boolean): Promise<void> {
+    const id = this.tenantId();
+    if (id == null) return;
+    this.consoleSidebarSaving.set(true);
+    this.tenantService.updateTenantConsoleSidebar(id, { flattenGroupsForNonAdmin: checked }).subscribe({
+      next: (r) => {
+        this.consoleSidebarFlatten.set(r.flattenGroupsForNonAdmin);
+        this.consoleSidebarSaving.set(false);
+      },
+      error: async (err) => {
+        this.consoleSidebarSaving.set(false);
+        const raw = err?.error?.error ?? err?.message ?? 'Error';
+        await this.msgBox.show({
+          title: this.translate.instant('common.error'),
+          html: `<p>${escapeHtml(String(raw))}</p>`,
+          confirm: false,
+        });
+        this.loadConsoleSidebar(id);
+      },
+    });
+  }
+
+  private loadTenantEmailSmtp(tenantId: number): void {
+    this.tenantSmtpLoading.set(true);
+    this.tenantService.getTenantEmailSmtp(tenantId).subscribe({
+      next: (dto) => {
+        this.tenantSmtpSnapshot.set(dto);
+        this.tenantSmtpForm.patchValue({
+          useCustomSmtp: dto.useCustomSmtp,
+          host: dto.host ?? '',
+          port: dto.port ?? 587,
+          secure: dto.secure ?? false,
+          user: dto.user ?? '',
+          from: dto.from ?? '',
+          pass: '',
+          clearStoredPassword: false,
+        });
+        this.tenantSmtpLoading.set(false);
+      },
+      error: () => {
+        this.tenantSmtpSnapshot.set(null);
+        this.tenantSmtpLoading.set(false);
+      },
+    });
+  }
+
+  private loadTenantMercadoPago(tenantId: number): void {
+    this.tenantMpLoading.set(true);
+    this.tenantService.getTenantMercadoPago(tenantId).subscribe({
+      next: (dto) => {
+        this.tenantMpSnapshot.set(dto);
+        this.tenantMpForm.patchValue({
+          accessToken: '',
+          sandbox: dto.sandbox !== false,
+          isEnabled: dto.isEnabled === true,
+        });
+        this.tenantMpLoading.set(false);
+      },
+      error: () => {
+        this.tenantMpSnapshot.set(null);
+        this.tenantMpLoading.set(false);
+      },
+    });
+  }
+
+  saveTenantMercadoPago(): void {
+    const id = this.tenantId();
+    if (id == null) return;
+    const raw = this.tenantMpForm.getRawValue();
+    if (raw.isEnabled && !String(raw.accessToken || '').trim() && !this.tenantMpSnapshot()?.tokenConfigured) {
+      void this.msgBox.show({
+        title: this.translate.instant('common.error'),
+        html: `<p>${escapeHtml(this.translate.instant('tenants.mercadoPagoTokenRequired'))}</p>`,
+        confirm: false,
+      });
+      return;
+    }
+    this.tenantMpSaving.set(true);
+    const body: { accessToken?: string; sandbox: boolean; isEnabled: boolean } = {
+      sandbox: !!raw.sandbox,
+      isEnabled: !!raw.isEnabled,
+    };
+    if (String(raw.accessToken || '').trim()) {
+      body.accessToken = String(raw.accessToken).trim();
+    }
+    this.tenantService.putTenantMercadoPago(id, body).subscribe({
+      next: (dto) => {
+        this.tenantMpSnapshot.set(dto);
+        this.tenantMpForm.patchValue({ accessToken: '' });
+        this.tenantMpSaving.set(false);
+      },
+      error: async (err) => {
+        this.tenantMpSaving.set(false);
+        const rawErr = err?.error?.error ?? err?.message ?? 'Error';
+        await this.msgBox.show({
+          title: this.translate.instant('common.error'),
+          html: `<p>${escapeHtml(String(rawErr))}</p>`,
+          confirm: false,
+        });
+      },
+    });
+  }
+
+  saveTenantEmailSmtp(): void {
+    const id = this.tenantId();
+    if (id == null) return;
+    const raw = this.tenantSmtpForm.getRawValue();
+    if (raw.useCustomSmtp && !String(raw.host || '').trim()) {
+      void this.msgBox.show({
+        title: this.translate.instant('common.error'),
+        html: `<p>${escapeHtml(this.translate.instant('tenants.emailSmtpHostRequired'))}</p>`,
+        confirm: false,
+      });
+      return;
+    }
+    this.tenantSmtpSaving.set(true);
+    const body: {
+      useCustomSmtp: boolean;
+      host: string;
+      port: number;
+      secure: boolean;
+      user: string;
+      from: string;
+      pass?: string;
+      clearPassword?: boolean;
+    } = {
+      useCustomSmtp: raw.useCustomSmtp,
+      host: String(raw.host || '').trim(),
+      port: Number(raw.port) || 587,
+      secure: !!raw.secure,
+      user: String(raw.user || '').trim(),
+      from: String(raw.from || '').trim(),
+    };
+    if (String(raw.pass || '').trim()) {
+      body.pass = String(raw.pass).trim();
+    }
+    if (raw.clearStoredPassword) {
+      body.clearPassword = true;
+    }
+    this.tenantService.putTenantEmailSmtp(id, body).subscribe({
+      next: (dto) => {
+        this.tenantSmtpSnapshot.set(dto);
+        this.tenantSmtpForm.patchValue({ pass: '', clearStoredPassword: false });
+        this.tenantSmtpSaving.set(false);
+      },
+      error: async (err) => {
+        this.tenantSmtpSaving.set(false);
+        const rawErr = err?.error?.error ?? err?.message ?? 'Error';
+        await this.msgBox.show({
+          title: this.translate.instant('common.error'),
+          html: `<p>${escapeHtml(String(rawErr))}</p>`,
+          confirm: false,
+        });
+      },
+    });
+  }
+
+  private syncPlanSelectionsFromTenant(t: TenantDetail): void {
+    const m: Record<number, number> = {};
+    for (const line of t.serviceSubscriptions ?? []) {
+      if (line.productId != null && line.servicePlanId != null) {
+        m[line.productId] = line.servicePlanId;
+      }
+    }
+    this.planSelectionByProduct.set(m);
+  }
+
+  /** Planes del catálogo filtrados por línea de producto (fallback: todos si la API no envía productId). */
+  plansForProduct(productId: number | null | undefined): ServicePlan[] {
+    const all = this.plans();
+    if (productId == null) return all;
+    const filtered = all.filter((p) => p.productId === productId);
+    return filtered.length > 0 ? filtered : all;
+  }
+
+  planOptionLabel(p: ServicePlan): string {
+    const name = p.planName ?? p.servicePlanName ?? String(p.servicePlanId);
+    if (p.price != null && p.currency) {
+      return `${name} (${p.price} ${p.currency})`;
+    }
+    return name;
+  }
+
+  selectedPlanForLine(line: TenantServiceSubscriptionLine): number {
+    const pid = line.productId;
+    if (pid == null) return line.servicePlanId ?? 0;
+    return this.planSelectionByProduct()[pid] ?? line.servicePlanId ?? 0;
+  }
+
+  onProductPlanSelect(productId: number | null | undefined, servicePlanId: number): void {
+    if (productId == null) return;
+    this.planSelectionByProduct.update((prev) => ({ ...prev, [productId]: servicePlanId }));
+  }
+
+  applyPlanChangeForProduct(productId: number | null | undefined): void {
+    const id = this.tenantId();
+    if (id === null || productId == null) return;
+    const servicePlanId = this.planSelectionByProduct()[productId];
+    if (servicePlanId == null) return;
+    this.planUpdating.set(true);
+    this.error.set(null);
+    this.tenantService.changeTenantPlan(id, servicePlanId, productId).subscribe({
+      next: (updated) => {
+        this.tenant.set(updated);
+        this.syncPlanSelectionsFromTenant(updated);
+        this.selectedPlanId.set(updated.servicePlanId ?? null);
+        this.loadModules(updated.tenantId);
+        this.planUpdating.set(false);
+      },
+      error: (err) => {
+        this.planUpdating.set(false);
+        this.error.set(err?.message ?? 'Error al cambiar plan');
+      },
+    });
+  }
+
+  private loadTenant(id: number): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.tenantService.getTenantDetail(id).subscribe({
+      next: (t) => {
+        this.tenant.set(t);
+        this.tenantSummaryForm.patchValue(
+          { tenantCode: t.tenantCode ?? '', tenantName: t.tenantName ?? '' },
+          { emitEvent: false },
+        );
+        this.selectedPlanId.set(t.servicePlanId ?? null);
+        this.syncPlanSelectionsFromTenant(t);
+        this.loadServicePlans(t.countryCode ?? 'AR');
+        this.loadTenantRoles(id);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err?.message ?? 'Error al cargar tenant');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  private refreshFeatureLists(id: number): void {
+    this.tenantService.getTenantStandaloneFeatures(id).subscribe({
+      next: (standalone) => this.standaloneFeatures.set(standalone),
+    });
+  }
+
+  private loadTenantFeatureFlags(id: number): void {
+    this.standaloneFeaturesLoading.set(true);
+    this.tenantService.getTenantStandaloneFeatures(id).subscribe({
+      next: (standalone) => {
+        this.standaloneFeatures.set(standalone);
+        this.standaloneFeaturesLoading.set(false);
+      },
+      error: () => {
+        this.standaloneFeaturesLoading.set(false);
+      },
+    });
+  }
+
+  private loadModules(id: number): void {
+    this.modulesLoading.set(true);
+    this.tenantService.getTenantModules(id).subscribe({
+      next: (list) => {
+        this.modules.set(
+          list.map((m) => ({
+            ...m,
+            fromAddon: m.fromAddon ?? false,
+            effectiveEnabled: m.effectiveEnabled ?? m.tenantEnabled,
+            editable: m.editable ?? false,
+          })),
+        );
+        this.modulesLoading.set(false);
+      },
+      error: () => this.modulesLoading.set(false),
+    });
+  }
+
+  private loadUsage(tenantId: number): void {
+    this.usageLoading.set(true);
+    this.tenantService.getTenantUsage(tenantId).subscribe({
+      next: (u) => {
+        this.tenantUsage.set(u);
+        this.usageLoading.set(false);
+      },
+      error: () => this.usageLoading.set(false),
+    });
+  }
+
+  getUsageLimit(limitCode: string): number | null {
+    const u = this.tenantUsage();
+    if (!u?.limits?.length) return null;
+    const limit = u.limits.find((l) => l.limitCode === limitCode);
+    return limit != null ? limit.limitValue : null;
+  }
+
+  /** Etiqueta legible para códigos de límite del plan (service_plan_limit.metric_code). */
+  usageMetricLabel(code: string): string {
+    const key = `tenants.usageMetric.${code}`;
+    const t = this.translate.instant(key);
+    return t !== key ? t : code;
+  }
+
+  contractUsageSummaryText(): string {
+    const u = this.tenantUsage();
+    if (!u) return '';
+    return this.translate.instant('tenants.contractUsageSummary', {
+      users: u.usersUsed,
+      modules: u.modulesEnabled,
+    });
+  }
+
+  activeTenantUsersCount(): number {
+    return this.tenantUsers().filter((u) => u.isActive).length;
+  }
+
+  /** Puede activarse otro usuario (o crear uno activo) sin superar maxUsers. */
+  canEnableInactiveUser(): boolean {
+    const max = this.getUsageLimit('maxUsers');
+    if (max == null) return true;
+    return this.activeTenantUsersCount() < max;
+  }
+
+  /** Hay más usuarios activos que el cupo (p. ej. tras bajar de plan). */
+  planUsersExceeded(): boolean {
+    const max = this.getUsageLimit('maxUsers');
+    if (max == null) return false;
+    return this.activeTenantUsersCount() > max;
+  }
+
+  usersQuotaSummary(): string {
+    const max = this.getUsageLimit('maxUsers');
+    if (max == null) return '';
+    return this.translate.instant('tenants.usersQuotaLine', {
+      active: this.activeTenantUsersCount(),
+      max,
+    });
+  }
+
+  userActiveToggleDisabled(u: TenantUser): boolean {
+    if (this.readonlyMode()) return true;
+    if (this.userTogglingId() === u.userId) return true;
+    if (u.isActive) return false;
+    return !this.canEnableInactiveUser();
+  }
+
+  private loadTenantRoles(tenantId: number): void {
+    this.tenantService.getTenantRoles(tenantId).subscribe({
+      next: (list) => {
+        this.tenantRoles.set(list);
+        if (list.length > 0 && this.newUserRoleId() == null) {
+          this.newUserRoleId.set(String(list[0].roleId));
+        }
+      },
+      error: () => this.tenantRoles.set([]),
+    });
+  }
+
+  createTenantUser(): void {
+    const id = this.tenantId();
+    if (id === null || this.readonlyMode()) return;
+    const email = this.newUserEmail().trim();
+    const roleId = this.newUserRoleId();
+    const password = this.newUserPassword().trim();
+    if (!email || !roleId) {
+      this.error.set(this.translate.instant('tenants.tenantUserCreateRequired'));
+      return;
+    }
+    if (!password) {
+      this.error.set(this.translate.instant('tenants.tenantUserPasswordRequired'));
+      return;
+    }
+    if (!this.canEnableInactiveUser()) {
+      this.error.set(this.translate.instant('tenants.planLimitUsersReached'));
+      return;
+    }
+    this.creatingTenantUser.set(true);
+    this.error.set(null);
+    this.tenantService
+      .createTenantUser(id, {
+        email,
+        roleId,
+        password,
+        firstName: this.newUserFirstName().trim() || undefined,
+        credentialDelivery: 'manual',
+      })
+      .subscribe({
+        next: () => {
+          this.creatingTenantUser.set(false);
+          this.newUserEmail.set('');
+          this.newUserFirstName.set('');
+          this.newUserPassword.set('');
+          this.loadUsers(id);
+          this.loadUsage(id);
+        },
+        error: (err) => {
+          this.creatingTenantUser.set(false);
+          const code = err?.error?.error;
+          if (code === 'plan_limit_reached' || err?.status === 403) {
+            this.error.set(this.translate.instant('tenants.planLimitUsersReached'));
+          } else {
+            this.error.set(
+              typeof err?.error?.error === 'string' ? err.error.error : err?.message ?? 'Error',
+            );
+          }
+        },
+      });
+  }
+
+  onTenantUserActiveToggle(u: TenantUser, checked: boolean): void {
+    const id = this.tenantId();
+    if (id === null || this.readonlyMode()) return;
+    if (!checked && u.isActive) {
+      // ok
+    } else if (checked && !u.isActive && !this.canEnableInactiveUser()) {
+      return;
+    }
+    this.userTogglingId.set(u.userId);
+    this.error.set(null);
+    this.tenantService.patchTenantUser(id, u.userId, { isActive: checked }).subscribe({
+      next: () => {
+        this.userTogglingId.set(null);
+        this.loadUsers(id);
+        this.loadUsage(id);
+      },
+      error: (err) => {
+        this.userTogglingId.set(null);
+        const code = err?.error?.error;
+        if (code === 'plan_limit_reached' || err?.status === 403) {
+          this.error.set(this.translate.instant('tenants.planLimitUsersReached'));
+        } else {
+          this.error.set(
+            typeof err?.error?.error === 'string' ? err.error.error : err?.message ?? 'Error',
+          );
+        }
+      },
+    });
+  }
+
+  private loadUsers(tenantId: number): void {
+    this.usersLoading.set(true);
+    this.tenantService.getTenantUsers(tenantId).subscribe({
+      next: (list) => {
+        this.tenantUsers.set(list);
+        this.usersLoading.set(false);
+      },
+      error: () => this.usersLoading.set(false),
+    });
+  }
+
+  private loadAudit(tenantId: number): void {
+    this.auditLoading.set(true);
+    this.tenantService.getTenantAudit(tenantId).subscribe({
+      next: (list) => {
+        this.tenantAudit.set(list);
+        this.auditLoading.set(false);
+      },
+      error: () => this.auditLoading.set(false),
+    });
+  }
+
+  private loadActivity(tenantId: number): void {
+    this.activityLoading.set(true);
+    this.tenantService.getTenantActivity(tenantId).subscribe({
+      next: (list) => {
+        this.activity.set((list ?? []).slice(0, 20));
+        this.activityLoading.set(false);
+      },
+      error: () => this.activityLoading.set(false),
+    });
+  }
+
+  /** Human-readable action label via i18n; fallback to raw action if no mapping. */
+  formatActionLabel(action: string): string {
+    if (!action) return '';
+    const key = ACTIVITY_ACTION_KEYS[action];
+    if (key) {
+      const translated = this.translate.instant(key);
+      return translated !== key ? translated : action;
+    }
+    return action;
+  }
+
+  /** Icon name for activity action (user.* → person, module.* → extension, etc.). */
+  getActivityIcon(action: string): string {
+    if (!action) return 'info';
+    if (action.startsWith('user.')) return 'person';
+    if (action.startsWith('module.')) return 'extension';
+    if (action.startsWith('api_key.') || action.startsWith('apikey.')) return 'key';
+    if (action.startsWith('webhook.')) return 'link';
+    if (action.startsWith('plan.')) return 'payments';
+    return 'info';
+  }
+
+  /** Relative time label (e.g. "2 minutes ago", "Yesterday") using Intl.RelativeTimeFormat when available. */
+  formatRelativeTime(date: string | Date): string {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(d.getTime())) return '';
+    const now = new Date();
+    const diffMs = d.getTime() - now.getTime();
+    const diffSec = Math.round(diffMs / 1000);
+    const diffMin = Math.round(diffSec / 60);
+    const diffHour = Math.round(diffMin / 60);
+    const diffDay = Math.round(diffHour / 24);
+
+    const locale = this.translate.currentLang || this.translate.defaultLang || 'en';
+    try {
+      if (typeof Intl !== 'undefined' && Intl.RelativeTimeFormat) {
+        const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+        if (Math.abs(diffSec) < 60) return rtf.format(diffSec, 'second');
+        if (Math.abs(diffMin) < 60) return rtf.format(diffMin, 'minute');
+        if (Math.abs(diffHour) < 24) return rtf.format(diffHour, 'hour');
+        if (Math.abs(diffDay) < 7) return rtf.format(diffDay, 'day');
+        if (Math.abs(diffDay) < 30) return rtf.format(Math.round(diffDay / 7), 'week');
+        if (Math.abs(diffDay) < 365) return rtf.format(Math.round(diffDay / 30), 'month');
+        return rtf.format(Math.round(diffDay / 365), 'year');
+      }
+    } catch {
+      // Intl.RelativeTimeFormat not available or failed
+    }
+    return d.toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' });
+  }
+
+  private loadApiKeys(tenantId: number): void {
+    this.apiKeysLoading.set(true);
+    this.tenantService.getTenantApiKeys(tenantId).subscribe({
+      next: (list) => {
+        this.apiKeys.set(list);
+        this.apiKeysLoading.set(false);
+      },
+      error: () => this.apiKeysLoading.set(false),
+    });
+  }
+
+  private loadTenantTheme(tenantId: number): void {
+    this.themeLoading.set(true);
+    this.tenantService.getTenantTheme(tenantId).subscribe({
+      next: (theme) => {
+        this.tenantTheme.set(theme);
+        this.patchTenantBrandingFormFromTheme(theme);
+        this.recomputeRecommendations();
+        this.themeLoading.set(false);
+      },
+      error: () => this.themeLoading.set(false),
+    });
+  }
+
+  /** Igual que `SettingsPage.patchFormsFromDto` pero desde `TenantThemeConfig`. */
+  private patchTenantBrandingFormFromTheme(th: TenantThemeConfig): void {
+    const eff = (key: string): string =>
+      th.effectiveTheme?.find((e) => e.colorKey === key)?.colorValue ?? '';
+    this.tenantBrandingForm.patchValue({
+      primaryColor: th.base.primary,
+      secondaryColor: th.base.secondary,
+      sidebarBgColor: eff('sidebarBg') || th.base.primary,
+      headerBgColor: eff('headerBg') || eff('surfaceVariant') || '#f4ece4',
+      pageBackgroundColor: eff('background') || eff('pageBackground') || '#fbf1e8',
+      buttonPrimaryColor: eff('buttonPrimary') || eff('primaryHover') || th.base.primary,
+      buttonSecondaryColor: eff('buttonSecondary') || eff('secondaryHover') || th.base.secondary,
+      buttonCancelColor: eff('textButton') || '#5f6b7a',
+      textColor: eff('onSurface') || '#012630',
+      fontFamily: th.typography.fontFamily ?? '',
+      headingFontFamily: th.typography.headingFontFamily ?? '',
+      baseFontSize: th.typography.baseFontSize ?? 16,
+      loginBackgroundUrl: th.assets.loginBackgroundUrl ?? '',
+      logoUrl: th.assets.logoUrl ?? '',
+      logoDarkUrl: th.assets.logoDarkUrl ?? '',
+      logoReducedUrl: th.assets.logoReducedUrl ?? '',
+      logoDarkReducedUrl: th.assets.logoDarkReducedUrl ?? '',
+      faviconUrl: th.assets.faviconUrl ?? '',
+      logoSlotSidebar: this.normalizeLogoSlot(th.assets.logoSlotSidebar),
+      logoSlotLogin: this.normalizeLogoSlot(th.assets.logoSlotLogin),
+      logoSlotFavicon: this.normalizeLogoSlot(th.assets.logoSlotFavicon),
+      logoSlotSidebarCollapsed: this.normalizeLogoSlot(th.assets.logoSlotSidebarCollapsed),
+    });
+    this.syncFontPresetFromForm();
+    this.advisorColor1.set(th.base.primary || '#0FA2CC');
+  }
+
+  private normalizeLogoSlot(v: string | null | undefined): TenantLogoVariant {
+    const s = String(v ?? '').trim();
+    if (s === 'alternate' || s === 'primary_reduced' || s === 'alternate_reduced' || s === 'primary') {
+      return s;
+    }
+    return 'primary';
+  }
+
+  clearBrandingAssetUrl(
+    field:
+      | 'logoUrl'
+      | 'logoDarkUrl'
+      | 'logoReducedUrl'
+      | 'logoDarkReducedUrl'
+      | 'faviconUrl'
+      | 'loginBackgroundUrl',
+  ): void {
+    this.tenantBrandingForm.patchValue({ [field]: '' });
+  }
+
+  togglePaletteTools(): void {
+    this.showPaletteTools.update((v) => !v);
+  }
+
+  onFontPresetChange(value: string): void {
+    if (value === 'custom') {
+      this.selectedFontPresetId.set('custom');
+      return;
+    }
+    const preset = FONT_PRESETS.find((p) => p.id === value);
+    if (!preset) return;
+    this.tenantBrandingForm.patchValue({ fontFamily: preset.fontFamily }, { emitEvent: false });
+    this.selectedFontPresetId.set(value);
+  }
+
+  private normalizeFontStack(value: string): string {
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/['"]/g, '')
+      .replace(/\s*,\s*/g, ',')
+      .replace(/\s+/g, '');
+  }
+
+  private syncFontPresetFromForm(): void {
+    const raw = this.tenantBrandingForm.get('fontFamily')?.value ?? '';
+    if (!raw.trim()) {
+      this.selectedFontPresetId.set('custom');
+      return;
+    }
+    const n = this.normalizeFontStack(raw);
+    const match = FONT_PRESETS.find((p) => this.normalizeFontStack(p.fontFamily) === n);
+    this.selectedFontPresetId.set(match?.id ?? 'custom');
+  }
+
+  /** Igual que `SettingsPage.applyPalette`: aplica preset y marca selección. */
+  applyPalette(palette: ThemePalette): void {
+    this.applyTenantPalette(palette);
+  }
+
+  applyTenantPalette(palette: ThemePalette): void {
+    this.selectedTenantPaletteId.set(palette.id);
+    this.tenantBrandingForm.patchValue({
+      primaryColor: palette.primaryColor,
+      secondaryColor: palette.secondaryColor,
+      sidebarBgColor: palette.sidebarBgColor,
+      headerBgColor: palette.headerBgColor,
+      pageBackgroundColor: palette.pageBackgroundColor ?? this.mixWithWhite(palette.headerBgColor, 0.22),
+      buttonPrimaryColor: palette.buttonPrimaryColor,
+      buttonSecondaryColor: palette.buttonSecondaryColor,
+      textColor: palette.textColor,
+    });
+  }
+
+  setAdvisorColor(slot: 1 | 2 | 3, value: string): void {
+    const v = String(value ?? '').trim();
+    if (slot === 1) this.advisorColor1.set(v);
+    if (slot === 2) this.advisorColor2.set(v);
+    if (slot === 3) this.advisorColor3.set(v);
+    this.recomputeRecommendations();
+  }
+
+  applyRecommendedPalette(palette: ThemePalette): void {
+    this.applyTenantPalette(palette);
+  }
+
+  private recomputeRecommendations(): void {
+    const c1 = this.normalizeHex(this.advisorColor1());
+    const c2 = this.normalizeHex(this.advisorColor2());
+    const c3 = this.normalizeHex(this.advisorColor3());
+    if (!c1) {
+      this.paletteRecommendations.set(this.themePalettes.slice(0, 4));
+      return;
+    }
+    const generated = buildAdvisorGeneratedPalette(c1, c2, c3);
+    const ranked = this.themePalettes
+      .map((p) => ({ p, score: this.scorePalette(p, c1, c2, c3) }))
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 5)
+      .map((x) => x.p);
+    this.paletteRecommendations.set([generated, ...ranked]);
+  }
+
+  private scorePalette(palette: ThemePalette, c1: string, c2: string | null, c3: string | null): number {
+    let score = this.distance(palette.primaryColor, c1) * 2.4;
+    if (c2) score += this.distance(palette.secondaryColor, c2) * 1.7;
+    if (c3) score += this.distance(palette.headerBgColor, c3) * 1.2;
+    return score;
+  }
+
+  private normalizeHex(value: string): string | null {
+    const v = String(value ?? '').trim();
+    if (!v) return null;
+    return /^#([0-9a-fA-F]{6})$/.test(v) ? v.toUpperCase() : null;
+  }
+
+  private hexToRgb(hex: string): { r: number; g: number; b: number } {
+    const n = hex.replace('#', '');
+    return {
+      r: parseInt(n.slice(0, 2), 16),
+      g: parseInt(n.slice(2, 4), 16),
+      b: parseInt(n.slice(4, 6), 16),
+    };
+  }
+
+  private rgbToHex(r: number, g: number, b: number): string {
+    const h = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');
+    return `#${h(r)}${h(g)}${h(b)}`.toUpperCase();
+  }
+
+  private distance(a: string, b: string): number {
+    const ca = this.hexToRgb(a);
+    const cb = this.hexToRgb(b);
+    const dr = ca.r - cb.r;
+    const dg = ca.g - cb.g;
+    const db = ca.b - cb.b;
+    return Math.sqrt(dr * dr + dg * dg + db * db);
+  }
+
+  private mixWithWhite(hex: string, ratio: number): string {
+    const c = this.hexToRgb(hex);
+    const r = c.r * (1 - ratio) + 255 * ratio;
+    const g = c.g * (1 - ratio) + 255 * ratio;
+    const b = c.b * (1 - ratio) + 255 * ratio;
+    return this.rgbToHex(r, g, b);
+  }
+
+  private shiftHue(hex: string, degrees: number): string {
+    const { h, s, l } = this.rgbToHsl(this.hexToRgb(hex));
+    const nh = (h + degrees + 360) % 360;
+    return this.hslToHex(nh, s, l);
+  }
+
+  private rgbToHsl(rgb: { r: number; g: number; b: number }): { h: number; s: number; l: number } {
+    const r = rgb.r / 255;
+    const g = rgb.g / 255;
+    const b = rgb.b / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    if (max === min) return { h: 0, s: 0, l };
+    const d = max - min;
+    const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    let h = 0;
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      default:
+        h = (r - g) / d + 4;
+        break;
+    }
+    return { h: h * 60, s, l };
+  }
+
+  private hslToHex(h: number, s: number, l: number): string {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = l - c / 2;
+    let r1 = 0,
+      g1 = 0,
+      b1 = 0;
+    if (h < 60) {
+      r1 = c;
+      g1 = x;
+    } else if (h < 120) {
+      r1 = x;
+      g1 = c;
+    } else if (h < 180) {
+      g1 = c;
+      b1 = x;
+    } else if (h < 240) {
+      g1 = x;
+      b1 = c;
+    } else if (h < 300) {
+      r1 = x;
+      b1 = c;
+    } else {
+      r1 = c;
+      b1 = x;
+    }
+    return this.rgbToHex((r1 + m) * 255, (g1 + m) * 255, (b1 + m) * 255);
+  }
+
+  private pickTextColor(bg: string): string {
+    const { r, g, b } = this.hexToRgb(bg);
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return lum > 0.65 ? '#012630' : '#FFFFFF';
+  }
+
+  private darkenHexForPalette(hex: string, factor: number): string {
+    const c = this.hexToRgb(hex);
+    return this.rgbToHex(c.r * (1 - factor), c.g * (1 - factor), c.b * (1 - factor));
+  }
+
+  saveTenantTheme(): void {
+    if (this.tenantBrandingForm.invalid) return;
+    const id = this.tenantId();
+    const t = this.tenantTheme();
+    if (id === null || !t) return;
+    const v = this.tenantBrandingForm.getRawValue();
+    this.themeSaving.set(true);
+    this.error.set(null);
+    const baseFont = Number(v.baseFontSize);
+    this.tenantService
+      .updateTenantTheme(id, {
+        strategy: 'custom',
+        base: {
+          primary: v.primaryColor,
+          secondary: v.secondaryColor,
+          themeMode: t.themeMode,
+          fontFamily: v.fontFamily?.trim() || undefined,
+          headingFontFamily: v.headingFontFamily?.trim() || undefined,
+          baseFontSize: Number.isFinite(baseFont) ? baseFont : t.typography.baseFontSize,
+        },
+        assets: {
+          logoUrl: v.logoUrl?.trim() ? v.logoUrl.trim() : null,
+          logoDarkUrl: v.logoDarkUrl?.trim() ? v.logoDarkUrl.trim() : null,
+          logoReducedUrl: v.logoReducedUrl?.trim() ? v.logoReducedUrl.trim() : null,
+          logoDarkReducedUrl: v.logoDarkReducedUrl?.trim() ? v.logoDarkReducedUrl.trim() : null,
+          faviconUrl: v.faviconUrl?.trim() ? v.faviconUrl.trim() : null,
+          loginBackgroundUrl: v.loginBackgroundUrl?.trim() ? v.loginBackgroundUrl.trim() : null,
+          logoSlotSidebar: this.normalizeLogoSlot(v.logoSlotSidebar),
+          logoSlotLogin: this.normalizeLogoSlot(v.logoSlotLogin),
+          logoSlotFavicon: this.normalizeLogoSlot(v.logoSlotFavicon),
+          logoSlotSidebarCollapsed: this.normalizeLogoSlot(v.logoSlotSidebarCollapsed),
+        },
+        overrides: {
+          sidebarBg: v.sidebarBgColor,
+          headerBg: v.headerBgColor,
+          background: v.pageBackgroundColor,
+          buttonPrimary: v.buttonPrimaryColor,
+          buttonSecondary: v.buttonSecondaryColor,
+          onSurface: v.textColor,
+          textButton: v.buttonCancelColor,
+        },
+      })
+      .subscribe({
+        next: () => {
+          this.themeSaving.set(false);
+          this.loadTenantTheme(id);
+        },
+        error: (err) => {
+          this.themeSaving.set(false);
+          this.error.set(err?.message ?? err?.error?.error ?? 'Error al guardar theme');
+        },
+      });
+  }
+
+  createApiKey(): void {
+    const tenantId = this.tenantId();
+    const name = this.newApiKeyName().trim();
+    if (tenantId === null || !name) return;
+    this.creatingApiKey.set(true);
+    this.error.set(null);
+    this.tenantService.createTenantApiKey(tenantId, name).subscribe({
+      next: () => {
+        this.newApiKeyName.set('');
+        this.loadApiKeys(tenantId);
+        this.creatingApiKey.set(false);
+      },
+      error: (err) => {
+        this.error.set(err?.message ?? err?.error?.error ?? 'Error al crear API key');
+        this.creatingApiKey.set(false);
+      },
+    });
+  }
+
+  async deactivateApiKey(key: TenantApiKey): Promise<void> {
+    if (!key.isActive) return;
+    const confirmed = await this.msgBox.show({
+      title: this.translate.instant('common.confirm'),
+      html: `<p>¿Desactivar la API key "${escapeHtml(key.name)}"? No se puede volver a activar.</p>`,
+      confirm: true,
+    });
+    if (!confirmed) return;
+    const tenantId = this.tenantId();
+    this.tenantService.deactivateApiKey(key.id).subscribe({
+      next: () => tenantId !== null && this.loadApiKeys(tenantId),
+      error: (err) => this.error.set(err?.message ?? err?.error?.error ?? 'Error al desactivar API key'),
+    });
+  }
+
+  private loadWebhooks(tenantId: number): void {
+    this.webhooksLoading.set(true);
+    this.tenantService.getTenantWebhooks(tenantId).subscribe({
+      next: (list) => {
+        this.tenantWebhooks.set(list);
+        this.webhooksLoading.set(false);
+      },
+      error: () => this.webhooksLoading.set(false),
+    });
+  }
+
+  createWebhook(): void {
+    const tenantId = this.tenantId();
+    const url = this.newWebhookUrl().trim();
+    if (tenantId === null || !url) return;
+    this.creatingWebhook.set(true);
+    this.error.set(null);
+    this.tenantService.createTenantWebhook(tenantId, url).subscribe({
+      next: () => {
+        this.newWebhookUrl.set('');
+        this.loadWebhooks(tenantId);
+        this.creatingWebhook.set(false);
+      },
+      error: (err) => {
+        this.error.set(err?.message ?? err?.error?.error ?? 'Error al crear webhook');
+        this.creatingWebhook.set(false);
+      },
+    });
+  }
+
+  async deactivateWebhook(webhook: TenantWebhook): Promise<void> {
+    if (!webhook.isActive) return;
+    const confirmed = await this.msgBox.show({
+      title: this.translate.instant('common.confirm'),
+      html: `<p>¿Desactivar el webhook ${escapeHtml(webhook.url)}?</p>`,
+      confirm: true,
+    });
+    if (!confirmed) return;
+    const tenantId = this.tenantId();
+    this.tenantService.deactivateWebhook(webhook.id).subscribe({
+      next: () => tenantId !== null && this.loadWebhooks(tenantId),
+      error: (err) => this.error.set(err?.message ?? err?.error?.error ?? 'Error al desactivar webhook'),
+    });
+  }
+
+  onModuleToggle(mod: TenantModule, enabled: boolean): void {
+    if (this.readonlyMode()) return;
+    const tenantId = this.tenantId();
+    if (tenantId === null) return;
+    if (!mod.editable) return;
+    const canToggle = mod.platformEnabled && mod.planEnabled;
+    if (enabled && !canToggle) return;
+    this.moduleTogglingId.set(mod.moduleId);
+    this.error.set(null);
+    this.tenantService.patchTenantModule(tenantId, mod.moduleId, enabled).subscribe({
+      next: () => {
+        this.loadModules(tenantId);
+        this.moduleTogglingId.set(null);
+      },
+      error: (err) => {
+        this.moduleTogglingId.set(null);
+        const code = err?.error?.error;
+        const msg =
+          code === 'module_not_allowed_by_plan'
+            ? 'El plan del tenant no incluye este módulo'
+            : code === 'module_manual_edit_disabled'
+              ? 'La edición manual de módulos está deshabilitada. Usá el plan o add-ons.'
+              : (err?.message ?? 'Error al actualizar módulo');
+        this.error.set(msg);
+      },
+    });
+  }
+
+  canToggleModule(mod: TenantModule): boolean {
+    return mod.editable === true && mod.platformEnabled === true && mod.planEnabled === true;
+  }
+
+  /** Add-on: módulo en el catálogo del producto pero no incluido en el plan. */
+  canAddonAction(mod: TenantModule): boolean {
+    return mod.platformEnabled && !mod.planEnabled;
+  }
+
+  onAddonToggle(mod: TenantModule, active: boolean): void {
+    if (this.readonlyMode()) return;
+    const tenantId = this.tenantId();
+    if (tenantId === null || !this.canAddonAction(mod)) return;
+    this.addonTogglingId.set(mod.moduleId);
+    this.error.set(null);
+    this.tenantService.patchTenantModuleAddon(tenantId, mod.moduleId, active).subscribe({
+      next: () => {
+        this.loadModules(tenantId);
+        this.addonTogglingId.set(null);
+      },
+      error: (err) => {
+        this.addonTogglingId.set(null);
+        const code = err?.error?.error;
+        const msg =
+          code === 'module_not_in_product_catalog'
+            ? 'Este módulo no está en el catálogo del producto del tenant.'
+            : (err?.message ?? 'Error al actualizar add-on');
+        this.error.set(msg);
+      },
+    });
+  }
+
+  onStandaloneFeatureToggle(row: TenantStandaloneFeature, enabled: boolean): void {
+    if (this.readonlyMode()) return;
+    const id = this.tenantId();
+    if (id === null) return;
+    this.standaloneFeatureToggling.set(row.featureCode);
+    this.error.set(null);
+    this.tenantService.updateTenantFeatures(id, [{ featureCode: row.featureCode, enabled }]).subscribe({
+      next: () => {
+        this.standaloneFeatureToggling.set(null);
+        this.refreshFeatureLists(id);
+      },
+      error: (err) => {
+        this.standaloneFeatureToggling.set(null);
+        this.error.set(err?.message ?? 'Error al actualizar la funcionalidad');
+      },
+    });
+  }
+
+  /** Add-on de feature (catálogo product_addon): misma regla que módulos — planEnabled false. */
+  canStandaloneAddonAction(sf: TenantStandaloneFeature): boolean {
+    const platform = sf.platformEnabled ?? true;
+    const inBasePlan = sf.planEnabled ?? true;
+    return platform && !inBasePlan;
+  }
+
+  onStandaloneAddonToggle(sf: TenantStandaloneFeature, active: boolean): void {
+    this.onStandaloneFeatureToggle(sf, active);
+  }
+
+  async suspendTenant(): Promise<void> {
+    const t = this.tenant();
+    const id = this.tenantId();
+    if (!t || id === null) return;
+    const confirmed = await this.msgBox.show({
+      title: this.translate.instant('common.confirm'),
+      html: `<p>¿Suspender el tenant ${escapeHtml(t.tenantName ?? '')}?</p>`,
+      confirm: true,
+    });
+    if (!confirmed) return;
+    this.actionPending.set(true);
+    this.error.set(null);
+    this.tenantService.suspendTenant(t.tenantId).subscribe({
+      next: () => {
+        this.actionPending.set(false);
+        this.loadTenant(id);
+      },
+      error: (err) => {
+        this.actionPending.set(false);
+        this.error.set(err?.message ?? 'Error al suspender');
+      },
+    });
+  }
+
+  async activateTenant(): Promise<void> {
+    const t = this.tenant();
+    const id = this.tenantId();
+    if (!t || id === null) return;
+    const confirmed = await this.msgBox.show({
+      title: this.translate.instant('common.confirm'),
+      html: `<p>¿Activar el tenant ${escapeHtml(t.tenantName ?? '')}?</p>`,
+      confirm: true,
+    });
+    if (!confirmed) return;
+    this.actionPending.set(true);
+    this.error.set(null);
+    this.tenantService.activateTenant(t.tenantId).subscribe({
+      next: () => {
+        this.actionPending.set(false);
+        this.loadTenant(id);
+      },
+      error: (err) => {
+        this.actionPending.set(false);
+        this.error.set(err?.message ?? 'Error al activar');
+      },
+    });
+  }
+
+  changePlan(): void {
+    const t = this.tenant();
+    const first = t?.serviceSubscriptions?.[0];
+    if (first?.productId != null) {
+      this.applyPlanChangeForProduct(first.productId);
+      return;
+    }
+    const id = this.tenantId();
+    const servicePlanId = this.selectedPlanId();
+    if (id === null || servicePlanId === null) return;
+    if (t && t.servicePlanId === servicePlanId) return;
+    this.planUpdating.set(true);
+    this.error.set(null);
+    this.tenantService.changeTenantPlan(id, servicePlanId).subscribe({
+      next: (updated) => {
+        this.tenant.set(updated);
+        this.syncPlanSelectionsFromTenant(updated);
+        this.selectedPlanId.set(updated.servicePlanId ?? null);
+        this.loadModules(updated.tenantId);
+        this.planUpdating.set(false);
+      },
+      error: (err) => {
+        this.planUpdating.set(false);
+        this.error.set(err?.message ?? 'Error al cambiar plan');
+      },
+    });
+  }
+}

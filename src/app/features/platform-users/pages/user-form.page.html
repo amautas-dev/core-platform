@@ -1,0 +1,110 @@
+<div class="user-form-page">
+  <header class="page-header">
+    <h1>{{ isEdit() ? ('users.editUser' | translate) : ('users.createUser' | translate) }}</h1>
+    <a mat-button [routerLink]="paths.users()">{{ 'common.back' | translate }}</a>
+  </header>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <mat-card>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-fields">
+          <mat-form-field appearance="outline" class="field-half">
+            <mat-label>{{ 'users.username' | translate }}</mat-label>
+            <input matInput formControlName="username" autocomplete="username" />
+            @if (form.get('username')?.hasError('required')) {
+              <mat-error>{{ 'users.validationRequired' | translate }}</mat-error>
+            }
+            @if (form.get('username')?.hasError('minlength')) {
+              <mat-error>{{ 'users.validationMinLength2' | translate }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field-half">
+            <mat-label>{{ 'users.email' | translate }}</mat-label>
+            <input matInput type="email" formControlName="email" autocomplete="email" />
+            @if (form.get('email')?.hasError('required')) {
+              <mat-error>{{ 'users.validationRequired' | translate }}</mat-error>
+            }
+            @if (form.get('email')?.hasError('email')) {
+              <mat-error>{{ 'users.validationEmailInvalid' | translate }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        @if (!isEdit()) {
+          <div class="form-fields form-fields--password">
+            <mat-form-field appearance="outline" class="field-half password-field">
+              <mat-label>{{ 'users.password' | translate }}</mat-label>
+              <input matInput type="password" formControlName="password" autocomplete="new-password" />
+              <button mat-icon-button matSuffix type="button" (click)="generatePassword()" [attr.aria-label]="'users.generatePassword' | translate" title="{{ 'users.generatePassword' | translate }}">
+                <mat-icon>refresh</mat-icon>
+              </button>
+              @if (form.get('password')?.hasError('required')) {
+                <mat-error>{{ 'users.validationRequired' | translate }}</mat-error>
+              }
+              @if (form.get('password')?.hasError('minlength')) {
+                <mat-error>{{ 'users.validationPasswordMinLength' | translate }}</mat-error>
+              }
+              @if (form.get('password')?.hasError('passwordUppercase')) {
+                <mat-error>{{ 'users.validationPasswordUppercase' | translate }}</mat-error>
+              }
+              @if (form.get('password')?.hasError('passwordLowercase')) {
+                <mat-error>{{ 'users.validationPasswordLowercase' | translate }}</mat-error>
+              }
+              @if (form.get('password')?.hasError('passwordNumber')) {
+                <mat-error>{{ 'users.validationPasswordNumber' | translate }}</mat-error>
+              }
+              <mat-hint>{{ 'users.passwordHint' | translate }}</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>{{ 'users.confirmPassword' | translate }}</mat-label>
+              <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password" />
+              @if (form.get('confirmPassword')?.hasError('required')) {
+                <mat-error>{{ 'users.validationRequired' | translate }}</mat-error>
+              }
+              @if (form.get('confirmPassword')?.hasError('passwordMismatch')) {
+                <mat-error>{{ 'users.validationPasswordMismatch' | translate }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="checkbox-row">
+            <mat-checkbox formControlName="sendInvitationEmail">{{ 'users.sendInvitationEmail' | translate }}</mat-checkbox>
+          </div>
+        } @else {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'users.passwordOptional' | translate }}</mat-label>
+            <input matInput type="password" formControlName="password" autocomplete="new-password" />
+            <mat-hint>{{ 'users.passwordLeaveEmptyHint' | translate }}</mat-hint>
+          </mat-form-field>
+        }
+
+        <mat-form-field appearance="outline" class="field-compact">
+          <mat-label>{{ 'users.role' | translate }}</mat-label>
+          <mat-select formControlName="roleCode">
+            @for (role of roles(); track role.roleId) {
+              <mat-option [value]="role.roleCode">
+                {{ role.roleName }} ({{ role.roleCode }})
+              </mat-option>
+            }
+          </mat-select>
+          @if (form.get('roleCode')?.hasError('required')) {
+            <mat-error>{{ 'users.validationRequired' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="actions">
+          <a mat-button [routerLink]="paths.users()">{{ 'common.cancel' | translate }}</a>
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading()">
+            {{ loading() ? (isEdit() ? ('common.saving' | translate) : ('users.creating' | translate)) : (isEdit() ? ('common.save' | translate) : ('users.createUser' | translate)) }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

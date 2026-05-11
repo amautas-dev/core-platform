@@ -1,0 +1,73 @@
+.service-plans-list-page {
+  padding: 1.5rem;
+
+  .filters-explain {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.65));
+    max-width: 56rem;
+  }
+
+  .page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      order: 3;
+
+      mat-form-field {
+        min-width: 200px;
+      }
+    }
+
+    a mat-icon {
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+  }
+
+  .error {
+    color: var(--mat-warn-color, #c62828);
+    margin-bottom: 1rem;
+  }
+
+  .table-with-paginator {
+    mat-paginator {
+      margin-top: 0.5rem;
+    }
+  }
+
+  .plans-table {
+    width: 100%;
+
+    th,
+    td {
+      padding: 0.75rem 1rem;
+    }
+
+    mat-chip.active {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    mat-chip.inactive {
+      background: #ffebee;
+      color: #c62828;
+    }
+  }
+}

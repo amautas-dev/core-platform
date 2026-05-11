@@ -1,0 +1,125 @@
+/**
+ * Utilidades de color: derivan del primario actual vía color-mix (sin RGB fijo del cyan legacy).
+ */
+.bg-primary-light {
+  background-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 14%, transparent);
+}
+
+.bg-primary-lighter {
+  background-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 7%, transparent);
+}
+
+.bg-secondary-light {
+  background-color: color-mix(in srgb, var(--color-accent-500, #4dd2f0) 14%, transparent);
+}
+
+.bg-success-light {
+  background-color: color-mix(in srgb, var(--color-success, #2e7d32) 14%, transparent);
+}
+
+.bg-warning-light {
+  background-color: color-mix(in srgb, var(--color-warning, #f9a825) 14%, transparent);
+}
+
+.bg-error-light {
+  background-color: color-mix(in srgb, var(--color-error, #d32f2f) 14%, transparent);
+}
+
+.bg-brand-surface {
+  background-color: var(--color-surface, #ffffff);
+}
+
+.bg-brand-background {
+  background-color: var(--color-bg, #fbf1e8);
+}
+
+.bg-brand-surface-variant {
+  background-color: var(--color-surface-variant, #f4f8f9);
+}
+
+/* ======= TEXT COLORS ======= */
+.text-primary {
+  color: var(--color-primary-500, #1f6feb);
+}
+
+.text-primary-hover {
+  color: var(--color-primary-hover, #1e66d3);
+}
+
+.text-secondary {
+  color: var(--color-accent-500, #4dd2f0);
+}
+
+.text-tertiary {
+  color: var(--color-accent-700, #28c0e2);
+}
+
+.text-success {
+  color: var(--color-success, #2e7d32);
+}
+
+.text-warning {
+  color: var(--color-warning, #f9a825);
+}
+
+.text-error {
+  color: var(--color-error, #d32f2f);
+}
+
+.text-on-surface {
+  color: var(--color-text-primary, #0f2f3a);
+}
+
+/* ======= BORDERS ======= */
+.border-primary {
+  border-color: var(--color-primary-500, #1f6feb);
+}
+
+.border-secondary {
+  border-color: var(--color-accent-500, #4dd2f0);
+}
+
+.border-error {
+  border-color: var(--color-error, #d32f2f);
+}
+
+.border-divider {
+  border-color: var(--color-border, #dbe7ec);
+}
+
+/* ======= UTILITIES COMBINADAS ======= */
+.badge-primary {
+  background-color: color-mix(in srgb, var(--color-primary-500, #1f6feb) 14%, transparent);
+  color: var(--color-primary-500, #1f6feb);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-success {
+  background-color: color-mix(in srgb, var(--color-success, #2e7d32) 14%, transparent);
+  color: var(--color-success, #2e7d32);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-warning {
+  background-color: color-mix(in srgb, var(--color-warning, #f9a825) 14%, transparent);
+  color: var(--color-warning, #f9a825);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-error {
+  background-color: color-mix(in srgb, var(--color-error, #d32f2f) 14%, transparent);
+  color: var(--color-error, #d32f2f);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
