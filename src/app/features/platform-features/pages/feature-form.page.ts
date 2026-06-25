@@ -18,9 +18,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { PlatformFeaturesService, type FeatureUpsertDto } from '../services/platform-features.service';
 import { PlatformModule } from '../../platform-modules/models/platform-module.interface';
 import { PlatformFeature } from '../models/platform-feature.interface';
+import { PlatformFeaturePermission } from '../models/platform-feature-permission.interface';
 import { PlatformTranslatePipe } from '../../../core/i18n/translate.pipe';
 import { PlatformRoutePathsService } from '../../../core/routing/platform-route-paths.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
@@ -53,6 +55,7 @@ function apiToTri(v: boolean | null | undefined): TriBool {
     MatSlideToggleModule,
     MatIconModule,
     MatExpansionModule,
+    MatCheckboxModule,
     PlatformTranslatePipe,
   ],
   templateUrl: './feature-form.page.html',
@@ -74,6 +77,10 @@ export class FeatureFormPage implements OnInit {
   readonly featureId = signal<number | null>(null);
   readonly modules = signal<PlatformModule[]>([]);
   readonly allFeatures = signal<PlatformFeature[]>([]);
+  readonly featurePermissions = signal<PlatformFeaturePermission[]>([]);
+  readonly permissionsLoading = signal(false);
+  readonly permissionsSaving = signal(false);
+  readonly permissionFilter = signal('');
 
   readonly parentOptions = computed(() => {
     const id = this.featureId();
@@ -81,6 +88,23 @@ export class FeatureFormPage implements OnInit {
     if (id == null) return list;
     return list.filter((f) => f.featureId !== id);
   });
+
+  readonly filteredFeaturePermissions = computed(() => {
+    const q = this.permissionFilter().trim().toLowerCase();
+    const list = this.featurePermissions();
+    if (!q) return list;
+    return list.filter((permission) => {
+      return (
+        String(permission.permissionCode ?? '').toLowerCase().includes(q) ||
+        String(permission.permissionName ?? '').toLowerCase().includes(q) ||
+        String(permission.description ?? '').toLowerCase().includes(q)
+      );
+    });
+  });
+
+  readonly assignedPermissionCount = computed(
+    () => this.featurePermissions().filter((permission) => permission.assigned).length,
+  );
 
   readonly form = this.fb.nonNullable.group({
     code: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(80)]],
@@ -123,6 +147,7 @@ export class FeatureFormPage implements OnInit {
         this.featureId.set(numId);
         this.isEdit.set(true);
         this.loadFeature(numId);
+        this.loadFeaturePermissions(numId);
       }
     }
   }
@@ -155,6 +180,44 @@ export class FeatureFormPage implements OnInit {
       error: (err) => {
         this.error.set(err?.message ?? 'Error loading feature');
         this.loading.set(false);
+      },
+    });
+  }
+
+  private loadFeaturePermissions(id: number): void {
+    this.permissionsLoading.set(true);
+    this.featuresService.getFeaturePermissions(id).subscribe({
+      next: (response) => {
+        this.featurePermissions.set(response.availablePermissions);
+        this.permissionsLoading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err?.message ?? 'Error loading feature permissions');
+        this.permissionsLoading.set(false);
+      },
+    });
+  }
+
+  updatePermissionFilter(value: string): void {
+    this.permissionFilter.set(value);
+  }
+
+  onPermissionToggle(permission: PlatformFeaturePermission, assigned: boolean): void {
+    const id = this.featureId();
+    if (id == null) return;
+    const permissionIds = this.featurePermissions()
+      .filter((p) => (p.permissionId === permission.permissionId ? assigned : p.assigned))
+      .map((p) => p.permissionId);
+    this.permissionsSaving.set(true);
+    this.error.set(null);
+    this.featuresService.updateFeaturePermissions(id, permissionIds).subscribe({
+      next: (response) => {
+        this.featurePermissions.set(response.availablePermissions);
+        this.permissionsSaving.set(false);
+      },
+      error: (err) => {
+        this.error.set(err?.message ?? 'Error saving feature permissions');
+        this.permissionsSaving.set(false);
       },
     });
   }

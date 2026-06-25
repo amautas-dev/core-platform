@@ -95,6 +95,52 @@
   max-width: 100%;
 }
 
+.role-permissions-panel {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--mat-sys-outline, #ccc) 45%, transparent);
+}
+
+.role-permission-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.role-permission-feature {
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline, #ccc) 40%, transparent);
+
+  code {
+    font-size: 0.76rem;
+  }
+}
+
+.role-permission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.35rem 0.75rem;
+  padding-bottom: 0.5rem;
+}
+
+.role-permission-check {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.role-permission-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+
+  code {
+    font-family: ui-monospace, monospace;
+    opacity: 0.75;
+  }
+}
+
 .perm-scroll {
   flex: 1 1 auto;
   min-height: 0;

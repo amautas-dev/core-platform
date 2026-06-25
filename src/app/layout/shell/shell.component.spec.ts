@@ -1,4 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { ShellComponent } from './shell.component';
 
@@ -8,7 +12,8 @@ describe('ShellComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ShellComponent]
+      imports: [ShellComponent, HttpClientTestingModule, TranslateModule.forRoot()],
+      providers: [provideRouter([]), provideNoopAnimations()],
     })
     .compileComponents();
 

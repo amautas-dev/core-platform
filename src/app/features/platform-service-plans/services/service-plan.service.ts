@@ -6,6 +6,7 @@ import { ServicePlanLimit } from '../models/service-plan-limit.interface';
 import { ServicePlanModule } from '../models/service-plan-module.interface';
 import { CreateServicePlanDto } from '../models/create-service-plan.dto';
 import { UpdateServicePlanDto } from '../models/update-service-plan.dto';
+import { ServicePlanFeaturesResponse } from '../models/service-plan-feature.interface';
 
 /** Path relative to apiUrl (e.g. apiUrl = .../api → .../api/v1/platform/service-plans) */
 const BASE_PATH = 'v1/platform/service-plans';
@@ -64,6 +65,24 @@ export class ServicePlanService {
     return this.api.put<ServicePlanModule[]>(
       `${BASE_PATH}/${planId}/modules`,
       modules,
+      country != null && country !== '' ? { country } : undefined,
+    );
+  }
+
+  getPlanFeatures(planId: number, country?: string): Observable<ServicePlanFeaturesResponse> {
+    return this.api.get<ServicePlanFeaturesResponse>(`${BASE_PATH}/${planId}/features`, {
+      country: country ?? undefined,
+    });
+  }
+
+  updatePlanFeatures(
+    planId: number,
+    featureIds: number[],
+    country?: string
+  ): Observable<ServicePlanFeaturesResponse> {
+    return this.api.put<ServicePlanFeaturesResponse>(
+      `${BASE_PATH}/${planId}/features`,
+      { featureIds },
       country != null && country !== '' ? { country } : undefined,
     );
   }

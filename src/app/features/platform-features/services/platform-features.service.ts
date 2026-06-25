@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/api/api.service';
 import { PlatformFeature } from '../models/platform-feature.interface';
+import { PlatformFeaturePermissionsResponse } from '../models/platform-feature-permission.interface';
 import { PlatformModule } from '../../platform-modules/models/platform-module.interface';
 
 const FEATURES_PATH = 'v1/platform/features';
@@ -55,6 +56,20 @@ export class PlatformFeaturesService {
 
   deleteFeature(id: number): Observable<void> {
     return this.api.delete<void>(`${FEATURES_PATH}/${id}`);
+  }
+
+  getFeaturePermissions(featureId: number): Observable<PlatformFeaturePermissionsResponse> {
+    return this.api.get<PlatformFeaturePermissionsResponse>(`${FEATURES_PATH}/${featureId}/permissions`);
+  }
+
+  updateFeaturePermissions(
+    featureId: number,
+    permissionIds: number[]
+  ): Observable<PlatformFeaturePermissionsResponse> {
+    return this.api.put<PlatformFeaturePermissionsResponse>(
+      `${FEATURES_PATH}/${featureId}/permissions`,
+      { permissionIds },
+    );
   }
 
   /** Load modules for dropdown (moduleCode) when creating/editing features. */

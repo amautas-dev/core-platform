@@ -21,6 +21,7 @@ import {
   ConsoleRolesService,
   type PermissionCatalogEntry,
   type MenuGroupDto,
+  type ConsoleRolePermissionFeature,
 } from '../services/console-roles.service';
 import { PlatformTranslatePipe } from '../../../core/i18n/translate.pipe';
 import { PlatformRoutePathsService } from '../../../core/routing/platform-route-paths.service';
@@ -95,6 +96,8 @@ export class ConsoleRoleFeaturesPage implements OnInit {
   readonly saveError = signal(false);
   readonly permissionCatalog = signal<PermissionCatalogEntry[]>([]);
   readonly permissionSelected = signal<Set<string>>(new Set());
+  readonly rolePermissionFeatures = signal<ConsoleRolePermissionFeature[]>([]);
+  readonly rolePermissionSelected = signal<Set<string>>(new Set());
   readonly menuGroups = signal<MenuGroupUi[]>([]);
   readonly saving = signal(false);
   readonly roleTitle = signal<{ code: string; name: string } | null>(null);
@@ -146,6 +149,12 @@ export class ConsoleRoleFeaturesPage implements OnInit {
 
   readonly canSave = computed(() => this.permission.hasPermission(PERMISSIONS.FEATURES_UPDATE));
   readonly validationError = signal(false);
+  readonly visibleRolePermissionFeatures = computed(() => {
+    const selectedFeatures = this.permissionSelected();
+    return this.rolePermissionFeatures().filter((feature) =>
+      selectedFeatures.has(String(feature.featureId)),
+    );
+  });
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -158,9 +167,12 @@ export class ConsoleRoleFeaturesPage implements OnInit {
     forkJoin({
       catalog: this.consoleRolesService.listAssignableFeatures(this.activeProductCode),
       editor: this.consoleRolesService.getRoleFeatures(id, this.activeProductCode),
+      rolePermissions: this.consoleRolesService.getRolePermissions(id),
     }).subscribe({
-      next: ({ catalog, editor }) => {
+      next: ({ catalog, editor, rolePermissions }) => {
         this.permissionCatalog.set(catalog.permissionCatalog ?? []);
+        this.rolePermissionFeatures.set(rolePermissions.features ?? []);
+        this.rolePermissionSelected.set(this.selectedGrantSetFromFeatures(rolePermissions.features ?? []));
         const pc = (editor.product?.productCode ?? this.activeProductCode).trim() || 'CLUB';
         this.activeProductCode = pc;
         this.productCode.set(pc);
@@ -176,12 +188,30 @@ export class ConsoleRoleFeaturesPage implements OnInit {
       error: () => {
         this.permissionCatalog.set([]);
         this.permissionSelected.set(new Set());
+        this.rolePermissionFeatures.set([]);
+        this.rolePermissionSelected.set(new Set());
         this.menuGroups.set([]);
         this.productCode.set('');
         this.loading.set(false);
         this.loadError.set(true);
       },
     });
+  }
+
+  private grantKey(featureId: number | string, permissionId: number | string): string {
+    return `${featureId}:${permissionId}`;
+  }
+
+  private selectedGrantSetFromFeatures(features: ConsoleRolePermissionFeature[]): Set<string> {
+    const set = new Set<string>();
+    for (const feature of features) {
+      for (const permission of feature.validPermissions || []) {
+        if (permission.assigned) {
+          set.add(this.grantKey(feature.featureId, permission.permissionId));
+        }
+      }
+    }
+    return set;
   }
 
   back(): void {
@@ -200,6 +230,14 @@ export class ConsoleRoleFeaturesPage implements OnInit {
       next.add(featureId);
     } else {
       next.delete(featureId);
+      this.rolePermissionSelected.update((current) => {
+        const filtered = new Set<string>();
+        const prefix = `${featureId}:`;
+        for (const key of current) {
+          if (!key.startsWith(prefix)) filtered.add(key);
+        }
+        return filtered;
+      });
       this.menuGroups.update((groups) =>
         groups.map((g) => ({
           ...g,
@@ -212,6 +250,36 @@ export class ConsoleRoleFeaturesPage implements OnInit {
 
   isChecked(featureId: string): boolean {
     return this.permissionSelected().has(featureId);
+  }
+
+  isGrantChecked(featureId: number, permissionId: number): boolean {
+    return this.rolePermissionSelected().has(this.grantKey(featureId, permissionId));
+  }
+
+  toggleRolePermission(featureId: number, permissionId: number, checked: boolean): void {
+    const key = this.grantKey(featureId, permissionId);
+    const next = new Set(this.rolePermissionSelected());
+    if (checked) {
+      next.add(key);
+    } else {
+      next.delete(key);
+    }
+    this.rolePermissionSelected.set(next);
+  }
+
+  rolePermissionGrantsPayload(): Array<{ featureId: number; permissionId: number }> {
+    const selectedFeatures = this.permissionSelected();
+    const grants: Array<{ featureId: number; permissionId: number }> = [];
+    for (const key of this.rolePermissionSelected()) {
+      const [featureIdRaw, permissionIdRaw] = key.split(':');
+      if (!featureIdRaw || !permissionIdRaw) continue;
+      if (!selectedFeatures.has(featureIdRaw)) continue;
+      const featureId = Number(featureIdRaw);
+      const permissionId = Number(permissionIdRaw);
+      if (!Number.isFinite(featureId) || !Number.isFinite(permissionId)) continue;
+      grants.push({ featureId, permissionId });
+    }
+    return grants;
   }
 
   addGroup(): void {
@@ -356,7 +424,10 @@ export class ConsoleRoleFeaturesPage implements OnInit {
         })),
       },
     };
-    this.consoleRolesService.putRoleFeatures(id, body, this.activeProductCode).subscribe({
+    forkJoin({
+      features: this.consoleRolesService.putRoleFeatures(id, body, this.activeProductCode),
+      permissions: this.consoleRolesService.putRolePermissions(id, this.rolePermissionGrantsPayload()),
+    }).subscribe({
       next: () => {
         this.saving.set(false);
         void this.router.navigateByUrl(this.paths.catalogConsoleRoles());

@@ -13,10 +13,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ServicePlanService } from '../services/service-plan.service';
 import { ServicePlan } from '../models/service-plan.interface';
 import { ServicePlanLimit } from '../models/service-plan-limit.interface';
 import { ServicePlanModule } from '../models/service-plan-module.interface';
+import { ServicePlanFeature } from '../models/service-plan-feature.interface';
 import { HasPermissionDirective } from '../../../core/permissions/has-permission.directive';
 import { PERMISSIONS } from '../../../core/permissions/permissions.const';
 import { PlatformTranslatePipe } from '../../../core/i18n/translate.pipe';
@@ -39,6 +41,7 @@ import { TranslateService } from '@ngx-translate/core';
     MatFormFieldModule,
     MatIconModule,
     MatSlideToggleModule,
+    MatCheckboxModule,
     HasPermissionDirective,
     PlatformTranslatePipe,
   ],
@@ -56,6 +59,8 @@ export class ServicePlanDetailPage implements OnInit {
   readonly planLimits = signal<ServicePlanLimit[]>([]);
   readonly editableLimits = signal<{ limitCode: string; limitValue: number }[]>([]);
   readonly planModules = signal<ServicePlanModule[]>([]);
+  readonly planFeatures = signal<ServicePlanFeature[]>([]);
+  readonly featureFilter = signal('');
   /** Mercado del catálogo (query `country`); precio y módulos regionales. */
   readonly catalogCountry = signal<string>('AR');
   readonly filterProductId = signal<number>(0);
@@ -64,12 +69,29 @@ export class ServicePlanDetailPage implements OnInit {
   readonly limitsSaving = signal(false);
   readonly modulesLoading = signal(false);
   readonly modulesSaving = signal(false);
+  readonly featuresLoading = signal(false);
+  readonly featuresSaving = signal(false);
   readonly error = signal<string | null>(null);
 
   readonly planId = computed(() => this.plan()?.servicePlanId ?? null);
   /** Id de ruta (disponible antes de cargar el plan; evita enlaces `.../null/edit`). */
   readonly routePlanId = signal<number | null>(null);
   readonly PERMISSIONS = PERMISSIONS;
+  readonly filteredPlanFeatures = computed(() => {
+    const q = this.featureFilter().trim().toLowerCase();
+    const list = this.planFeatures();
+    if (!q) return list;
+    return list.filter((f) => {
+      const moduleLabel = `${f.module?.moduleCode ?? ''} ${f.module?.moduleName ?? ''}`.toLowerCase();
+      return (
+        String(f.featureCode ?? '').toLowerCase().includes(q) ||
+        String(f.featureName ?? '').toLowerCase().includes(q) ||
+        moduleLabel.includes(q) ||
+        String(f.featureType ?? '').toLowerCase().includes(q)
+      );
+    });
+  });
+  readonly assignedFeatureCount = computed(() => this.planFeatures().filter((f) => f.assigned).length);
 
   ngOnInit(): void {
     const q = this.route.snapshot.queryParamMap;
@@ -103,6 +125,7 @@ export class ServicePlanDetailPage implements OnInit {
         if (rid != null) {
           this.loadPlan(rid);
           this.loadPlanModules(rid);
+          this.loadPlanFeatures(rid);
         }
       });
 
@@ -129,6 +152,10 @@ export class ServicePlanDetailPage implements OnInit {
 
   planModulesMarketHintText(): string {
     return this.translate.instant('servicePlans.planModulesMarketHint', { country: this.catalogCountry() });
+  }
+
+  planFeaturesMarketHintText(): string {
+    return this.translate.instant('servicePlans.planFeaturesMarketHint', { country: this.catalogCountry() });
   }
 
   private loadPlan(id: number): void {
@@ -185,6 +212,43 @@ export class ServicePlanDetailPage implements OnInit {
         this.modulesLoading.set(false);
       },
       error: () => this.modulesLoading.set(false),
+    });
+  }
+
+  private loadPlanFeatures(planId: number): void {
+    this.featuresLoading.set(true);
+    const cc = this.catalogCountry();
+    this.servicePlanService.getPlanFeatures(planId, cc).subscribe({
+      next: (response) => {
+        this.planFeatures.set(response.availableFeatures);
+        this.featuresLoading.set(false);
+      },
+      error: () => this.featuresLoading.set(false),
+    });
+  }
+
+  updateFeatureFilter(value: string): void {
+    this.featureFilter.set(value);
+  }
+
+  onFeatureToggle(feature: ServicePlanFeature, enabled: boolean): void {
+    const id = this.planId();
+    if (id === null) return;
+    const featureIds = this.planFeatures()
+      .filter((f) => (f.featureId === feature.featureId ? enabled : f.assigned))
+      .map((f) => f.featureId);
+    this.featuresSaving.set(true);
+    this.error.set(null);
+    const cc = this.catalogCountry();
+    this.servicePlanService.updatePlanFeatures(id, featureIds, cc).subscribe({
+      next: (response) => {
+        this.planFeatures.set(response.availableFeatures);
+        this.featuresSaving.set(false);
+      },
+      error: (err) => {
+        this.error.set(err?.message ?? 'Error al actualizar features');
+        this.featuresSaving.set(false);
+      },
     });
   }
 

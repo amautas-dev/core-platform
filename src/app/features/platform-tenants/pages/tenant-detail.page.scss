@@ -603,6 +603,16 @@
     color: rgba(0, 0, 0, 0.38);
   }
 
+  .users-actions-header {
+    width: 88px;
+  }
+
+  .users-actions-cell {
+    white-space: nowrap;
+    text-align: right;
+    padding-right: 0.25rem !important;
+  }
+
   .api-keys-create {
     display: flex;
     align-items: flex-start;
@@ -1387,6 +1397,18 @@
   }
 }
 
+.desktop-license-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.desktop-license-plain-btn {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
 .tenant-main-inner-tabs {
   margin-top: 0.5rem;
 }
@@ -1477,4 +1499,51 @@
   font-size: 0.8125rem;
   color: rgba(0, 0, 0, 0.6);
   margin: 0.75rem 0;
+}
+
+.notif-tab .notif-commercial-license-card,
+.notif-tab .notif-license-card {
+  margin-bottom: 1.25rem;
+}
+
+.notif-license-warn {
+  color: #b45309;
+  background: rgba(180, 83, 9, 0.08);
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.notif-license-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.notif-license-field-full {
+  width: 100%;
+}
+
+.notif-license-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.notif-license-field-grow {
+  flex: 1;
+  min-width: 10rem;
+}
+
+.notif-license-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
 }

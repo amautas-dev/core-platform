@@ -1,4 +1,6 @@
-// Environment para desarrollo local (ng serve)
+/**
+ * Local: `ng serve` (default `development`). API en localhost (puerto de apps/api).
+ */
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:3002/api',

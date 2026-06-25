@@ -1,7 +1,7 @@
-/** Build / deploy entorno **dev** (`ng build --configuration=dev`). */
+/** Build / deploy entorno **staging** (`ng build --configuration=staging`). */
 export const environment = {
   production: false,
-  apiUrl: 'https://dev-api.amautas.com.ar/api',
+  apiUrl: 'https://staging-api.amautas.com.ar/api',
   GMapsApiKey: 'AIzaSyDhc9ibqCxO4k9MmABoDypgQN5QKBJXlGA',
   errorNotificationEmail: 'pablo.flores86@gmail.com',
   authDebug: false,

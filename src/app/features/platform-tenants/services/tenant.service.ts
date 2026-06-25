@@ -13,6 +13,7 @@ import { TenantModule } from '../models/tenant-module.interface';
 import { TenantUser } from '../models/tenant-user.interface';
 import { TenantAudit } from '../models/tenant-audit.interface';
 import type { TenantActivityItem } from '../models/tenant-activity.interface';
+import type { TenantDesktopTelemetryItem } from '../models/tenant-desktop-telemetry.interface';
 import { TenantUsage } from '../models/tenant-usage.interface';
 import { TenantApiKey } from '../models/tenant-api-key.interface';
 import { TenantWebhook } from '../models/tenant-webhook.interface';
@@ -92,9 +93,11 @@ export class TenantService {
   /**
    * Genera `licencia.amautas` (paquete firmado, escritorio). Respuesta binaria; usar con responseType blob en el caller.
    */
-  downloadProvisioningPackage(tenantId: number, moduleCode: string): Observable<Blob> {
+  downloadProvisioningPackage(tenantId: number, moduleCode: string, plain = false): Observable<Blob> {
     const path = `${BASE_PATH}/${tenantId}/modules/${encodeURIComponent(moduleCode)}/provisioning`;
-    return this.http.post(this.api.buildUrl(path), {}, { responseType: 'blob' });
+    const url = plain ? `${this.api.buildUrl(path)}?plain=1` : this.api.buildUrl(path);
+    const body = plain ? { plain: true } : {};
+    return this.http.post(url, body, { responseType: 'blob' });
   }
 
   getTenantUsers(id: number): Observable<TenantUser[]> {
@@ -126,6 +129,7 @@ export class TenantService {
     body: {
       isActive?: boolean;
       password?: string;
+      username?: string;
       firstName?: string;
       lastName?: string;
       email?: string;
@@ -135,6 +139,10 @@ export class TenantService {
     return this.api.patch(`${BASE_PATH}/${tenantId}/users/${userId}`, body);
   }
 
+  deleteTenantUser(tenantId: number, userId: number): Observable<{ ok: boolean }> {
+    return this.api.delete<{ ok: boolean }>(`${BASE_PATH}/${tenantId}/users/${userId}`);
+  }
+
   getTenantAudit(id: number): Observable<TenantAudit[]> {
     return this.api.get<TenantAudit[]>(`${BASE_PATH}/${id}/audit`);
   }
@@ -142,6 +150,14 @@ export class TenantService {
   /** Latest activity from tenant_audit_log (action, entityType, userEmail, etc.). */
   getTenantActivity(tenantId: number): Observable<TenantActivityItem[]> {
     return this.api.get<TenantActivityItem[]>(`${BASE_PATH}/${tenantId}/activity`);
+  }
+
+  /** Telemetría del módulo Notificaciones (app de escritorio → Core). */
+  getTenantDesktopTelemetry(tenantId: number, limit = 30): Observable<TenantDesktopTelemetryItem[]> {
+    return this.api.get<TenantDesktopTelemetryItem[]>(
+      `${BASE_PATH}/${tenantId}/desktop-telemetry`,
+      { limit, product: 'notificaciones-desktop' },
+    );
   }
 
   getTenantUsage(id: number): Observable<TenantUsage> {
@@ -456,12 +472,59 @@ export class TenantService {
       body,
     );
   }
+
+  getNotificacionesLicenseTerms(tenantId: number): Observable<NotificacionesLicenseTermsDto> {
+    return this.api.get<NotificacionesLicenseTermsDto>(
+      `${BASE_PATH}/${tenantId}/notificaciones-license-terms`,
+    );
+  }
+
+  putNotificacionesLicenseTerms(
+    tenantId: number,
+    body: PutNotificacionesLicenseTermsDto,
+  ): Observable<NotificacionesLicenseTermsDto> {
+    return this.api.put<NotificacionesLicenseTermsDto>(
+      `${BASE_PATH}/${tenantId}/notificaciones-license-terms`,
+      body,
+    );
+  }
 }
 
 export interface TenantNotificationMessageTypeRow {
   messageTypeCode: string;
   enabled: boolean;
   sortOrder: number;
+}
+
+/** GET/PUT notificaciones-license-terms (términos efectivos o fila activa). */
+export interface NotificacionesLicenseTermsDto {
+  licenseKind: string;
+  maxDevices: number;
+  maxMessageTypes: number;
+  priceAmount: number;
+  currencyCode: string;
+  priceOverrideReason: string | null;
+  validFrom: string | null;
+  validUntil: string | null;
+  notes: string | null;
+  fromDefaults: boolean;
+  recordId: string | null;
+  id?: string;
+  isActive?: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface PutNotificacionesLicenseTermsDto {
+  licenseKind: string;
+  maxDevices: number;
+  maxMessageTypes: number;
+  priceAmount: number;
+  currencyCode: string;
+  priceOverrideReason?: string | null;
+  validFrom?: string | null;
+  validUntil?: string | null;
+  notes?: string | null;
 }
 
 export interface TenantNotificationTemplateRow {

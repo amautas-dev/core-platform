@@ -87,6 +87,38 @@
     flex-wrap: wrap;
   }
 
+  .feature-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+
+    mat-form-field {
+      min-width: min(100%, 320px);
+    }
+  }
+
+  .feature-count {
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;
+  }
+
+  .features-table {
+    width: 100%;
+
+    th,
+    td {
+      padding: 0.5rem 0.75rem;
+    }
+
+    code {
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+  }
+
   .plan-modules-list {
     list-style: none;
     padding: 0;

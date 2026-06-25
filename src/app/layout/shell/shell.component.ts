@@ -83,6 +83,7 @@ export class ShellComponent implements OnInit {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe((e) => {
+        this.settingsService.restorePlatformDocumentFavicon();
         const url = e.urlAfterRedirects.split('?')[0] ?? '';
         const qs = e.urlAfterRedirects.includes('?') ? '?' + e.urlAfterRedirects.split('?')[1] : '';
         const lang = this.language.currentLang;

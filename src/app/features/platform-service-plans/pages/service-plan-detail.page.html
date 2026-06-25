@@ -127,6 +127,85 @@
         }
       </mat-tab>
 
+      <mat-tab [label]="'servicePlans.featuresTab' | translate">
+        @if (featuresLoading()) {
+          <p>{{ 'servicePlans.loading' | translate }}</p>
+        } @else {
+          <mat-card class="detail-card">
+            <mat-card-header>
+              <mat-card-title>{{ 'servicePlans.planFeaturesTitle' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ 'servicePlans.planFeaturesSubtitle' | translate }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="tab-hint">{{ 'servicePlans.planFeaturesHint' | translate }}</p>
+              <p class="tab-hint tab-hint--strong">{{ planFeaturesMarketHintText() }}</p>
+              <div class="feature-toolbar">
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ 'servicePlans.featureSearch' | translate }}</mat-label>
+                  <input
+                    matInput
+                    [value]="featureFilter()"
+                    (input)="updateFeatureFilter($any($event.target).value)"
+                    placeholder="club.console.memberships"
+                  />
+                </mat-form-field>
+                <span class="feature-count">
+                  {{ 'servicePlans.featuresAssignedCount' | translate : { count: assignedFeatureCount() } }}
+                </span>
+              </div>
+              @if (planFeatures().length === 0) {
+                <p class="section-hint">{{ 'servicePlans.planFeaturesEmpty' | translate }}</p>
+              } @else {
+                <table mat-table [dataSource]="filteredPlanFeatures()" class="features-table">
+                  <ng-container matColumnDef="assigned">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.assigned' | translate }}</th>
+                    <td mat-cell *matCellDef="let f">
+                      <mat-checkbox
+                        [checked]="!!f.assigned"
+                        (change)="onFeatureToggle(f, $event.checked)"
+                        [disabled]="featuresSaving()"
+                        color="primary"
+                        *hasPermission="PERMISSIONS.PLANS_UPDATE"
+                      ></mat-checkbox>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="code">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.code' | translate }}</th>
+                    <td mat-cell *matCellDef="let f">
+                      <code>{{ f.featureCode }}</code>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.name' | translate }}</th>
+                    <td mat-cell *matCellDef="let f">{{ f.featureName || f.featureCode }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="module">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.module' | translate }}</th>
+                    <td mat-cell *matCellDef="let f">
+                      {{ f.module?.moduleName || f.module?.moduleCode || '-' }}
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="type">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'servicePlans.featureType' | translate }}</th>
+                    <td mat-cell *matCellDef="let f">{{ f.featureType || '-' }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>{{ 'common.status' | translate }}</th>
+                    <td mat-cell *matCellDef="let f">
+                      <mat-chip [class.active]="f.isActive" [class.inactive]="!f.isActive">
+                        {{ f.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
+                      </mat-chip>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="['assigned', 'code', 'name', 'module', 'type', 'status']"></tr>
+                  <tr mat-row *matRowDef="let row; columns: ['assigned', 'code', 'name', 'module', 'type', 'status']"></tr>
+                </table>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+      </mat-tab>
+
       <mat-tab [label]="'servicePlans.modulesTab' | translate">
         @if (modulesLoading()) {
           <p>{{ 'servicePlans.loading' | translate }}</p>
@@ -138,6 +217,7 @@
             </mat-card-header>
             <mat-card-content>
               <p class="tab-hint">{{ 'servicePlans.planModulesHint' | translate }}</p>
+              <p class="tab-hint tab-hint--strong">{{ 'servicePlans.modulesLegacyHint' | translate }}</p>
               <p class="tab-hint tab-hint--strong">{{ planModulesMarketHintText() }}</p>
               @if (planModules().length === 0) {
                 <p>No hay módulos en la plataforma.</p>

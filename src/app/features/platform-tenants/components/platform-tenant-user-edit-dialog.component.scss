@@ -1,0 +1,16 @@
+.full-width {
+  width: 100%;
+  display: block;
+}
+
+.tenant-user-edit-dialog__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.error {
+  margin: 0.5rem 0 0;
+  color: #b00020;
+  font-size: 0.9rem;
+}

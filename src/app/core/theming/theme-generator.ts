@@ -100,9 +100,23 @@ export function normalizeHexColor(hex: string, fallback: string): string {
   return f ? `#${f}` : '#1f6feb';
 }
 
-/** Heurística: secundarios tipo crema/beige no deben generar escala “acento” saturada */
+/**
+ * Heurística: secundarios tipo crema/beige no deben generar escala “acento” saturada.
+ *
+ * Usa saturación **HSV** (croma/max), no HSL: la saturación HSL se infla en colores
+ * claros (un crema como `#f4ece4` da ~42% HSL pero ~7% HSV), por lo que la métrica
+ * HSL no detectaba cremas/beiges. HSV es robusta para neutros claros.
+ */
 export function isLowSaturationNeutral(hex: string): boolean {
-  return hexToHsl(hex).s < 14;
+  const n = normalizeHex(hex);
+  if (!n) return false;
+  const r = parseInt(n.slice(0, 2), 16) / 255;
+  const g = parseInt(n.slice(2, 4), 16) / 255;
+  const b = parseInt(n.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const hsvSaturation = max === 0 ? 0 : ((max - min) / max) * 100;
+  return hsvSaturation < 14;
 }
 
 function hueShift(hex: string, degrees: number): string {

@@ -326,6 +326,38 @@
             </mat-card-content>
           </mat-card>
 
+          <mat-card class="detail-card recent-activity-card desktop-telemetry-card">
+            <mat-card-header>
+              <mat-card-title>{{ 'tenants.desktopTelemetry' | translate }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              @if (desktopTelemetryLoading()) {
+                <div class="activity-loading">
+                  <mat-spinner diameter="28"></mat-spinner>
+                  <span>{{ 'common.loading' | translate }}</span>
+                </div>
+              } @else if (desktopTelemetry().length === 0) {
+                <p class="activity-empty">{{ 'tenants.noDesktopTelemetry' | translate }}</p>
+              } @else {
+                <ul class="activity-list">
+                  @for (ev of desktopTelemetry(); track ev.id) {
+                    <li class="activity-item">
+                      <mat-icon class="activity-icon">{{ getDesktopTelemetryIcon(ev.eventCode, ev.level) }}</mat-icon>
+                      <span class="activity-time">{{ formatRelativeTime(ev.createdAt) }}</span>
+                      <span class="activity-action">{{ formatDesktopEventLabel(ev.eventCode, ev.message) }}</span>
+                      @if (ev.installationId) {
+                        <span class="activity-user" [title]="ev.installationId">
+                          – {{ 'tenants.desktopTelemetryInstallation' | translate }}
+                          {{ ev.installationId.slice(0, 8) }}…
+                        </span>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </mat-card-content>
+          </mat-card>
+
           <mat-card class="detail-card recent-activity-card">
             <mat-card-header>
               <mat-card-title>{{ 'tenants.recentActivity' | translate }}</mat-card-title>
@@ -375,6 +407,7 @@
                         <app-branding-asset-upload
                           [label]="'settings.branding.logoMainLight' | translate"
                           [previewUrl]="tenantPreviewUrlForField('logoFileId')"
+                          [fallbackSrc]="null"
                           [uploadHandler]="tenantAssetUpload('logo')"
                           [inherited]="tenantInheritedForField('logoFileId')"
                           [showRemove]="!!tenantBrandingForm.get('logoFileId')?.value"
@@ -385,6 +418,7 @@
                         <app-branding-asset-upload
                           [label]="'settings.branding.logoMainDark' | translate"
                           [previewUrl]="tenantPreviewUrlForField('logoDarkFileId')"
+                          [fallbackSrc]="null"
                           [uploadHandler]="tenantAssetUpload('logo_dark')"
                           [inherited]="tenantInheritedForField('logoDarkFileId')"
                           [showRemove]="!!tenantBrandingForm.get('logoDarkFileId')?.value"
@@ -397,7 +431,7 @@
                           [previewUrl]="tenantPreviewUrlForField('logoCompactFileId')"
                           [uploadHandler]="tenantAssetUpload('logo_compact')"
                           [compactPreview]="true"
-                          [fallbackSrc]="'assets/brand/amautas-logo-reduc.png'"
+                          [fallbackSrc]="null"
                           [inherited]="tenantInheritedForField('logoCompactFileId')"
                           [showRemove]="!!tenantBrandingForm.get('logoCompactFileId')?.value"
                           [disabled]="readonlyMode()"
@@ -409,7 +443,7 @@
                           [previewUrl]="tenantPreviewUrlForField('logoCompactDarkFileId')"
                           [uploadHandler]="tenantAssetUpload('logo_compact_dark')"
                           [compactPreview]="true"
-                          [fallbackSrc]="'assets/brand/amautas-logo-alt-reduc.png'"
+                          [fallbackSrc]="null"
                           [inherited]="tenantInheritedForField('logoCompactDarkFileId')"
                           [showRemove]="!!tenantBrandingForm.get('logoCompactDarkFileId')?.value"
                           [disabled]="readonlyMode()"
@@ -425,7 +459,7 @@
                           [previewUrl]="tenantPreviewUrlForField('faviconFileId')"
                           [uploadHandler]="tenantAssetUpload('favicon')"
                           [faviconPreview]="true"
-                          [fallbackSrc]="'assets/brand/amautas-logo.png'"
+                          [fallbackSrc]="null"
                           [inherited]="tenantInheritedForField('faviconFileId')"
                           [showRemove]="!!tenantBrandingForm.get('faviconFileId')?.value"
                           [disabled]="readonlyMode()"
@@ -883,24 +917,37 @@
                       <th mat-header-cell *matHeaderCellDef>{{ 'tenants.desktopLicenseColumn' | translate }}</th>
                       <td mat-cell *matCellDef="let m">
                         @if (notificacionesLicenseEntitled(m)) {
-                          <button
-                            mat-stroked-button
-                            type="button"
-                            color="primary"
-                            [matTooltip]="'tenants.desktopLicenseHint' | translate"
-                            (click)="downloadProvisioningPackage('notificaciones')"
-                            [disabled]="provisioningLoading()"
-                            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
-                          >
-                            @if (provisioningLoading()) {
-                              <mat-spinner diameter="18" class="btn-inline-spinner" />
-                            }
-                            {{
-                              provisioningLoading()
-                                ? ('tenants.provisioningGenerating' | translate)
-                                : ('tenants.provisioningGenerateButton' | translate)
-                            }}
-                          </button>
+                          <div class="desktop-license-actions">
+                            <button
+                              mat-stroked-button
+                              type="button"
+                              color="primary"
+                              [matTooltip]="'tenants.desktopLicenseHint' | translate"
+                              (click)="downloadProvisioningPackage('notificaciones')"
+                              [disabled]="provisioningLoading() || notifLicenseProvisioningBlocked()"
+                              *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                            >
+                              @if (provisioningLoading()) {
+                                <mat-spinner diameter="18" class="btn-inline-spinner" />
+                              }
+                              {{
+                                provisioningLoading()
+                                  ? ('tenants.provisioningGenerating' | translate)
+                                  : ('tenants.provisioningGenerateButton' | translate)
+                              }}
+                            </button>
+                            <button
+                              mat-button
+                              type="button"
+                              class="desktop-license-plain-btn"
+                              [matTooltip]="'tenants.provisioningPlainHint' | translate"
+                              (click)="downloadProvisioningPackage('notificaciones', true)"
+                              [disabled]="provisioningLoading() || notifLicenseProvisioningBlocked()"
+                              *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                            >
+                              {{ 'tenants.provisioningPlainButton' | translate }}
+                            </button>
+                          </div>
                         } @else {
                           <span>—</span>
                         }
@@ -1298,16 +1345,43 @@
                         }
                       </td>
                     </ng-container>
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell *matHeaderCellDef class="users-actions-header"></th>
+                      <td mat-cell *matCellDef="let u" class="users-actions-cell">
+                        @if (!readonlyMode()) {
+                          <button
+                            mat-icon-button
+                            type="button"
+                            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                            [matTooltip]="'tenants.tenantUserEditAria' | translate"
+                            [attr.aria-label]="'tenants.tenantUserEditAria' | translate"
+                            [disabled]="userTogglingId() === u.userId"
+                            (click)="openTenantUserEditDialog(u)"
+                          >
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                          <button
+                            mat-icon-button
+                            type="button"
+                            color="warn"
+                            *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                            [matTooltip]="'tenants.tenantUserDeleteAria' | translate"
+                            [attr.aria-label]="'tenants.tenantUserDeleteAria' | translate"
+                            [disabled]="userTogglingId() === u.userId"
+                            (click)="confirmDeleteTenantUser(u)"
+                          >
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        }
+                      </td>
+                    </ng-container>
                     <tr
                       mat-header-row
-                      *matHeaderRowDef="['username', 'email', 'role', 'status', 'password', 'activeToggle']"
+                      *matHeaderRowDef="tenantUserTableColumns"
                     ></tr>
                     <tr
                       mat-row
-                      *matRowDef="
-                        let row;
-                        columns: ['username', 'email', 'role', 'status', 'password', 'activeToggle']
-                      "
+                      *matRowDef="let row; columns: tenantUserTableColumns"
                     ></tr>
                   </table>
                 }
@@ -1460,29 +1534,151 @@
       @if (hasNotificationsModule()) {
         <mat-tab [label]="'tenants.notificationsTab' | translate">
           <div class="tab-content notif-tab">
+            <mat-card class="detail-card notif-commercial-license-card">
+              <mat-card-header>
+                <mat-card-title>{{ 'tenants.notifLicenseSectionTitle' | translate }}</mat-card-title>
+                <mat-card-subtitle>{{ 'tenants.notifLicenseSectionHelper' | translate }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                @if (notifLicenseTermsLoading()) {
+                  <p class="tab-loading">{{ 'tenants.notifLicenseLoading' | translate }}</p>
+                } @else {
+                  @if (notifLicenseProvisioningBlocked() && notifLicenseTerms(); as nlt) {
+                    <p class="notif-license-warn">
+                      {{
+                        'tenants.notifLicenseWarnExceedsTypes'
+                          | translate: { enabled: enabledNotifMessageTypeCount(), max: nlt.maxMessageTypes }
+                      }}
+                    </p>
+                  }
+                  <form [formGroup]="notifLicenseForm" class="notif-license-form">
+                    <mat-form-field appearance="outline" class="notif-license-field-full">
+                      <mat-label>{{ 'tenants.notifLicenseKind' | translate }}</mat-label>
+                      <mat-select formControlName="licenseKind">
+                        <mat-option value="subscription">{{
+                          'tenants.notifLicenseKindSubscription' | translate
+                        }}</mat-option>
+                        <mat-option value="perpetual">{{
+                          'tenants.notifLicenseKindPerpetual' | translate
+                        }}</mat-option>
+                        <mat-option value="free">{{ 'tenants.notifLicenseKindFree' | translate }}</mat-option>
+                        <mat-option value="custom">{{ 'tenants.notifLicenseKindCustom' | translate }}</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <div class="notif-license-row">
+                      <mat-checkbox formControlName="devicesUnlimited">{{
+                        'tenants.notifLicenseDevicesUnlimited' | translate
+                      }}</mat-checkbox>
+                      <mat-form-field appearance="outline" class="notif-license-field-grow">
+                        <mat-label>{{ 'tenants.notifLicenseMaxDevices' | translate }}</mat-label>
+                        <input
+                          matInput
+                          type="number"
+                          min="1"
+                          formControlName="maxDevices"
+                          [readonly]="!!notifLicenseForm.controls.devicesUnlimited.value"
+                        />
+                      </mat-form-field>
+                    </div>
+                    <div class="notif-license-row">
+                      <mat-checkbox formControlName="messageTypesUnlimited">{{
+                        'tenants.notifLicenseMessageTypesUnlimited' | translate
+                      }}</mat-checkbox>
+                      <mat-form-field appearance="outline" class="notif-license-field-grow">
+                        <mat-label>{{ 'tenants.notifLicenseMaxMessageTypes' | translate }}</mat-label>
+                        <input
+                          matInput
+                          type="number"
+                          min="1"
+                          formControlName="maxMessageTypes"
+                          [readonly]="!!notifLicenseForm.controls.messageTypesUnlimited.value"
+                        />
+                      </mat-form-field>
+                    </div>
+                    <div class="notif-license-row-2">
+                      <mat-form-field appearance="outline">
+                        <mat-label>{{ 'tenants.notifLicensePrice' | translate }}</mat-label>
+                        <input matInput type="number" min="0" formControlName="priceAmount" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>{{ 'tenants.notifLicenseCurrency' | translate }}</mat-label>
+                        <input matInput formControlName="currencyCode" maxlength="10" />
+                      </mat-form-field>
+                    </div>
+                    <mat-form-field appearance="outline" class="notif-license-field-full">
+                      <mat-label>{{ 'tenants.notifLicenseOverrideReason' | translate }}</mat-label>
+                      <textarea matInput rows="2" formControlName="priceOverrideReason"></textarea>
+                    </mat-form-field>
+                    <div class="notif-license-row-2">
+                      <mat-form-field appearance="outline">
+                        <mat-label>{{ 'tenants.notifLicenseValidFrom' | translate }}</mat-label>
+                        <input matInput type="datetime-local" formControlName="validFrom" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>{{ 'tenants.notifLicenseValidUntil' | translate }}</mat-label>
+                        <input matInput type="datetime-local" formControlName="validUntil" />
+                      </mat-form-field>
+                    </div>
+                    <mat-form-field appearance="outline" class="notif-license-field-full">
+                      <mat-label>{{ 'tenants.notifLicenseNotes' | translate }}</mat-label>
+                      <textarea matInput rows="2" formControlName="notes"></textarea>
+                    </mat-form-field>
+                    @if (!readonlyMode()) {
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        (click)="saveNotifLicenseTerms()"
+                        [disabled]="notifLicenseSaving() || notifLicenseForm.invalid"
+                        *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                      >
+                        {{
+                          notifLicenseSaving()
+                            ? ('tenants.notifLicenseSaving' | translate)
+                            : ('tenants.notifLicenseSave' | translate)
+                        }}
+                      </button>
+                    }
+                  </form>
+                }
+              </mat-card-content>
+            </mat-card>
             <mat-card class="detail-card notif-license-card">
               <mat-card-header>
                 <mat-card-title>{{ 'tenants.notificationsTabLicenseCardTitle' | translate }}</mat-card-title>
                 <mat-card-subtitle>{{ 'tenants.notificationsTabLicenseCardHint' | translate }}</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>
-                <button
-                  mat-flat-button
-                  type="button"
-                  color="primary"
-                  (click)="downloadProvisioningPackage('notificaciones')"
-                  [disabled]="provisioningLoading()"
-                  *hasPermission="PERMISSIONS.TENANTS_UPDATE"
-                >
-                  @if (provisioningLoading()) {
-                    <mat-spinner diameter="18" class="btn-inline-spinner" />
-                  }
-                  {{
-                    provisioningLoading()
-                      ? ('tenants.provisioningGenerating' | translate)
-                      : ('tenants.provisioningGenerateButton' | translate)
-                  }}
-                </button>
+                <div class="desktop-license-actions">
+                  <button
+                    mat-flat-button
+                    type="button"
+                    color="primary"
+                    (click)="downloadProvisioningPackage('notificaciones')"
+                    [disabled]="provisioningLoading() || notifLicenseProvisioningBlocked()"
+                    *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                  >
+                    @if (provisioningLoading()) {
+                      <mat-spinner diameter="18" class="btn-inline-spinner" />
+                    }
+                    {{
+                      provisioningLoading()
+                        ? ('tenants.provisioningGenerating' | translate)
+                        : ('tenants.provisioningGenerateButton' | translate)
+                    }}
+                  </button>
+                  <button
+                    mat-button
+                    type="button"
+                    class="desktop-license-plain-btn"
+                    [matTooltip]="'tenants.provisioningPlainHint' | translate"
+                    (click)="downloadProvisioningPackage('notificaciones', true)"
+                    [disabled]="provisioningLoading() || notifLicenseProvisioningBlocked()"
+                    *hasPermission="PERMISSIONS.TENANTS_UPDATE"
+                  >
+                    {{ 'tenants.provisioningPlainButton' | translate }}
+                  </button>
+                </div>
               </mat-card-content>
             </mat-card>
             <p class="tab-hint">{{ 'tenants.notificationsTabIntroGuided' | translate }}</p>

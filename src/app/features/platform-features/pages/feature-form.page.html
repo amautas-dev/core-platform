@@ -172,6 +172,54 @@
           </div>
         </section>
 
+        @if (isEdit()) {
+          <section class="form-block form-block--permissions" aria-labelledby="feat-block-permissions">
+            <h2 id="feat-block-permissions" class="section-title">{{ 'features.permissionsSection' | translate }}</h2>
+            <p class="section-hint">{{ 'features.permissionsSectionHint' | translate }}</p>
+            @if (permissionsLoading()) {
+              <p>{{ 'common.loading' | translate }}</p>
+            } @else {
+              <div class="permissions-toolbar">
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ 'features.permissionsSearch' | translate }}</mat-label>
+                  <input
+                    matInput
+                    [value]="permissionFilter()"
+                    (input)="updatePermissionFilter($any($event.target).value)"
+                    placeholder="view, create, edit"
+                  />
+                </mat-form-field>
+                <span class="permissions-count">
+                  {{ 'features.permissionsAssignedCount' | translate : { count: assignedPermissionCount() } }}
+                </span>
+              </div>
+              @if (featurePermissions().length === 0) {
+                <p class="section-hint">{{ 'features.permissionsEmpty' | translate }}</p>
+              } @else {
+                <div class="permissions-list">
+                  @for (permission of filteredFeaturePermissions(); track permission.permissionId) {
+                    <label class="permission-row">
+                      <mat-checkbox
+                        [checked]="permission.assigned"
+                        [disabled]="permissionsSaving()"
+                        (change)="onPermissionToggle(permission, $event.checked)"
+                        color="primary"
+                      ></mat-checkbox>
+                      <span class="permission-main">
+                        <code>{{ permission.permissionCode }}</code>
+                        <span>{{ permission.permissionName }}</span>
+                      </span>
+                      @if (permission.description) {
+                        <span class="permission-description">{{ permission.description }}</span>
+                      }
+                    </label>
+                  }
+                </div>
+              }
+            }
+          </section>
+        }
+
         <!-- C. Avanzado (colapsable) -->
         <mat-expansion-panel class="form-block form-block--advanced" [expanded]="false">
           <mat-expansion-panel-header>

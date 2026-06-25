@@ -3,632 +3,410 @@
 > ng build
 
 - Generating browser application bundles (phase: setup)...
-✔ Browser application bundle generation complete.
-✔ Browser application bundle generation complete.
-[1m[33m
-Warning: [96msrc/app/features/clientes/cuenta-corriente-dialog/cuenta-corriente-dialog.component.ts[0m:[93m88[0m:[93m5[0m - [93mwarning[0m[90m NG8113: [0mSelectOnFocusDirective is not used within the template of CuentaCorrienteDialogComponent
+√ Browser application bundle generation complete.
+√ Browser application bundle generation complete.
+- Copying assets...
+√ Copying assets complete.
+- Generating index html...
+√ Index html generation complete.
+
+Initial chunk files | Names                                                                    |  Raw size
+main.js             | main                                                                     |   6.41 MB | 
+styles.css          | styles                                                                   | 196.49 kB | 
+polyfills.js        | polyfills                                                                | 116.68 kB | 
+runtime.js          | runtime                                                                  |  13.38 kB | 
+
+                    | Initial total                                                            |   6.74 MB
+
+Lazy chunk files    | Names                                                                    |  Raw size
+188.js              | features-platform-tenants-pages-tenant-detail-page                       | 912.53 kB | 
+61.js               | ngx-quill-quill-CUw8Q_m0-mjs                                             | 741.22 kB | 
+639.js              | features-platform-settings-pages-settings-page                           | 284.55 kB | 
+448.js              | features-platform-tenants-pages-tenant-onboarding-wizard-page            | 212.80 kB | 
+179.js              | features-platform-tenants-pages-tenant-detail-page                       | 200.89 kB | 
+629.js              | features-platform-service-plans-pages-service-plan-form-page             | 177.37 kB | 
+726.js              | features-platform-tenants-pages-tenant-detail-page                       | 158.38 kB | 
+195.js              | features-platform-tenants-pages-tenants-list-page                        | 158.15 kB | 
+391.js              | features-platform-features-pages-feature-form-page                       | 112.94 kB | 
+626.js              | features-platform-console-roles-pages-console-role-features-page         | 108.73 kB | 
+389.js              | features-dashboard-pages-dashboard-page                                  | 101.85 kB | 
+98.js               | features-platform-translations-pages-translations-list-page              | 100.33 kB | 
+176.js              | features-platform-service-plans-pages-service-plan-detail-page           |  94.45 kB | 
+282.js              | features-platform-tenants-pages-tenant-detail-page                       |  87.03 kB | 
+909.js              | features-platform-modules-pages-module-form-page                         |  79.72 kB | 
+524.js              | features-platform-tenants-pages-tenant-billing-page                      |  73.56 kB | 
+516.js              | features-platform-products-pages-product-detail-page                     |  68.67 kB | 
+293.js              | features-profile-pages-profile-page                                      |  67.04 kB | 
+688.js              | features-platform-features-pages-features-list-page                      |  59.00 kB | 
+917.js              | features-platform-tenants-pages-tenant-detail-page                       |  58.85 kB | 
+586.js              | features-platform-tenants-pages-tenants-list-page                        |  52.20 kB | 
+497.js              | features-platform-users-pages-user-form-page                             |  51.77 kB | 
+921.js              | features-platform-products-pages-product-form-page                       |  50.56 kB | 
+882.js              | features-platform-products-pages-products-list-page                      |  50.20 kB | 
+86.js               | features-platform-service-plans-pages-service-plans-list-page            |  49.07 kB | 
+686.js              | features-platform-modules-pages-modules-list-page                        |  48.09 kB | 
+721.js              | features-platform-tenants-pages-tenant-onboarding-wizard-page            |  48.05 kB | 
+789.js              | features-platform-roles-pages-role-form-page                             |  45.88 kB | 
+18.js               | features-platform-users-pages-users-list-page                            |  39.72 kB | 
+302.js              | features-platform-tenants-pages-tenant-onboarding-wizard-page            |  38.36 kB | 
+505.js              | features-system-health-pages-system-health-page                          |  34.93 kB | 
+206.js              | features-platform-roles-pages-roles-list-page                            |  30.31 kB | 
+870.js              | features-platform-console-roles-pages-console-roles-list-page            |  29.64 kB | 
+common.js           | common                                                                   |  27.18 kB | 
+712.js              | features-platform-tenants-pages-tenant-onboarding-wizard-page            |  24.09 kB | 
+880.js              | features-platform-tenants-pages-tenants-list-page                        |  13.05 kB | 
+276.js              | features-platform-access-pages-platform-access-shell-page                |  11.62 kB | 
+718.js              | features-platform-catalog-pages-platform-catalog-shell-page              |  10.92 kB | 
+562.js              | features-platform-catalog-pages-catalog-redirect-page                    |   3.93 kB | 
+695.js              | features-shell-home-redirect-page                                        |   2.21 kB | 
+119.js              | features-platform-console-roles-pages-platform-console-roles-outlet-page |   2.07 kB | 
+845.js              | features-platform-service-plans-pages-platform-service-plans-outlet-page |   2.07 kB | 
+545.js              | features-platform-products-pages-platform-products-outlet-page           |   2.00 kB | 
+113.js              | features-platform-features-pages-platform-features-outlet-page           |   2.00 kB | 
+407.js              | features-platform-modules-pages-platform-modules-outlet-page             |   1.99 kB | 
+991.js              | features-platform-tenants-pages-platform-tenants-outlet-page             |   1.99 kB | 
+
+Build at: 2026-06-25T15:17:07.060Z - Hash: b1d52a05da243461 - Time: 147913ms
+
+./src/styles.scss - Warning: Module Warning (from ../../node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 1122, column 8 of file:///D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/styles.scss:1122:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1122 | @import "styles/ui-kit.scss";
 
-[7m88[0m     SelectOnFocusDirective,
-[7m  [0m [93m    ~~~~~~~~~~~~~~~~~~~~~~[0m
+src\styles.scss 1123:9  root stylesheet
+
 
+Warning: src/app/features/platform-tenants/pages/tenant-detail.page.html:829:36 - warning NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.
+
+829                 @if (usage.limits?.length) {
+                                       ~~~~~~
 
-Warning: [96msrc/app/features/finanzas/pagos-personal/pagos-personal.component.ts[0m:[93m64[0m:[93m5[0m - [93mwarning[0m[90m NG8113: [0mCurrencyFormatPipe is not used within the template of PagosPersonalComponent
+  src/app/features/platform-tenants/pages/tenant-detail.page.ts:183:16
+    183   templateUrl: './tenant-detail.page.html',
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Warning occurs in the template of component TenantDetailPage.
 
-[7m64[0m     CurrencyFormatPipe,
-[7m  [0m [93m    ~~~~~~~~~~~~~~~~~~[0m
 
+Warning: src/app/shared/components/tenant-branding-asset-field/tenant-branding-asset-field.component.html:30:32 - warning NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.
 
-[39m[22m
-[1m[31m
-../../node_modules/date-fns/_lib/getTimezoneOffsetInMilliseconds.js:1:0-38 - Error: Module not found: Error: Can't resolve '../toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\_lib'
+30     } @else if (control.value?.trim()) {
+                                  ~~~~
 
-../../node_modules/date-fns/_lib/normalizeDates.js:1:0-52 - Error: Module not found: Error: Can't resolve '../constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\_lib'
+  src/app/shared/components/tenant-branding-asset-field/tenant-branding-asset-field.component.ts:31:16
+    31   templateUrl: './tenant-branding-asset-field.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Warning occurs in the template of component TenantBrandingAssetFieldComponent.
 
-../../node_modules/date-fns/getISODay.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
 
-../../node_modules/date-fns/getISOWeek.js:1:0-52 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: src/app/shared/components/tenant-branding-asset-field/tenant-branding-asset-field.component.html:60:25 - warning NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.
 
-../../node_modules/date-fns/getISOWeek.js:2:0-53 - Error: Module not found: Error: Can't resolve './startOfISOWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+60     @if (control.value?.trim()) {
+                           ~~~~
 
-../../node_modules/date-fns/getISOWeek.js:3:0-61 - Error: Module not found: Error: Can't resolve './startOfISOWeekYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+  src/app/shared/components/tenant-branding-asset-field/tenant-branding-asset-field.component.ts:31:16
+    31   templateUrl: './tenant-branding-asset-field.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Warning occurs in the template of component TenantBrandingAssetFieldComponent.
 
-../../node_modules/date-fns/getISOWeek.js:4:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
 
-../../node_modules/date-fns/getISOWeekYear.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/auth/auth.guard.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getISOWeekYear.js:2:0-53 - Error: Module not found: Error: Can't resolve './startOfISOWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/auth/auth.interceptor.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getISOWeekYear.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/auth/dev-admin.guard.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getISOWeeksInYear.js:1:0-41 - Error: Module not found: Error: Can't resolve './addWeeks.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/auth/setup.guard.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getISOWeeksInYear.js:2:0-52 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/config/client-config.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getISOWeeksInYear.js:3:0-61 - Error: Module not found: Error: Can't resolve './startOfISOWeekYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/config/index.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getMilliseconds.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/directives/has-permission.directive.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getMinutes.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/directives/select-on-focus.directive.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getMonth.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/i18n/index.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getOverlappingDaysInIntervals.js:2:0-51 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/permissions/index.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getOverlappingDaysInIntervals.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/permissions/permission.model.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getQuarter.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/services/permission.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getSeconds.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/services/setup.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getTime.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/theming/index.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getUnixTime.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/core/theming/theme-defaults.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeek.js:1:0-52 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/auth/role-redirect.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeek.js:2:0-47 - Error: Module not found: Error: Can't resolve './startOfWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/_common/audit-log.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeek.js:4:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/_common/funcionalidad.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeekOfMonth.js:2:0-39 - Error: Module not found: Error: Can't resolve './getDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/_common/menu-item.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeekOfMonth.js:3:0-37 - Error: Module not found: Error: Can't resolve './getDay.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/_common/permiso-rol.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeekOfMonth.js:4:0-49 - Error: Module not found: Error: Can't resolve './startOfMonth.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/_common/persona.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeekOfMonth.js:5:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/_common/rol.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeekYear.js:2:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/_common/usuario.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeekYear.js:3:0-47 - Error: Module not found: Error: Can't resolve './startOfWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/carga.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeekYear.js:4:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/cargaxzona.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeeksInMonth.js:1:0-75 - Error: Module not found: Error: Can't resolve './differenceInCalendarWeeks.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/categoria.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeeksInMonth.js:3:0-49 - Error: Module not found: Error: Can't resolve './startOfMonth.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/cliente-repartidor.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getWeeksInMonth.js:4:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/cliente-vendedor.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/getYear.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/cliente.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/hoursToMilliseconds.js:1:0-52 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/compromiso-proveedor.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/hoursToMinutes.js:1:0-47 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/detalle-pedido-lote.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/hoursToSeconds.js:1:0-47 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/detalle-pedido.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:3:0-25 - Error: Module not found: Error: Can't resolve './add.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/devolucion-detalle.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:4:0-37 - Error: Module not found: Error: Can't resolve './addBusinessDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/devolucion-entrega.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:5:0-29 - Error: Module not found: Error: Can't resolve './addDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/documento-respaldo.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:6:0-30 - Error: Module not found: Error: Can't resolve './addHours.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/entrega-producto.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:7:0-37 - Error: Module not found: Error: Can't resolve './addISOWeekYears.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/entrega.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:8:0-37 - Error: Module not found: Error: Can't resolve './addMilliseconds.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/estado-cuenta-corriente.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:9:0-32 - Error: Module not found: Error: Can't resolve './addMinutes.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/estado-pedido.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:10:0-31 - Error: Module not found: Error: Can't resolve './addMonths.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/lista-precio.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:11:0-33 - Error: Module not found: Error: Can't resolve './addQuarters.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/marca.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:12:0-32 - Error: Module not found: Error: Can't resolve './addSeconds.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/pago-pedido.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:13:0-30 - Error: Module not found: Error: Can't resolve './addWeeks.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/pago-personal.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:14:0-30 - Error: Module not found: Error: Can't resolve './addYears.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/pago-saldo-manual.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:15:0-45 - Error: Module not found: Error: Can't resolve './areIntervalsOverlapping.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/pedido.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:16:0-27 - Error: Module not found: Error: Can't resolve './clamp.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/producto.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:17:0-36 - Error: Module not found: Error: Can't resolve './closestIndexTo.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/productos-no-comercial.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:18:0-31 - Error: Module not found: Error: Can't resolve './closestTo.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/proveedor.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:19:0-32 - Error: Module not found: Error: Can't resolve './compareAsc.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/rendicion.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:20:0-33 - Error: Module not found: Error: Can't resolve './compareDesc.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/repartidor.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:21:0-35 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/repartidorxzona.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:22:0-34 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/subcategoria.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:23:0-33 - Error: Module not found: Error: Can't resolve './daysToWeeks.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/vendedor.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:24:0-46 - Error: Module not found: Error: Can't resolve './differenceInBusinessDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/vendedorxzona.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:25:0-46 - Error: Module not found: Error: Can't resolve './differenceInCalendarDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/visita-cliente.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:26:0-54 - Error: Module not found: Error: Can't resolve './differenceInCalendarISOWeekYears.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/models/zona.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:27:0-50 - Error: Module not found: Error: Can't resolve './differenceInCalendarISOWeeks.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/audit-log-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:28:0-48 - Error: Module not found: Error: Can't resolve './differenceInCalendarMonths.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/carga-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:29:0-50 - Error: Module not found: Error: Can't resolve './differenceInCalendarQuarters.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/categoria-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:30:0-47 - Error: Module not found: Error: Can't resolve './differenceInCalendarWeeks.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/chart.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:31:0-47 - Error: Module not found: Error: Can't resolve './differenceInCalendarYears.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/cliente-change.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:32:0-38 - Error: Module not found: Error: Can't resolve './differenceInDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/cliente-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:33:0-39 - Error: Module not found: Error: Can't resolve './differenceInHours.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/cliente-repartidor-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:34:0-46 - Error: Module not found: Error: Can't resolve './differenceInISOWeekYears.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/cliente-vendedor-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:35:0-46 - Error: Module not found: Error: Can't resolve './differenceInMilliseconds.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/entregas.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:36:0-41 - Error: Module not found: Error: Can't resolve './differenceInMinutes.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/estado-cuenta-corriente-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:37:0-40 - Error: Module not found: Error: Can't resolve './differenceInMonths.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/listas-precios.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:38:0-42 - Error: Module not found: Error: Can't resolve './differenceInQuarters.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/marca-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:39:0-41 - Error: Module not found: Error: Can't resolve './differenceInSeconds.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/menu.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:40:0-39 - Error: Module not found: Error: Can't resolve './differenceInWeeks.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/pedido-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:41:0-39 - Error: Module not found: Error: Can't resolve './differenceInYears.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/pedido-stock-lotes.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:42:0-39 - Error: Module not found: Error: Can't resolve './eachDayOfInterval.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/permiso-rol-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:43:0-40 - Error: Module not found: Error: Can't resolve './eachHourOfInterval.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/permisos.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:44:0-42 - Error: Module not found: Error: Can't resolve './eachMinuteOfInterval.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/producto-changes.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:45:0-41 - Error: Module not found: Error: Can't resolve './eachMonthOfInterval.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/productos-derivados.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:46:0-43 - Error: Module not found: Error: Can't resolve './eachQuarterOfInterval.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/productos-no-comercial.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:47:0-40 - Error: Module not found: Error: Can't resolve './eachWeekOfInterval.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/productos-stock.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:48:0-43 - Error: Module not found: Error: Can't resolve './eachWeekendOfInterval.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/proveedor-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:49:0-40 - Error: Module not found: Error: Can't resolve './eachWeekendOfMonth.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/rendicion-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:50:0-39 - Error: Module not found: Error: Can't resolve './eachWeekendOfYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/repartidor-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:51:0-40 - Error: Module not found: Error: Can't resolve './eachYearOfInterval.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/repartidorxzona-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:52:0-30 - Error: Module not found: Error: Can't resolve './endOfDay.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/rol.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:53:0-33 - Error: Module not found: Error: Can't resolve './endOfDecade.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/subcategoria-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:54:0-31 - Error: Module not found: Error: Can't resolve './endOfHour.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/usuario-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:55:0-34 - Error: Module not found: Error: Can't resolve './endOfISOWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/vendedor-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:56:0-38 - Error: Module not found: Error: Can't resolve './endOfISOWeekYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/vendedorxzona-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:57:0-33 - Error: Module not found: Error: Can't resolve './endOfMinute.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/domain/services/zona-data.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:58:0-32 - Error: Module not found: Error: Can't resolve './endOfMonth.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/features/platform-catalog/catalog-paths.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:59:0-34 - Error: Module not found: Error: Can't resolve './endOfQuarter.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/features/platform-roles/pages/platform-roles-outlet.page.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:60:0-33 - Error: Module not found: Error: Can't resolve './endOfSecond.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/features/platform-roles/routes/platform-roles.routes.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:61:0-32 - Error: Module not found: Error: Can't resolve './endOfToday.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/features/platform-service-plans/routes/platform-service-plans.routes.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:62:0-35 - Error: Module not found: Error: Can't resolve './endOfTomorrow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/features/platform-tenants/routes/platform-tenants.routes.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:63:0-31 - Error: Module not found: Error: Can't resolve './endOfWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/features/platform-users/pages/platform-users-outlet.page.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:64:0-31 - Error: Module not found: Error: Can't resolve './endOfYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/features/platform-users/routes/platform-users.routes.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:65:0-36 - Error: Module not found: Error: Can't resolve './endOfYesterday.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/routes/app.routes.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:66:0-28 - Error: Module not found: Error: Can't resolve './format.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/app/shared/components/tenant-branding-asset-field/tenant-branding-asset-field.component.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:67:0-36 - Error: Module not found: Error: Can't resolve './formatDistance.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/environments/environment.dev.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:68:0-42 - Error: Module not found: Error: Can't resolve './formatDistanceStrict.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/environments/environment.prod.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:69:0-41 - Error: Module not found: Error: Can't resolve './formatDistanceToNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
+Warning: D:/Projects/Amautas-dev/core/apps/amautas-platform-admin/src/environments/environment.staging.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
 
-../../node_modules/date-fns/index.js:70:0-47 - Error: Module not found: Error: Can't resolve './formatDistanceToNowStrict.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
 
-../../node_modules/date-fns/index.js:71:0-36 - Error: Module not found: Error: Can't resolve './formatDuration.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:72:0-31 - Error: Module not found: Error: Can't resolve './formatISO.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:73:0-35 - Error: Module not found: Error: Can't resolve './formatISO9075.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:74:0-39 - Error: Module not found: Error: Can't resolve './formatISODuration.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:75:0-35 - Error: Module not found: Error: Can't resolve './formatRFC3339.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:76:0-35 - Error: Module not found: Error: Can't resolve './formatRFC7231.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:77:0-36 - Error: Module not found: Error: Can't resolve './formatRelative.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:78:0-34 - Error: Module not found: Error: Can't resolve './fromUnixTime.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:79:0-29 - Error: Module not found: Error: Can't resolve './getDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:80:0-28 - Error: Module not found: Error: Can't resolve './getDay.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:81:0-34 - Error: Module not found: Error: Can't resolve './getDayOfYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:82:0-36 - Error: Module not found: Error: Can't resolve './getDaysInMonth.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:83:0-35 - Error: Module not found: Error: Can't resolve './getDaysInYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:84:0-31 - Error: Module not found: Error: Can't resolve './getDecade.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:85:0-39 - Error: Module not found: Error: Can't resolve './getDefaultOptions.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:86:0-30 - Error: Module not found: Error: Can't resolve './getHours.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:210:0-32 - Error: Module not found: Error: Can't resolve './setQuarter.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:211:0-32 - Error: Module not found: Error: Can't resolve './setSeconds.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:212:0-29 - Error: Module not found: Error: Can't resolve './setWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:213:0-33 - Error: Module not found: Error: Can't resolve './setWeekYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:216:0-35 - Error: Module not found: Error: Can't resolve './startOfDecade.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:217:0-33 - Error: Module not found: Error: Can't resolve './startOfHour.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:218:0-36 - Error: Module not found: Error: Can't resolve './startOfISOWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:219:0-40 - Error: Module not found: Error: Can't resolve './startOfISOWeekYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:220:0-35 - Error: Module not found: Error: Can't resolve './startOfMinute.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:221:0-34 - Error: Module not found: Error: Can't resolve './startOfMonth.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:223:0-35 - Error: Module not found: Error: Can't resolve './startOfSecond.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:224:0-34 - Error: Module not found: Error: Can't resolve './startOfToday.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:226:0-33 - Error: Module not found: Error: Can't resolve './startOfWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:228:0-33 - Error: Module not found: Error: Can't resolve './startOfYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:229:0-38 - Error: Module not found: Error: Can't resolve './startOfYesterday.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:230:0-25 - Error: Module not found: Error: Can't resolve './sub.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:232:0-29 - Error: Module not found: Error: Can't resolve './subDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:233:0-30 - Error: Module not found: Error: Can't resolve './subHours.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:234:0-37 - Error: Module not found: Error: Can't resolve './subISOWeekYears.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:235:0-37 - Error: Module not found: Error: Can't resolve './subMilliseconds.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:236:0-32 - Error: Module not found: Error: Can't resolve './subMinutes.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:237:0-31 - Error: Module not found: Error: Can't resolve './subMonths.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:238:0-33 - Error: Module not found: Error: Can't resolve './subQuarters.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:240:0-30 - Error: Module not found: Error: Can't resolve './subWeeks.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:241:0-30 - Error: Module not found: Error: Can't resolve './subYears.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:242:0-28 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:246:0-35 - Error: Module not found: Error: Can't resolve './yearsToMonths.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/index.js:247:0-37 - Error: Module not found: Error: Can't resolve './yearsToQuarters.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intervalToDuration.js:2:0-31 - Error: Module not found: Error: Can't resolve './add.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intervalToDuration.js:3:0-57 - Error: Module not found: Error: Can't resolve './differenceInDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intervalToDuration.js:4:0-59 - Error: Module not found: Error: Can't resolve './differenceInHours.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intervalToDuration.js:5:0-63 - Error: Module not found: Error: Can't resolve './differenceInMinutes.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intervalToDuration.js:6:0-61 - Error: Module not found: Error: Can't resolve './differenceInMonths.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intervalToDuration.js:7:0-63 - Error: Module not found: Error: Can't resolve './differenceInSeconds.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intervalToDuration.js:8:0-59 - Error: Module not found: Error: Can't resolve './differenceInYears.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intlFormat.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intlFormatDistance.js:2:0-142 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intlFormatDistance.js:3:0-73 - Error: Module not found: Error: Can't resolve './differenceInCalendarDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intlFormatDistance.js:4:0-77 - Error: Module not found: Error: Can't resolve './differenceInCalendarMonths.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intlFormatDistance.js:5:0-81 - Error: Module not found: Error: Can't resolve './differenceInCalendarQuarters.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intlFormatDistance.js:6:0-75 - Error: Module not found: Error: Can't resolve './differenceInCalendarWeeks.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intlFormatDistance.js:7:0-75 - Error: Module not found: Error: Can't resolve './differenceInCalendarYears.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intlFormatDistance.js:8:0-59 - Error: Module not found: Error: Can't resolve './differenceInHours.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intlFormatDistance.js:9:0-63 - Error: Module not found: Error: Can't resolve './differenceInMinutes.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/intlFormatDistance.js:10:0-63 - Error: Module not found: Error: Can't resolve './differenceInSeconds.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isAfter.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isBefore.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isEqual.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isFirstDayOfMonth.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isFriday.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isFuture.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isLastDayOfMonth.js:1:0-41 - Error: Module not found: Error: Can't resolve './endOfDay.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isLastDayOfMonth.js:2:0-45 - Error: Module not found: Error: Can't resolve './endOfMonth.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isLastDayOfMonth.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isLeapYear.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isMonday.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isPast.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isSameHour.js:2:0-47 - Error: Module not found: Error: Can't resolve './startOfHour.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isSameISOWeekYear.js:1:0-61 - Error: Module not found: Error: Can't resolve './startOfISOWeekYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isSameMinute.js:1:0-51 - Error: Module not found: Error: Can't resolve './startOfMinute.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isSameSecond.js:1:0-51 - Error: Module not found: Error: Can't resolve './startOfSecond.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isSameWeek.js:2:0-47 - Error: Module not found: Error: Can't resolve './startOfWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isSaturday.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isSunday.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisHour.js:1:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisHour.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisISOWeek.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisISOWeek.js:2:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisMinute.js:1:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisMonth.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisMonth.js:2:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisQuarter.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisQuarter.js:2:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisSecond.js:1:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisWeek.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisWeek.js:2:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisYear.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThisYear.js:2:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isThursday.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isToday.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isToday.js:2:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isTomorrow.js:1:0-39 - Error: Module not found: Error: Can't resolve './addDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isTomorrow.js:2:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isTuesday.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isValid.js:2:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isWednesday.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isWeekend.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isWithinInterval.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isYesterday.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isYesterday.js:2:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/isYesterday.js:4:0-39 - Error: Module not found: Error: Can't resolve './subDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/lastDayOfDecade.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/lastDayOfISOWeekYear.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/lastDayOfISOWeekYear.js:3:0-53 - Error: Module not found: Error: Can't resolve './startOfISOWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/lastDayOfMonth.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/lastDayOfQuarter.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/lastDayOfWeek.js:2:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/lastDayOfYear.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/lightFormat.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/max.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/max.js:2:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/milliseconds.js:1:0-44 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/millisecondsToHours.js:1:0-52 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/millisecondsToMinutes.js:1:0-54 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/millisecondsToSeconds.js:1:0-54 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/min.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/min.js:2:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/minutesToHours.js:1:0-47 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/minutesToMilliseconds.js:1:0-54 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/minutesToSeconds.js:1:0-49 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/monthsToQuarters.js:1:0-49 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/monthsToYears.js:1:0-46 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/nextDay.js:1:0-39 - Error: Module not found: Error: Can't resolve './addDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/nextDay.js:2:0-37 - Error: Module not found: Error: Can't resolve './getDay.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/parse.js:4:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/parse.js:5:0-59 - Error: Module not found: Error: Can't resolve './getDefaultOptions.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/parse.js:6:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/parseISO.js:1:0-74 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/parseISO.js:2:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/parseISO.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/parseJSON.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/parse/_lib/Setter.js:1:0-55 - Error: Module not found: Error: Can't resolve '../../constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib'
-
-../../node_modules/date-fns/parse/_lib/parsers/ISOTimezoneParser.js:1:0-58 - Error: Module not found: Error: Can't resolve '../../../constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib\parsers'
-
-../../node_modules/date-fns/parse/_lib/parsers/ISOTimezoneWithZParser.js:1:0-58 - Error: Module not found: Error: Can't resolve '../../../constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib\parsers'
-
-../../node_modules/date-fns/parse/_lib/parsers/ISOWeekParser.js:2:0-60 - Error: Module not found: Error: Can't resolve '../../../startOfISOWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib\parsers'
-
-../../node_modules/date-fns/parse/_lib/parsers/ISOWeekYearParser.js:1:0-60 - Error: Module not found: Error: Can't resolve '../../../startOfISOWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib\parsers'
-
-../../node_modules/date-fns/parse/_lib/parsers/ISOWeekYearParser.js:2:0-58 - Error: Module not found: Error: Can't resolve '../../../constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib\parsers'
-
-../../node_modules/date-fns/parse/_lib/parsers/LocalWeekParser.js:1:0-46 - Error: Module not found: Error: Can't resolve '../../../setWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib\parsers'
-
-../../node_modules/date-fns/parse/_lib/parsers/LocalWeekParser.js:2:0-54 - Error: Module not found: Error: Can't resolve '../../../startOfWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib\parsers'
-
-../../node_modules/date-fns/parse/_lib/parsers/LocalWeekYearParser.js:2:0-54 - Error: Module not found: Error: Can't resolve '../../../startOfWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib\parsers'
-
-../../node_modules/date-fns/parse/_lib/parsers/TimestampMillisecondsParser.js:1:0-58 - Error: Module not found: Error: Can't resolve '../../../constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib\parsers'
-
-../../node_modules/date-fns/parse/_lib/parsers/TimestampSecondsParser.js:1:0-58 - Error: Module not found: Error: Can't resolve '../../../constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib\parsers'
-
-../../node_modules/date-fns/parse/_lib/utils.js:1:0-100 - Error: Module not found: Error: Can't resolve '../../constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns\parse\_lib'
-
-../../node_modules/date-fns/previousDay.js:1:0-37 - Error: Module not found: Error: Can't resolve './getDay.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/previousDay.js:2:0-39 - Error: Module not found: Error: Can't resolve './subDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/quartersToMonths.js:1:0-49 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/quartersToYears.js:1:0-48 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/roundToNearestHours.js:2:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/roundToNearestHours.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/roundToNearestMinutes.js:2:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/roundToNearestMinutes.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/secondsToHours.js:1:0-47 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/secondsToMilliseconds.js:1:0-54 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/secondsToMinutes.js:1:0-49 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/set.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/set.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setDate.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setDay.js:2:0-39 - Error: Module not found: Error: Can't resolve './addDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setDay.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setDayOfYear.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setHours.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setISODay.js:1:0-39 - Error: Module not found: Error: Can't resolve './addDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setISODay.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setISOWeek.js:2:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setISOWeekYear.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setISOWeekYear.js:2:0-73 - Error: Module not found: Error: Can't resolve './differenceInCalendarDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setISOWeekYear.js:3:0-61 - Error: Module not found: Error: Can't resolve './startOfISOWeekYear.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setISOWeekYear.js:4:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setMilliseconds.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setMinutes.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setMonth.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setMonth.js:2:0-53 - Error: Module not found: Error: Can't resolve './getDaysInMonth.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setMonth.js:3:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setYear.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/setYear.js:2:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/startOfDay.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/startOfQuarter.js:1:0-37 - Error: Module not found: Error: Can't resolve './toDate.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/startOfTomorrow.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/startOfTomorrow.js:2:0-49 - Error: Module not found: Error: Can't resolve './constructNow.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/startOfWeekYear.js:2:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/startOfWeekYear.js:4:0-47 - Error: Module not found: Error: Can't resolve './startOfWeek.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/subBusinessDays.js:1:0-55 - Error: Module not found: Error: Can't resolve './addBusinessDays.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/subSeconds.js:1:0-45 - Error: Module not found: Error: Can't resolve './addSeconds.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/transpose.js:1:0-51 - Error: Module not found: Error: Can't resolve './constructFrom.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/weeksToDays.js:1:0-44 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/date-fns/yearsToDays.js:1:0-44 - Error: Module not found: Error: Can't resolve './constants.js' in 'D:\Projects\Amautas-dev\core\node_modules\date-fns'
-
-../../node_modules/ui-kit/dist/fesm2022/ui-kit.mjs:3116:15-21 - Error: export 'format' (imported as 'format') was not found in 'date-fns' (possible exports: getISODay, getISOWeek, getISOWeekYear, getISOWeeksInYear, getMilliseconds, getMinutes, getMonth, getOverlappingDaysInIntervals, getQuarter, getSeconds, getTime, getUnixTime, getWeek, getWeekOfMonth, getWeekYear, getWeeksInMonth, getYear, hoursToMilliseconds, hoursToMinutes, hoursToSeconds, interval, intervalToDuration, intlFormat, intlFormatDistance, isAfter, isBefore, isDate, isEqual, isExists, isFirstDayOfMonth, isFriday, isFuture, isLastDayOfMonth, isLeapYear, isMatch, isMonday, isPast, isSameDay, isSameHour, isSameISOWeek, isSameISOWeekYear, isSameMinute, isSameMonth, isSameQuarter, isSameSecond, isSameWeek, isSameYear, isSaturday, isSunday, isThisHour, isThisISOWeek, isThisMinute, isThisMonth, isThisQuarter, isThisSecond, isThisWeek, isThisYear, isThursday, isToday, isTomorrow, isTuesday, isValid, isWednesday, isWeekend, isWithinInterval, isYesterday, lastDayOfDecade, lastDayOfISOWeek, lastDayOfISOWeekYear, lastDayOfMonth, lastDayOfQuarter, lastDayOfWeek, lastDayOfYear, lightFormat, lightFormatters, longFormatters, max, milliseconds, millisecondsToHours, millisecondsToMinutes, millisecondsToSeconds, min, minutesToHours, minutesToMilliseconds, minutesToSeconds, monthsToQuarters, monthsToYears, nextDay, nextFriday, nextMonday, nextSaturday, nextSunday, nextThursday, nextTuesday, nextWednesday, parse, parseISO, parseJSON, parsers, previousDay, previousFriday, previousMonday, previousSaturday, previousSunday, previousThursday, previousTuesday, previousWednesday, quartersToMonths, quartersToYears, roundToNearestHours, roundToNearestMinutes, secondsToHours, secondsToMilliseconds, secondsToMinutes, set, setDate, setDay, setDayOfYear, setDefaultOptions, setHours, setISODay, setISOWeek, setISOWeekYear, setMilliseconds, setMinutes, setMonth, setYear, startOfDay, startOfQuarter, startOfTomorrow, startOfWeekYear, subBusinessDays, subSeconds, transpose, weeksToDays, yearsToDays)
-
-../../node_modules/ui-kit/dist/fesm2022/ui-kit.mjs:3142:15-21 - Error: export 'format' (imported as 'format') was not found in 'date-fns' (possible exports: getISODay, getISOWeek, getISOWeekYear, getISOWeeksInYear, getMilliseconds, getMinutes, getMonth, getOverlappingDaysInIntervals, getQuarter, getSeconds, getTime, getUnixTime, getWeek, getWeekOfMonth, getWeekYear, getWeeksInMonth, getYear, hoursToMilliseconds, hoursToMinutes, hoursToSeconds, interval, intervalToDuration, intlFormat, intlFormatDistance, isAfter, isBefore, isDate, isEqual, isExists, isFirstDayOfMonth, isFriday, isFuture, isLastDayOfMonth, isLeapYear, isMatch, isMonday, isPast, isSameDay, isSameHour, isSameISOWeek, isSameISOWeekYear, isSameMinute, isSameMonth, isSameQuarter, isSameSecond, isSameWeek, isSameYear, isSaturday, isSunday, isThisHour, isThisISOWeek, isThisMinute, isThisMonth, isThisQuarter, isThisSecond, isThisWeek, isThisYear, isThursday, isToday, isTomorrow, isTuesday, isValid, isWednesday, isWeekend, isWithinInterval, isYesterday, lastDayOfDecade, lastDayOfISOWeek, lastDayOfISOWeekYear, lastDayOfMonth, lastDayOfQuarter, lastDayOfWeek, lastDayOfYear, lightFormat, lightFormatters, longFormatters, max, milliseconds, millisecondsToHours, millisecondsToMinutes, millisecondsToSeconds, min, minutesToHours, minutesToMilliseconds, minutesToSeconds, monthsToQuarters, monthsToYears, nextDay, nextFriday, nextMonday, nextSaturday, nextSunday, nextThursday, nextTuesday, nextWednesday, parse, parseISO, parseJSON, parsers, previousDay, previousFriday, previousMonday, previousSaturday, previousSunday, previousThursday, previousTuesday, previousWednesday, quartersToMonths, quartersToYears, roundToNearestHours, roundToNearestMinutes, secondsToHours, secondsToMilliseconds, secondsToMinutes, set, setDate, setDay, setDayOfYear, setDefaultOptions, setHours, setISODay, setISOWeek, setISOWeekYear, setMilliseconds, setMinutes, setMonth, setYear, startOfDay, startOfQuarter, startOfTomorrow, startOfWeekYear, subBusinessDays, subSeconds, transpose, weeksToDays, yearsToDays)
-
-../../node_modules/ui-kit/dist/fesm2022/ui-kit.mjs:5273:13-19 - Error: export 'format' (imported as 'format') was not found in 'date-fns' (possible exports: getISODay, getISOWeek, getISOWeekYear, getISOWeeksInYear, getMilliseconds, getMinutes, getMonth, getOverlappingDaysInIntervals, getQuarter, getSeconds, getTime, getUnixTime, getWeek, getWeekOfMonth, getWeekYear, getWeeksInMonth, getYear, hoursToMilliseconds, hoursToMinutes, hoursToSeconds, interval, intervalToDuration, intlFormat, intlFormatDistance, isAfter, isBefore, isDate, isEqual, isExists, isFirstDayOfMonth, isFriday, isFuture, isLastDayOfMonth, isLeapYear, isMatch, isMonday, isPast, isSameDay, isSameHour, isSameISOWeek, isSameISOWeekYear, isSameMinute, isSameMonth, isSameQuarter, isSameSecond, isSameWeek, isSameYear, isSaturday, isSunday, isThisHour, isThisISOWeek, isThisMinute, isThisMonth, isThisQuarter, isThisSecond, isThisWeek, isThisYear, isThursday, isToday, isTomorrow, isTuesday, isValid, isWednesday, isWeekend, isWithinInterval, isYesterday, lastDayOfDecade, lastDayOfISOWeek, lastDayOfISOWeekYear, lastDayOfMonth, lastDayOfQuarter, lastDayOfWeek, lastDayOfYear, lightFormat, lightFormatters, longFormatters, max, milliseconds, millisecondsToHours, millisecondsToMinutes, millisecondsToSeconds, min, minutesToHours, minutesToMilliseconds, minutesToSeconds, monthsToQuarters, monthsToYears, nextDay, nextFriday, nextMonday, nextSaturday, nextSunday, nextThursday, nextTuesday, nextWednesday, parse, parseISO, parseJSON, parsers, previousDay, previousFriday, previousMonday, previousSaturday, previousSunday, previousThursday, previousTuesday, previousWednesday, quartersToMonths, quartersToYears, roundToNearestHours, roundToNearestMinutes, secondsToHours, secondsToMilliseconds, secondsToMinutes, set, setDate, setDay, setDayOfYear, setDefaultOptions, setHours, setISODay, setISOWeek, setISOWeekYear, setMilliseconds, setMinutes, setMonth, setYear, startOfDay, startOfQuarter, startOfTomorrow, startOfWeekYear, subBusinessDays, subSeconds, transpose, weeksToDays, yearsToDays)
-
-[39m[22m
-npm error Lifecycle script `build` failed with error:
-npm error code 1
-npm error path D:\Projects\Amautas-dev\core\apps\amautas-platform-admin
-npm error workspace @amautas-core/amautas-platform-admin@0.0.0
-npm error location D:\Projects\Amautas-dev\core\apps\amautas-platform-admin
-npm error command failed
-npm error command C:\Windows\system32\cmd.exe /d /s /c ng build

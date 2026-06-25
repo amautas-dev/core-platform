@@ -64,6 +64,34 @@ export interface ConsoleRoleEditorResponse {
   menuGroups: MenuGroupDto[];
 }
 
+export interface ConsoleRolePermissionItem {
+  permissionId: number;
+  permissionCode: string;
+  permissionName: string;
+  description: string | null;
+  assigned: boolean;
+}
+
+export interface ConsoleRolePermissionFeature {
+  featureId: number;
+  featureCode: string;
+  featureName: string | null;
+  moduleCode: string | null;
+  moduleName: string | null;
+  validPermissions: ConsoleRolePermissionItem[];
+}
+
+export interface ConsoleRolePermissionsResponse {
+  role: {
+    consoleRoleId: string;
+    code: string;
+    name: string;
+    product: { productId: string; productCode: string | null; productName: string | null } | null;
+  };
+  source: 'console_role_permission';
+  features: ConsoleRolePermissionFeature[];
+}
+
 export interface AssignableFeaturesResponse {
   product: { productId: string; productCode: string | null; productName: string | null };
   permissionCatalog: PermissionCatalogEntry[];
@@ -116,6 +144,22 @@ export class ConsoleRolesService {
       `v1/platform/console-roles/${consoleRoleId}/features`,
       body,
       { productCode },
+    );
+  }
+
+  getRolePermissions(consoleRoleId: string) {
+    return this.api.get<ConsoleRolePermissionsResponse>(
+      `v1/platform/console-roles/${consoleRoleId}/permissions`,
+    );
+  }
+
+  putRolePermissions(
+    consoleRoleId: string,
+    grants: Array<{ featureId: number; permissionId: number }>
+  ) {
+    return this.api.put<ConsoleRolePermissionsResponse & { ok: boolean }>(
+      `v1/platform/console-roles/${consoleRoleId}/permissions`,
+      { grants },
     );
   }
 }

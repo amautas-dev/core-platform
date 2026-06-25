@@ -213,6 +213,52 @@
           </section>
         </div>
 
+        <section class="role-permissions-panel" aria-labelledby="role-permissions-heading">
+          <h2 id="role-permissions-heading" class="panel-title">
+            {{ 'consoleRolesPage.sectionRolePermissions' | translate }}
+          </h2>
+          <p class="panel-hint">{{ 'consoleRolesPage.sectionRolePermissionsHint' | translate }}</p>
+
+          @if (visibleRolePermissionFeatures().length === 0) {
+            <p class="empty-menu">{{ 'consoleRolesPage.emptyRolePermissions' | translate }}</p>
+          } @else {
+            <div class="role-permission-features">
+              @for (feature of visibleRolePermissionFeatures(); track feature.featureId) {
+                <mat-expansion-panel class="role-permission-feature" [expanded]="true">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      {{ feature.featureName || feature.featureCode }}
+                    </mat-panel-title>
+                    <mat-panel-description>
+                      <code>{{ feature.featureCode }}</code>
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+
+                  @if (feature.validPermissions.length === 0) {
+                    <p class="panel-hint">{{ 'consoleRolesPage.noValidPermissionsForFeature' | translate }}</p>
+                  } @else {
+                    <div class="role-permission-grid">
+                      @for (permission of feature.validPermissions; track permission.permissionId) {
+                        <label class="role-permission-check">
+                          <mat-checkbox
+                            [checked]="isGrantChecked(feature.featureId, permission.permissionId)"
+                            [disabled]="!canSave()"
+                            (change)="toggleRolePermission(feature.featureId, permission.permissionId, $event.checked)"
+                          />
+                          <span class="role-permission-text">
+                            <code>{{ permission.permissionCode }}</code>
+                            <span>{{ permission.permissionName }}</span>
+                          </span>
+                        </label>
+                      }
+                    </div>
+                  }
+                </mat-expansion-panel>
+              }
+            </div>
+          }
+        </section>
+
         <div class="actions">
           <button mat-button type="button" (click)="back()" [disabled]="saving()">
             {{ 'common.cancel' | translate }}

@@ -208,6 +208,20 @@ export class PlatformSettingsService {
     return this.api.buildUrl(`v1/public/platform-branding-asset/${encodeURIComponent(String(fileId))}`);
   }
 
+  restorePlatformDocumentFavicon(): void {
+    try {
+      const raw = localStorage.getItem(BRANDING_CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<PlatformSettingsDto>;
+        this.syncDocumentFaviconFromDto(parsed);
+        return;
+      }
+    } catch {
+      // ignore invalid cache
+    }
+    this.syncDocumentFaviconFromDto({ faviconFileId: null });
+  }
+
   /**
    * Genera la paleta desde los inputs, aplica variables `--color-*` semánticas y puente Material.
    */

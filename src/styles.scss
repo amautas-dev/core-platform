@@ -579,6 +579,43 @@ mat-chip.inactive {
   max-height: calc(90vh - 140px);
 }
 
+/* Diálogos de usuario tenant (editar / contraseña): footer siempre visible */
+::ng-deep .platform-tenant-user-edit-dialog .mat-mdc-dialog-container,
+::ng-deep .platform-tenant-user-edit-dialog .mat-dialog-container,
+::ng-deep .platform-tenant-user-password-dialog .mat-mdc-dialog-container,
+::ng-deep .platform-tenant-user-password-dialog .mat-dialog-container {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+::ng-deep .platform-tenant-user-edit-dialog .mat-mdc-dialog-surface,
+::ng-deep .platform-tenant-user-edit-dialog .mdc-dialog__surface,
+::ng-deep .platform-tenant-user-password-dialog .mat-mdc-dialog-surface,
+::ng-deep .platform-tenant-user-password-dialog .mdc-dialog__surface {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+::ng-deep .platform-tenant-user-edit-dialog mat-dialog-content,
+::ng-deep .platform-tenant-user-edit-dialog .mat-mdc-dialog-content,
+::ng-deep .platform-tenant-user-password-dialog mat-dialog-content,
+::ng-deep .platform-tenant-user-password-dialog .mat-mdc-dialog-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  max-height: none;
+}
+
+::ng-deep .platform-tenant-user-edit-dialog mat-dialog-actions,
+::ng-deep .platform-tenant-user-edit-dialog .mat-mdc-dialog-actions,
+::ng-deep .platform-tenant-user-password-dialog mat-dialog-actions,
+::ng-deep .platform-tenant-user-password-dialog .mat-mdc-dialog-actions {
+  flex: 0 0 auto;
+}
+
 /* Estilos para el diálogo de Registrar Entrega */
 ::ng-deep .registrar-entrega-dialog {
   // Centrar el diálogo

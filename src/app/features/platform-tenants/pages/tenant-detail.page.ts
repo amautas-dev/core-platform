@@ -10,7 +10,7 @@ import {
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, filter, map, take } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, forkJoin, map, take } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -27,6 +27,8 @@ import type {
   TenantEmailSmtpDto,
   TenantI18nOverrideRow,
   TenantMercadoPagoConfigDto,
+  NotificacionesLicenseTermsDto,
+  PutNotificacionesLicenseTermsDto,
 } from '../services/tenant.service';
 import { PlatformTenantRoleFeaturesDialogComponent } from '../components/platform-tenant-role-features-dialog.component';
 import { PlatformTenantI18nOverrideDialogComponent } from '../components/platform-tenant-i18n-override-dialog.component';
@@ -64,12 +66,27 @@ const ACTIVITY_ACTION_KEYS: Record<string, string> = {
   'webhook.created': 'activity.webhookCreated',
   'webhook.deactivated': 'activity.webhookDeactivated',
 };
+
+const DESKTOP_TELEMETRY_EVENT_KEYS: Record<string, string> = {
+  'notificaciones.app.started': 'desktopTelemetry.appStarted',
+  'notificaciones.license.applied': 'desktopTelemetry.licenseApplied',
+  'notificaciones.auth.login.success': 'desktopTelemetry.loginSuccess',
+  'notificaciones.auth.login.failed': 'desktopTelemetry.loginFailed',
+  'notificaciones.import.csv.completed': 'desktopTelemetry.importCsv',
+  'notificaciones.send.email.completed': 'desktopTelemetry.sendEmail',
+  'notificaciones.send.email.failed': 'desktopTelemetry.sendEmailFailed',
+  'notificaciones.send.whatsapp.completed': 'desktopTelemetry.sendWhatsapp',
+  'notificaciones.send.whatsapp.failed': 'desktopTelemetry.sendWhatsappFailed',
+  'notificaciones.campaign.created': 'desktopTelemetry.campaignCreated',
+  'notificaciones.campaign.finished': 'desktopTelemetry.campaignFinished',
+};
 import type { TenantModule } from '../models/tenant-module.interface';
 import { TenantUser } from '../models/tenant-user.interface';
 import type { TenantRoleOption } from '../models/tenant-role-option.interface';
 import { TenantAudit } from '../models/tenant-audit.interface';
 import type { TenantUsage } from '../models/tenant-usage.interface';
 import type { TenantActivityItem } from '../models/tenant-activity.interface';
+import type { TenantDesktopTelemetryItem } from '../models/tenant-desktop-telemetry.interface';
 import type { TenantApiKey } from '../models/tenant-api-key.interface';
 import type { TenantWebhook } from '../models/tenant-webhook.interface';
 import type {
@@ -107,6 +124,7 @@ import { TenantThemeService } from '../../../core/theming/tenant-theme.service';
 import { legacyColumnsFromTokens } from '../../../core/theming/branding-legacy';
 import { BrandingAssetUploadComponent } from '../../../shared/components/branding-asset-upload/branding-asset-upload.component';
 import { PlatformTenantUserPasswordDialogComponent } from '../components/platform-tenant-user-password-dialog.component';
+import { PlatformTenantUserEditDialogComponent } from '../components/platform-tenant-user-edit-dialog.component';
 import { TenantNotificationsGuidedComponent } from '../components/tenant-notifications-guided.component';
 
 type TenantBrandingFileIdField =
@@ -196,6 +214,16 @@ export class TenantDetailPage implements OnInit {
   readonly tenantRoles = signal<TenantRoleOption[]>([]);
   readonly creatingTenantUser = signal(false);
   readonly userTogglingId = signal<number | null>(null);
+
+  readonly tenantUserTableColumns = [
+    'username',
+    'email',
+    'role',
+    'status',
+    'password',
+    'activeToggle',
+    'actions',
+  ];
   readonly newUserEmail = signal('');
   readonly newUserFirstName = signal('');
   readonly newUserPassword = signal('');
@@ -239,6 +267,8 @@ export class TenantDetailPage implements OnInit {
   readonly newWebhookUrl = signal('');
   readonly activity = signal<TenantActivityItem[]>([]);
   readonly activityLoading = signal(false);
+  readonly desktopTelemetry = signal<TenantDesktopTelemetryItem[]>([]);
+  readonly desktopTelemetryLoading = signal(false);
   readonly tenantTheme = signal<TenantThemeConfig | null>(null);
   readonly themeLoading = signal(false);
   readonly themeSaving = signal(false);
@@ -256,7 +286,6 @@ export class TenantDetailPage implements OnInit {
   /** Vista previa identidad (mock login): modo claro u oscuro. */
   readonly brandPreviewMode = signal<'light' | 'dark'>('light');
   private readonly assetCacheBuster = signal(0);
-  private docFaviconBust = 0;
 
   /** Consola tenant: menú lateral plano para no admin (tenant_setting). */
   readonly consoleSidebarFlatten = signal<boolean | null>(null);
@@ -289,6 +318,25 @@ export class TenantDetailPage implements OnInit {
     accessToken: [''],
     sandbox: [true],
     isEnabled: [false],
+  });
+
+  readonly notifLicenseTermsLoading = signal(false);
+  readonly notifLicenseSaving = signal(false);
+  readonly notifLicenseTerms = signal<NotificacionesLicenseTermsDto | null>(null);
+  readonly enabledNotifMessageTypeCount = signal(0);
+
+  readonly notifLicenseForm = this.fb.nonNullable.group({
+    licenseKind: ['perpetual', Validators.required],
+    maxDevices: [1, [Validators.required, Validators.min(1)]],
+    devicesUnlimited: [true],
+    maxMessageTypes: [1, [Validators.required, Validators.min(1)]],
+    messageTypesUnlimited: [true],
+    priceAmount: [390000, [Validators.required, Validators.min(0)]],
+    currencyCode: ['ARS', [Validators.required, Validators.maxLength(10)]],
+    priceOverrideReason: [''],
+    validFrom: [''],
+    validUntil: [''],
+    notes: [''],
   });
 
   /** Código y nombre de empresa (pestaña Resumen, modo edición). */
@@ -392,6 +440,7 @@ export class TenantDetailPage implements OnInit {
           this.tenantBrandingForm,
           this.tenantSmtpForm,
           this.tenantMpForm,
+          this.notifLicenseForm,
         ]) {
           if (ro) {
             f.disable({ emitEvent: false });
@@ -475,6 +524,7 @@ export class TenantDetailPage implements OnInit {
     this.loadApiKeys(tenantId);
     this.loadWebhooks(tenantId);
     this.loadActivity(tenantId);
+    this.loadDesktopTelemetry(tenantId);
     this.loadTenantTheme(tenantId);
     this.loadConsoleSidebar(tenantId);
     this.loadConsoleRoles(tenantId);
@@ -523,9 +573,6 @@ export class TenantDetailPage implements OnInit {
     this.tenantBrandingForm.controls.fontFamily.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.syncFontPresetFromForm());
-    this.tenantBrandingForm.controls.faviconFileId.valueChanges
-      .pipe(debounceTime(200), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.syncDocumentFaviconForTenantEditor());
     this.recomputeRecommendations();
   }
 
@@ -1171,10 +1218,123 @@ export class TenantDetailPage implements OnInit {
           })),
         );
         this.modulesLoading.set(false);
+        const hasNotif = list.some((m) => {
+          if (String(m.moduleCode || '').toLowerCase() !== 'notificaciones') return false;
+          const eff = Boolean(m.effectiveEnabled ?? m.tenantEnabled);
+          return Boolean(eff || m.planEnabled || m.fromAddon);
+        });
+        if (hasNotif) {
+          this.refreshNotificacionesLicensePanel(id);
+        } else {
+          this.notifLicenseTerms.set(null);
+          this.enabledNotifMessageTypeCount.set(0);
+        }
       },
       error: () => {
         if (this.isStaleTenantResponse(id)) return;
         this.modulesLoading.set(false);
+      },
+    });
+  }
+
+  private refreshNotificacionesLicensePanel(tenantId: number): void {
+    this.notifLicenseTermsLoading.set(true);
+    forkJoin({
+      terms: this.tenantService.getNotificacionesLicenseTerms(tenantId),
+      types: this.tenantService.listNotificationMessageTypes(tenantId),
+    }).subscribe({
+      next: ({ terms, types }) => {
+        if (this.isStaleTenantResponse(tenantId)) return;
+        this.notifLicenseTerms.set(terms);
+        this.enabledNotifMessageTypeCount.set(types.filter((t) => t.enabled).length);
+        this.patchNotifLicenseFormFromDto(terms);
+        this.notifLicenseTermsLoading.set(false);
+      },
+      error: () => {
+        if (this.isStaleTenantResponse(tenantId)) return;
+        this.notifLicenseTermsLoading.set(false);
+      },
+    });
+  }
+
+  private patchNotifLicenseFormFromDto(d: NotificacionesLicenseTermsDto): void {
+    const isoToLocalInput = (iso: string | null | undefined): string => {
+      if (!iso) return '';
+      const s = String(iso);
+      if (s.length >= 16 && s.includes('T')) return s.slice(0, 16);
+      return '';
+    };
+    this.notifLicenseForm.patchValue(
+      {
+        licenseKind: d.licenseKind,
+        maxDevices: d.maxDevices === -1 ? 1 : d.maxDevices,
+        devicesUnlimited: d.maxDevices === -1,
+        maxMessageTypes: d.maxMessageTypes === -1 ? 1 : d.maxMessageTypes,
+        messageTypesUnlimited: d.maxMessageTypes === -1,
+        priceAmount: d.priceAmount,
+        currencyCode: (d.currencyCode || 'ARS').trim().toUpperCase(),
+        priceOverrideReason: d.priceOverrideReason ?? '',
+        validFrom: isoToLocalInput(d.validFrom),
+        validUntil: isoToLocalInput(d.validUntil),
+        notes: d.notes ?? '',
+      },
+      { emitEvent: false },
+    );
+  }
+
+  /** True si los tipos de mensaje habilitados superan el límite de la licencia guardada. */
+  notifLicenseProvisioningBlocked(): boolean {
+    const terms = this.notifLicenseTerms();
+    const n = this.enabledNotifMessageTypeCount();
+    if (!terms || terms.maxMessageTypes === -1) return false;
+    return n > terms.maxMessageTypes;
+  }
+
+  saveNotifLicenseTerms(): void {
+    if (this.readonlyMode()) return;
+    const id = this.tenantId();
+    if (id === null) return;
+    this.notifLicenseForm.markAllAsTouched();
+    if (this.notifLicenseForm.invalid) return;
+    const v = this.notifLicenseForm.getRawValue();
+    const body: PutNotificacionesLicenseTermsDto = {
+      licenseKind: v.licenseKind,
+      maxDevices: v.devicesUnlimited ? -1 : Number(v.maxDevices),
+      maxMessageTypes: v.messageTypesUnlimited ? -1 : Number(v.maxMessageTypes),
+      priceAmount: Number(v.priceAmount),
+      currencyCode: String(v.currencyCode || 'ARS')
+        .trim()
+        .toUpperCase(),
+      priceOverrideReason: v.priceOverrideReason?.trim() || null,
+      validFrom: v.validFrom ? new Date(v.validFrom).toISOString() : null,
+      validUntil: v.validUntil ? new Date(v.validUntil).toISOString() : null,
+      notes: v.notes?.trim() || null,
+    };
+    this.notifLicenseSaving.set(true);
+    this.error.set(null);
+    this.tenantService.putNotificacionesLicenseTerms(id, body).subscribe({
+      next: (terms) => {
+        this.notifLicenseSaving.set(false);
+        this.notifLicenseTerms.set(terms);
+        this.patchNotifLicenseFormFromDto(terms);
+        void this.msgBox.show({
+          title: this.translate.instant('common.success'),
+          html: `<p>${escapeHtml(this.translate.instant('tenants.notifLicenseSaveSuccess'))}</p>`,
+          confirm: false,
+        });
+      },
+      error: (err: unknown) => {
+        this.notifLicenseSaving.set(false);
+        const msg =
+          err && typeof err === 'object' && err !== null && 'error' in err
+            ? String((err as { error?: { error?: string } }).error?.error ?? 'Error')
+            : 'Error';
+        this.error.set(msg);
+        void this.msgBox.show({
+          title: this.translate.instant('common.error'),
+          html: `<p>${escapeHtml(msg)}</p>`,
+          confirm: false,
+        });
       },
     });
   }
@@ -1323,10 +1483,56 @@ export class TenantDetailPage implements OnInit {
     if (id === null || this.readonlyMode()) return;
     const ref = this.dialog.open(PlatformTenantUserPasswordDialogComponent, {
       width: '440px',
+      maxHeight: '90vh',
+      panelClass: 'platform-tenant-user-password-dialog',
       data: { tenantId: id, user: u },
     });
     ref.afterClosed().subscribe((saved) => {
       if (saved) this.loadUsers(id);
+    });
+  }
+
+  openTenantUserEditDialog(u: TenantUser): void {
+    const id = this.tenantId();
+    if (id === null || this.readonlyMode()) return;
+    const roles = this.tenantRoles();
+    if (!roles.length) return;
+    const ref = this.dialog.open(PlatformTenantUserEditDialogComponent, {
+      width: '440px',
+      maxHeight: '90vh',
+      panelClass: 'platform-tenant-user-edit-dialog',
+      autoFocus: 'first-tabbable',
+      data: { tenantId: id, user: u, roles },
+    });
+    ref.afterClosed().subscribe((saved) => {
+      if (saved) this.loadUsers(id);
+    });
+  }
+
+  async confirmDeleteTenantUser(u: TenantUser): Promise<void> {
+    const id = this.tenantId();
+    if (id === null || this.readonlyMode()) return;
+    const label = u.email?.trim() || u.username;
+    const confirmed = await this.msgBox.show({
+      title: this.translate.instant('common.confirm'),
+      html: `<p>${escapeHtml(this.translate.instant('tenants.tenantUserDeleteConfirm', { user: label }))}</p>`,
+      confirm: true,
+    });
+    if (!confirmed) return;
+    this.userTogglingId.set(u.userId);
+    this.error.set(null);
+    this.tenantService.deleteTenantUser(id, u.userId).subscribe({
+      next: () => {
+        this.userTogglingId.set(null);
+        this.loadUsers(id);
+        this.loadUsage(id);
+      },
+      error: (err) => {
+        this.userTogglingId.set(null);
+        this.error.set(
+          typeof err?.error?.error === 'string' ? err.error.error : err?.message ?? 'Error',
+        );
+      },
     });
   }
 
@@ -1403,6 +1609,40 @@ export class TenantDetailPage implements OnInit {
         this.activityLoading.set(false);
       },
     });
+  }
+
+  private loadDesktopTelemetry(tenantId: number): void {
+    this.desktopTelemetryLoading.set(true);
+    this.tenantService.getTenantDesktopTelemetry(tenantId, 25).subscribe({
+      next: (list) => {
+        if (this.isStaleTenantResponse(tenantId)) return;
+        this.desktopTelemetry.set(list ?? []);
+        this.desktopTelemetryLoading.set(false);
+      },
+      error: () => {
+        if (this.isStaleTenantResponse(tenantId)) return;
+        this.desktopTelemetryLoading.set(false);
+      },
+    });
+  }
+
+  formatDesktopEventLabel(eventCode: string, message: string): string {
+    const key = DESKTOP_TELEMETRY_EVENT_KEYS[eventCode];
+    if (key) {
+      const translated = this.translate.instant(key);
+      if (translated !== key) return translated;
+    }
+    return message?.trim() || eventCode;
+  }
+
+  getDesktopTelemetryIcon(eventCode: string, level: string): string {
+    if (eventCode.includes('failed') || level === 'error') return 'error_outline';
+    if (eventCode.includes('campaign')) return 'campaign';
+    if (eventCode.includes('send')) return 'send';
+    if (eventCode.includes('auth') || eventCode.includes('login')) return 'login';
+    if (eventCode.includes('import')) return 'upload_file';
+    if (eventCode.includes('license')) return 'verified_user';
+    return 'desktop_windows';
   }
 
   /** Human-readable action label via i18n; fallback to raw action if no mapping. */
@@ -1521,38 +1761,6 @@ export class TenantDetailPage implements OnInit {
     });
     this.syncFontPresetFromForm();
     this.advisorColor1.set(th.base.primary || '#0FA2CC');
-    this.syncDocumentFaviconForTenantEditor();
-  }
-
-  /**
-   * Pestaña del navegador al editar marca del tenant (paridad con Configuración → Branding de plataforma).
-   */
-  private syncDocumentFaviconForTenantEditor(): void {
-    const t = this.tenantTheme();
-    const fid = this.tenantBrandingForm.controls.faviconFileId.value?.trim();
-    const fromFile = fid ? this.previewUrlForTenantFileId(fid) : null;
-    const resolvedUrl = this.absoluteApiMediaUrl(t?.brandingResolved?.assets?.favicon?.url?.trim() ?? '') ?? '';
-    const defaultStatic = 'assets/brand/amautas-logo-reduc.png';
-    const raw = fromFile || resolvedUrl;
-    const baseUrl = raw !== '' ? raw.split('?')[0] : '';
-    const href =
-      baseUrl !== '' ? `${baseUrl}?t=${++this.docFaviconBust}` : defaultStatic;
-
-    const ensure = (rel: string): HTMLLinkElement => {
-      let el = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
-      if (!el) {
-        el = document.createElement('link');
-        el.rel = rel;
-        document.head.appendChild(el);
-      }
-      return el;
-    };
-    for (const rel of ['icon', 'shortcut icon'] as const) {
-      const link = ensure(rel);
-      link.href = href;
-      link.removeAttribute('type');
-    }
-    ensure('apple-touch-icon').href = href;
   }
 
   tenantBrandingPublicUrl(tenantCode: string, fileId: string): string {
@@ -1580,14 +1788,24 @@ export class TenantDetailPage implements OnInit {
   }
 
   tenantPreviewUrlForField(field: TenantBrandingFileIdField): string | null {
-    const fid = this.tenantBrandingForm.get(field)?.value as string | null | undefined;
-    const direct = this.previewUrlForTenantFileId(fid ?? null);
-    if (direct) return direct;
     const slot = TENANT_BRANDING_RESOLVED_SLOT[field];
-    const rel = this.tenantTheme()?.brandingResolved?.assets?.[slot]?.url ?? null;
-    const abs = this.absoluteApiMediaUrl(rel);
-    if (!abs) return null;
-    return `${abs.split('?')[0]}?t=${this.assetCacheBuster()}`;
+    const resolved = this.tenantTheme()?.brandingResolved?.assets?.[slot];
+    const fid = (this.tenantBrandingForm.get(field)?.value as string | null | undefined)?.trim() || null;
+    const resolvedFid = resolved?.fileId?.trim() || null;
+
+    // Cambio local pendiente de persistir (subida reciente).
+    if (fid && fid !== resolvedFid) {
+      const pending = this.previewUrlForTenantFileId(fid);
+      if (pending) return pending;
+    }
+
+    // URL canónica del API (tenant vs plataforma según herencia).
+    if (resolved?.url) {
+      const abs = this.absoluteApiMediaUrl(resolved.url);
+      if (abs) return `${abs.split('?')[0]}?t=${this.assetCacheBuster()}`;
+    }
+
+    return this.previewUrlForTenantFileId(fid);
   }
 
   tenantInheritedForField(field: TenantBrandingFileIdField): boolean {
@@ -1725,23 +1943,16 @@ export class TenantDetailPage implements OnInit {
   }
 
   loginPreviewBackground(): string {
-    const v = this.tenantBrandingForm.getRawValue();
-    const id =
-      this.brandPreviewMode() === 'dark' ? v.loginBackgroundDarkFileId : v.loginBackgroundLightFileId;
-    const u = this.previewUrlForTenantFileId(id ?? null);
+    const field =
+      this.brandPreviewMode() === 'dark' ? 'loginBackgroundDarkFileId' : 'loginBackgroundLightFileId';
+    const u = this.tenantPreviewUrlForField(field);
     if (u) return `url("${u.replace(/"/g, '\\"')}")`;
-    const slot = this.brandPreviewMode() === 'dark' ? 'loginBackgroundDark' : 'loginBackgroundLight';
-    const fallbackAbs = this.absoluteApiMediaUrl(this.tenantTheme()?.brandingResolved?.assets?.[slot]?.url ?? '');
-    if (fallbackAbs) return `url("${fallbackAbs.replace(/"/g, '\\"')}")`;
     return 'linear-gradient(155deg, var(--color-primary-600, #0c8cb0), var(--color-primary-900, #063544))';
   }
 
   loginPatternOverlay(): string | null {
-    const v = this.tenantBrandingForm.getRawValue();
-    const u = this.previewUrlForTenantFileId(v.appBackgroundPatternFileId ?? null);
-    if (u) return `url("${u.replace(/"/g, '\\"')}")`;
-    const pAbs = this.absoluteApiMediaUrl(this.tenantTheme()?.brandingResolved?.assets?.appBackgroundPattern?.url ?? '');
-    return pAbs ? `url("${pAbs.replace(/"/g, '\\"')}")` : null;
+    const u = this.tenantPreviewUrlForField('appBackgroundPatternFileId');
+    return u ? `url("${u.replace(/"/g, '\\"')}")` : null;
   }
 
   private absoluteStaticAsset(path: string): string {
@@ -1753,14 +1964,10 @@ export class TenantDetailPage implements OnInit {
   }
 
   loginMockLogoBg(): string {
-    const v = this.tenantBrandingForm.getRawValue();
-    const id = this.brandPreviewMode() === 'dark' ? v.logoDarkFileId : v.logoFileId;
-    const u = this.previewUrlForTenantFileId(id ?? null);
+    const field = this.brandPreviewMode() === 'dark' ? 'logoDarkFileId' : 'logoFileId';
+    const u = this.tenantPreviewUrlForField(field);
     if (u) return `url("${u.replace(/"/g, '\\"')}")`;
-    const slot = this.brandPreviewMode() === 'dark' ? 'logoFullDark' : 'logoFullLight';
-    const fallbackAbs = this.absoluteApiMediaUrl(this.tenantTheme()?.brandingResolved?.assets?.[slot]?.url ?? '');
-    if (fallbackAbs) return `url("${fallbackAbs.replace(/"/g, '\\"')}")`;
-    return `url("${this.absoluteStaticAsset('assets/brand/amautas-logo.png').replace(/"/g, '\\"')}")`;
+    return 'none';
   }
 
   private normalizeLogoSlot(v: string | null | undefined): TenantLogoVariant {
@@ -2114,26 +2321,68 @@ export class TenantDetailPage implements OnInit {
     return String(m.moduleCode || '').toLowerCase() === 'notificaciones';
   }
 
+  private triggerProvisioningDownload(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   /** Paquete firmado para la app de escritorio (módulo `notificaciones`). */
-  downloadProvisioningPackage(moduleCode: string = 'notificaciones'): void {
+  downloadProvisioningPackage(moduleCode: string = 'notificaciones', plain = false): void {
     const id = this.tenantId();
     if (id === null) return;
     this.provisioningLoading.set(true);
-    this.tenantService.downloadProvisioningPackage(id, moduleCode).subscribe({
-      next: (blob) => {
+    this.tenantService.downloadProvisioningPackage(id, moduleCode, plain).subscribe({
+      next: async (blob) => {
         this.provisioningLoading.set(false);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'licencia.amautas';
-        a.rel = 'noopener';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        if (plain) {
+          try {
+            const text = await blob.text();
+            const parsed = JSON.parse(text) as { format?: string; payload?: unknown };
+            if (parsed?.format === 'amautas-license-encrypted') {
+              await this.msgBox.show({
+                title: this.translate.instant('common.error'),
+                html: `<p>${escapeHtml(
+                  this.translate.instant('tenants.provisioningPlainStillEncrypted'),
+                )}</p>`,
+                confirm: false,
+              });
+              return;
+            }
+            if (parsed?.payload == null) {
+              await this.msgBox.show({
+                title: this.translate.instant('common.error'),
+                html: `<p>${escapeHtml(this.translate.instant('tenants.provisioningPlainInvalid'))}</p>`,
+                confirm: false,
+              });
+              return;
+            }
+            const plainBlob = new Blob([text], { type: 'application/octet-stream' });
+            this.triggerProvisioningDownload(plainBlob, 'licencia-plain.amautas');
+          } catch {
+            await this.msgBox.show({
+              title: this.translate.instant('common.error'),
+              html: `<p>${escapeHtml(this.translate.instant('tenants.provisioningPlainInvalid'))}</p>`,
+              confirm: false,
+            });
+            return;
+          }
+        } else {
+          this.triggerProvisioningDownload(blob, 'licencia.amautas');
+        }
         void this.msgBox.show({
           title: this.translate.instant('common.success'),
-          html: `<p>${escapeHtml(this.translate.instant('tenants.provisioningDownloadSuccess'))}</p>`,
+          html: `<p>${escapeHtml(
+            this.translate.instant(
+              plain ? 'tenants.provisioningDownloadPlainSuccess' : 'tenants.provisioningDownloadSuccess',
+            ),
+          )}</p>`,
           confirm: false,
         });
       },
